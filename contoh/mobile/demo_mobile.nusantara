@@ -1,0 +1,65 @@
+# Contoh 4: Showcase & Demonstrasi Lengkap Nusantara Mobile
+# Mencakup Komponen UI, Safe Area, Navigasi, Status Jaringan & Baterai, dan Notifikasi
+
+gunakan "std:mobile" sebagai seluler
+
+fungsi saatAksiBagikan(evt : peta) mulai
+  opsi : peta = {
+    "judul": "Aplikasi Nusantara Mobile",
+    "teks": "Saya membangun aplikasi mobile menggunakan bahasa NUSANTARA!",
+    "url": "https://nusantara.dev"
+  }
+  seluler.bagikan(opsi)
+  seluler.tampilkanSnackbar("Konten berhasil dibagikan!", 2000)
+selesai
+
+fungsi saatUjiNotifikasi(evt : peta) mulai
+  notif : peta = {
+    "id": "notif_demo_1",
+    "judul": "Pengingat Nusantara",
+    "pesan": "Waktunya melanjutkan pengembangan aplikasi mobile!",
+    "tundaDetik": 2
+  }
+  seluler.jadwalkanNotifikasi(notif)
+  seluler.tampilkanSnackbar("Notifikasi dijadwalkan dalam 2 detik.", 2500)
+selesai
+
+program DemoLengkapMobile
+mulai
+  konfig : peta = {
+    "nama": "Demo Fitur Mobile",
+    "id": "id.nusantara.demomobile",
+    "versi": "1.0.0",
+    "nomorBuild": 1,
+    "orientasi": "potret"
+  }
+
+  aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+
+  areaAman : peta = seluler.buatAreaAman()
+  bilahJudul : peta = seluler.buatTeks("Nusantara Mobile Showcase", 22, "tebal", "#0d47a1")
+  pemisah : peta = seluler.buatPemisah()
+
+  infoDev : peta = seluler.dapatkanInfoPerangkat()
+  infoNet : peta = seluler.dapatkanStatusJaringan()
+  infoBat : peta = seluler.dapatkanStatusBaterai()
+
+  teksDev : peta = seluler.buatTeks("Model: Virtual Phone | Resolusi: 390x844", 14)
+  teksNet : peta = seluler.buatTeks("Jaringan: WiFi Terhubung", 14, "normal", "#2e7d32")
+  teksBat : peta = seluler.buatTeks("Baterai: 85% Tersedia", 14)
+
+  tombolNotif : peta = seluler.buatTombol("Jadwalkan Notifikasi", saatUjiNotifikasi)
+  tombolBagikan : peta = seluler.buatTombol("Bagikan Aplikasi", saatAksiBagikan)
+
+  seluler.tambahKomponenMobile(aplikasi, areaAman)
+  seluler.tambahKomponenMobile(aplikasi, bilahJudul)
+  seluler.tambahKomponenMobile(aplikasi, pemisah)
+  seluler.tambahKomponenMobile(aplikasi, teksDev)
+  seluler.tambahKomponenMobile(aplikasi, teksNet)
+  seluler.tambahKomponenMobile(aplikasi, teksBat)
+  seluler.tambahKomponenMobile(aplikasi, tombolNotif)
+  seluler.tambahKomponenMobile(aplikasi, tombolBagikan)
+
+  seluler.jalankanAplikasiMobile(aplikasi)
+  tampilkan("Demo Lengkap Nusantara Mobile sukses dijalankan.")
+selesai

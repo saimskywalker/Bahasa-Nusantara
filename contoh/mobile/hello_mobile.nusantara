@@ -1,0 +1,30 @@
+# Contoh 1: Aplikasi Mobile Sederhana Nusantara
+# Menampilkan salam, tombol sentuh interaktif, dan status aplikasi
+
+gunakan "std:mobile" sebagai seluler
+
+fungsi saatTombolSentuh(evt : peta) mulai
+  seluler.tampilkanSnackbar("Halo! Anda menyentuh tombol di Nusantara Mobile.", 3000)
+selesai
+
+program HaloMobile
+mulai
+  konfig : peta = {
+    "nama": "Halo Mobile Nusantara",
+    "id": "id.nusantara.halomobile",
+    "versi": "1.0.0",
+    "nomorBuild": 1
+  }
+
+  aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+  judul : peta = seluler.buatTeks("Halo Nusantara Mobile!", 22, "tebal", "#1976d2")
+  deskripsi : peta = seluler.buatTeks("Aplikasi mobile lintas platform dengan sintaks Bahasa Indonesia.", 14, "normal", "#616161")
+  tombol : peta = seluler.buatTombol("Sentuh Saya", saatTombolSentuh)
+
+  seluler.tambahKomponenMobile(aplikasi, judul)
+  seluler.tambahKomponenMobile(aplikasi, deskripsi)
+  seluler.tambahKomponenMobile(aplikasi, tombol)
+
+  seluler.jalankanAplikasiMobile(aplikasi)
+  tampilkan("Aplikasi Halo Mobile berhasil diinisialisasi dan dijalankan.")
+selesai

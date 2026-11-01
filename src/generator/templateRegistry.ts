@@ -532,6 +532,79 @@ nusantara jalankan src/utama.nusantara
         },
       ],
     });
+
+    // 8. Template: Mobile Application (Phase 37)
+    this.daftarkan({
+      id: 'mobile',
+      nama: 'Aplikasi Mobile (Android & iOS)',
+      kategori: 'aplikasi',
+      deskripsi: 'Kerangka proyek aplikasi mobile Android dan iOS dengan Nusantara Mobile Framework.',
+      versi: '1.0.0',
+      versiMinimumNusantara: '0.37.0',
+      persyaratanRuntime: ['mobile', 'interpreter'],
+      dependensi: {},
+      status: 'siap',
+      petunjukJalankan: [
+        'nusantara mobile periksa',
+        'nusantara jalankan src/utama.nusantara',
+        'nusantara mobile jalankan desktop',
+      ],
+      batasan: ['Mendukung Android (minSdkVersion 24), iOS (iOS 15.0+), dan desktop preview simulator.'],
+      berkas: [
+        {
+          jalur: 'src/utama.nusantara',
+          konten: `gunakan "std:mobile" sebagai seluler
+
+fungsi saatKlikTombol(peristiwa : peta) mulai
+    seluler.tampilkanSnackbar("Halo dari Nusantara Mobile!", 3000)
+selesai
+
+program {{PASCAL_NAME}}
+mulai
+    konfig : peta = {
+        "nama": "{{NAMA_PROYEK}}",
+        "id": "id.nusantara.{{NAMA_PROYEK}}",
+        "versi": "1.0.0",
+        "nomorBuild": 1
+    }
+
+    aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+    judul : peta = seluler.buatTeks("Selamat Datang di Nusantara Mobile", 20, "tebal")
+    tombolAksi : peta = seluler.buatTombol("Sentuh Saya", saatKlikTombol)
+
+    seluler.tambahKomponenMobile(aplikasi, judul)
+    seluler.tambahKomponenMobile(aplikasi, tombolAksi)
+
+    seluler.jalankanAplikasiMobile(aplikasi)
+    tulis("Aplikasi mobile berhasil dimulai.")
+selesai
+`,
+        },
+        {
+          jalur: 'README.md',
+          konten: `# {{NAMA_PROYEK}} - Aplikasi Mobile NUSANTARA
+
+{{DESKRIPSI_PROYEK}}
+
+## Persyaratan
+- Bahasa Pemrograman NUSANTARA >= v{{VERSI_NUSANTARA}}
+
+## Menjalankan Aplikasi
+\`\`\`bash
+# Pemeriksaan Lingkungan (Android SDK / Xcode)
+nusantara mobile periksa
+
+# Menjalankan Simulator Desktop
+nusantara mobile jalankan desktop
+\`\`\`
+`,
+        },
+        {
+          jalur: '.gitignore',
+          konten: `target/\n.cache/\n*.log\nbuild/\n.gradle/\n`,
+        },
+      ],
+    });
   }
 
   public daftarkan(template: DefinisiTemplate): void {

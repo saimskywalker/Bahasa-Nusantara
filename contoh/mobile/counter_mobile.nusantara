@@ -1,0 +1,39 @@
+# Contoh 2: Penghitung Interaktif Mobile (Interactive Mobile Counter)
+# Menggunakan State management, haptic feedback, dan perubahan teks dinamis
+
+gunakan "std:mobile" sebagai seluler
+
+fungsi saatTambah(evt : peta) mulai
+  seluler.haptik("ringan")
+  seluler.tampilkanSnackbar("Nilai penghitung bertambah!", 1500)
+selesai
+
+fungsi saatReset(evt : peta) mulai
+  seluler.haptik("peringatan")
+  seluler.tampilkanAlert("Reset Penghitung", "Nilai penghitung berhasil direset ke 0.")
+selesai
+
+program PenghitungMobile
+mulai
+  konfig : peta = {
+    "nama": "Penghitung Mobile",
+    "id": "id.nusantara.penghitung",
+    "versi": "1.0.0",
+    "nomorBuild": 1
+  }
+
+  aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+
+  judul : peta = seluler.buatTeks("Aplikasi Penghitung Mobile", 20, "tebal")
+  tampilanNilai : peta = seluler.buatTeks("Nilai Saat Ini: 0", 28, "tebal", "#2e7d32")
+  tombolTambah : peta = seluler.buatTombol("Tambah (+1)", saatTambah)
+  tombolReset : peta = seluler.buatTombol("Reset (0)", saatReset)
+
+  seluler.tambahKomponenMobile(aplikasi, judul)
+  seluler.tambahKomponenMobile(aplikasi, tampilanNilai)
+  seluler.tambahKomponenMobile(aplikasi, tombolTambah)
+  seluler.tambahKomponenMobile(aplikasi, tombolReset)
+
+  seluler.jalankanAplikasiMobile(aplikasi)
+  tampilkan("Aplikasi Penghitung Mobile berhasil berjalan.")
+selesai

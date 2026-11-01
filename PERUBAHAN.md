@@ -4,6 +4,69 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.37.0] — 2026-10-31
+### Phase 37: Nusantara Mobile Application Framework (Android & iOS Development Support)
+
+Fase ini menghadirkan fondasi lengkap Nusantara Mobile Application Framework, memungkinkan pengembang membangun aplikasi seluler lintas platform untuk sistem operasi Android dan iOS menggunakan sintaks deklaratif Bahasa Indonesia pada bahasa pemrograman NUSANTARA.
+
+#### Ditambahkan:
+- **Mobile Core (`src/mobile/core/`):**
+  - `lifecycle.ts`: Pengelola siklus hidup aplikasi mobile (`StatusLifecycleMobile`: `DIBUAT`, `MEMULAI`, `AKTIF`, `JEDA`, `RESUME`, `LATAR_BELAKANG`, `BERHENTI`, `DIHANCURKAN`) dengan hook transisi dan listener.
+  - `config.ts`: `PengelolaKonfigurasiMobile` yang memvalidasi `nusantara.json` (ID paket terbalik, semver, orientasi, platform target, min SDK range).
+  - `state.ts`: `PengelolaStateMobile` untuk manajemen state global reaktif dengan listener spesifik per kunci dan global.
+  - `application_context.ts`: `KonteksAplikasiMobile` singleton penyedia metadata perangkat default, orientasi, dan manager perizinan.
+  - `application.ts`: `AplikasiMobile` sebagai orkestrator aplikasi seluler, hierarki komponen akar, dan serialisasi JSON.
+- **Sistem Keamanan Mobile (`src/mobile/security/`):**
+  - `permission.ts`: `PengelolaIzinMobile` menangani 10 jenis izin seluler dinamis (kamera, lokasi, notifikasi, foto media, mic, bluetooth, sensor, dll) dengan rasional dan listener status.
+  - `secure_storage.ts`: `PenyimpananAmanMobile` mengabstraksikan Android Keystore & iOS Keychain menggunakan enkripsi simetris AES-256-CBC dengan IV dinamis.
+- **Primitif Antarmuka Visual & Formulir (`src/mobile/ui/`):**
+  - `TeksMobile`, `TombolMobile` (varian primer, sekunder, garis, teks, bahaya; loading spinner), `InputTeksMobile`, `InputSandiMobile`, `SakelarMobile`, `KotakCentangMobile`, `TombolRadioMobile`, `DropdownMobile`, `GambarMobile`, `IkonMobile`, `IndikatorProgresMobile`, `IndikatorMemuatMobile`, `KartuMobile`, `PemisahMobile`, `DaftarMobile`, dan `GridMobile`.
+  - `DialogMobile`, `AlertMobile`, dan `SnackbarMobile` (varian info, sukses, peringatan, bahaya).
+- **Mesin Tata Letak Responsif (`src/mobile/layout/`):**
+  - `responsive.ts`: `PengelolaResponsifMobile` mengelola breakpoint (`ponsel_kecil`, `ponsel_standar`, `ponsel_besar`, `tablet`), orientasi potret/lanskap, dan rasio skala piksel.
+  - `safe_area.ts`: `AreaAmanMobile` wadah pembungkus insets takik kamera, status bar, dan home gesture bar (atas, bawah, kiri, kanan).
+  - `flex.ts`: `TataLetakVertikalMobile`, `TataLetakHorizontalMobile`, `TataLetakFleksibelMobile` (perataan, jarak/gap, wrapping).
+  - `stack.ts`: `TataLetakTumpukMobile` untuk Z-index layering dan floating positioning.
+  - `scroll.ts`: `TampilanGulirMobile` untuk navigasi gulir vertikal/horizontal dengan inersia pantulan.
+- **Sistem Navigasi & Tautan Dalam (`src/mobile/navigation/`):**
+  - `route.ts`: Definisi `RuteMobile` dengan pembuat halaman dan transisi animasi.
+  - `stack_navigator.ts`: `NavigatorTumpukanMobile` (`dorong`, `kembali`, `ganti`, `reset`, `bisaKembali`, `dapatkanKedalaman`, listener perubahan).
+  - `tab_navigator.ts`: `NavigatorTabMobile` untuk antarmuka multi-tab.
+  - `bottom_nav.ts`: `NavigasiBawahMobile` untuk bilah menu bawah seluler dengan lencana (badge).
+  - `deep_link.ts`: `PengelolaDeepLinkMobile` mengurai custom URL schemes (`nusantara://...`), host, path, dan query params.
+- **API Perangkat Seluler (`src/mobile/device/`):**
+  - `info.ts`: `InfoPerangkatMobile` (metadata perangkat keras, simulator flag, platform detection).
+  - `network.ts`: `StatusJaringanMobile` (wifi, cellular metered, listener koneksi).
+  - `battery.ts`: `StatusBateraiMobile` (persentase baterai, pengisian daya, mode hemat energi).
+  - `haptics.ts`: `GetaranMobile` (vibrate ms dan 6 pola umpan balik haptik).
+  - `clipboard.ts`: `PapanKlipMobile` (salin dan tempel teks).
+  - `location.ts`: `LokasiPerangkatMobile` (koordinat geolokasi dengan pemeriksaan izin otomatis).
+  - `notification.ts`: `NotifikasiLokalMobile` (penjadwalan pengingat lokal dan pembatalan).
+  - `share.ts`: `BerbagiMobile` (dialog berbagi konten sistem).
+- **Jembatan Platform Native (`src/mobile/bridge/`):**
+  - Protokol IPC native dua arah (`PesanJembatanPermintaan`, `PesanJembatanRespon`, `PesanJembatanPeristiwa`).
+  - `JembatanMobileNative`: Panggilan metode RPC native, penanganan galat `METODE_TIDAK_DITEMUKAN`, dan pub/sub saluran peristiwa.
+- **Pengelola Aset Mobile (`src/mobile/assets/`):**
+  - `PengelolaAsetMobile`: Pengelompokan aset di `aset/`, mitigasi path traversal `..`, whitelist ekstensi resmi, dan generator manifest aset.
+- **Fondasi Sistem Build Android & iOS (`src/mobile/build/`):**
+  - `android.ts`: Deteksi `ANDROID_HOME`/JDK/ADB, generator `AndroidManifest.xml` dinamis, generator `build.gradle` (SDK 34), dan konfigurasi `proguard-rules.pro`.
+  - `ios.ts`: Deteksi macOS/Xcode, generator `Info.plist` dinamis dengan entri privasi, dan generator template `Podfile`.
+- **Integrasi CLI Mobile (`src/mobile/cli/` & `src/paket/cli.ts`):**
+  - Subperintah: `nusantara mobile <baru|platform|periksa|build|jalankan|info>`.
+- **Integrasi Pustaka Standar (`src/stdlib/mobile.ts` & `src/stdlib/index.ts`):**
+  - Modul resmi `std:mobile` dengan alias `mobile`, `seluler`, `android`, `ios`.
+  - Fungsi wrapper runtime untuk pembuatan aplikasi, komponen UI, navigator, dialog, snackbar, dan API perangkat.
+- **Template Proyek Baru (`src/generator/templateRegistry.ts`):**
+  - Template `mobile` resmi untuk `nusantara new <nama> --template mobile`.
+- **Contoh Aplikasi Nyata (`contoh/mobile/`):**
+  - `hello_mobile.nusantara`, `counter_mobile.nusantara`, `profile_mobile.nusantara`, `demo_mobile.nusantara`.
+- **18 Berkas Dokumentasi Resmi (`docs/mobile/`):**
+  - Mencakup pengenalan, instalasi, persiapan Android/iOS, struktur proyek, konfigurasi, komponen UI, layout, navigasi, state, device API, perizinan, aset, build Android/iOS, keamanan, pengujian, dan pemecahan masalah.
+- **Suite Pengujian Otomatis (`pengujian/mobile/uji_mobile_fase37.ts`):**
+  - Skrip npm `"test:mobile-v37"` dan integrasi ke suite uji utama `npm test`.
+
+---
+
 ## [v0.31.0] — 2026-10-28
 ### Phase 31: Nusantara Authentication, Session & Access Control
 

@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "GUI Framework, Desktop Application Development, Window Management, Widget System, Responsive Layout, Themes, Dialogs, HTTP Client, API Integration, WebSocket, Real-Time Events, Background Tasks, CLI Generator, ORM, Autentikasi, Web Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.36.0.",
+  "description": "Mobile Application Framework, Android & iOS Development, Desktop Application Development, GUI Framework, Window Management, Widget System, Responsive Layout, Themes, Dialogs, HTTP Client, API Integration, WebSocket, Real-Time Events, Background Tasks, CLI Generator, ORM, Autentikasi, Web Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.37.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

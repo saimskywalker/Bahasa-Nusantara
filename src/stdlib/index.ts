@@ -29,6 +29,7 @@ import { simbolEksporORM, buatEksporORM } from './orm';
 import { simbolEksporRealtime, buatEksporRealtime } from './realtime';
 import { simbolEksporHTTP, buatEksporHTTP } from './http';
 import { simbolEksporGUI, buatEksporGUI } from './gui';
+import { simbolEksporMobile, buatEksporMobile } from './mobile';
 
 export * from './teks';
 export * from './matematika';
@@ -52,6 +53,7 @@ export * from './orm';
 export * from './realtime';
 export * from './http';
 export * from './gui';
+export * from './mobile';
 
 export interface MetadataModulStandar {
   nama: string;
@@ -274,6 +276,30 @@ export const KATALOG_MODUL_STANDAR: Record<string, MetadataModulStandar> = {
     simbolEkspor: simbolEksporGUI,
     pabrikEkspor: () => buatEksporGUI(),
   },
+  mobile: {
+    nama: 'mobile',
+    deskripsi: 'Nusantara Mobile Application Framework untuk pengembangan aplikasi Android dan iOS.',
+    simbolEkspor: simbolEksporMobile,
+    pabrikEkspor: () => buatEksporMobile(),
+  },
+  seluler: {
+    nama: 'seluler',
+    deskripsi: 'Alias resmi Bahasa Indonesia untuk modul mobile Nusantara.',
+    simbolEkspor: simbolEksporMobile,
+    pabrikEkspor: () => buatEksporMobile(),
+  },
+  android: {
+    nama: 'android',
+    deskripsi: 'Alias resmi modul mobile untuk target platform Android.',
+    simbolEkspor: simbolEksporMobile,
+    pabrikEkspor: () => buatEksporMobile(),
+  },
+  ios: {
+    nama: 'ios',
+    deskripsi: 'Alias resmi modul mobile untuk target platform iOS.',
+    simbolEkspor: simbolEksporMobile,
+    pabrikEkspor: () => buatEksporMobile(),
+  },
 };
 
 /**
@@ -364,12 +390,20 @@ export const DAFTAR_MODUL_STANDAR_FASE31 = [
   'auth',
 ];
 
+export const DAFTAR_MODUL_STANDAR_FASE37 = [
+  'mobile',
+  'seluler',
+  'android',
+  'ios',
+];
+
 export const DAFTAR_SEMUA_MODUL_STANDAR = [
   ...DAFTAR_MODUL_STANDAR_INTI,
   ...DAFTAR_MODUL_STANDAR_FASE28,
   ...DAFTAR_MODUL_STANDAR_FASE29,
   ...DAFTAR_MODUL_STANDAR_FASE30,
   ...DAFTAR_MODUL_STANDAR_FASE31,
+  ...DAFTAR_MODUL_STANDAR_FASE37,
 ];
 
 /**

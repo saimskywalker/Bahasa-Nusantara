@@ -1,0 +1,39 @@
+# Contoh 3: Formulir Profil Pengguna Mobile
+# Menggunakan Input teks, Sandi, Sakelar, dan Secure Storage terenkripsi
+
+gunakan "std:mobile" sebagai seluler
+
+fungsi saatSimpan(evt : peta) mulai
+  seluler.simpanAman("pengguna_aktif", "budi_nusantara")
+  seluler.haptik("sukses")
+  seluler.tampilkanSnackbar("Data profil berhasil disimpan dengan enkripsi AES-256!", 2500)
+selesai
+
+program ProfilPenggunaMobile
+mulai
+  konfig : peta = {
+    "nama": "Profil Pengguna",
+    "id": "id.nusantara.profil",
+    "versi": "1.0.0",
+    "nomorBuild": 1
+  }
+
+  aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+
+  judul : peta = seluler.buatTeks("Profil Pengguna Nusantara", 20, "tebal")
+  inputNama : peta = seluler.buatInputTeks("Nama Lengkap", "Budi Santoso")
+  inputEmail : peta = seluler.buatInputTeks("Alamat Surel", "budi@nusantara.id")
+  inputSandi : peta = seluler.buatInputSandi("Kata Sandi")
+  sakelarNotif : peta = seluler.buatSakelar(benar)
+  tombolSimpan : peta = seluler.buatTombol("Simpan Profil", saatSimpan)
+
+  seluler.tambahKomponenMobile(aplikasi, judul)
+  seluler.tambahKomponenMobile(aplikasi, inputNama)
+  seluler.tambahKomponenMobile(aplikasi, inputEmail)
+  seluler.tambahKomponenMobile(aplikasi, inputSandi)
+  seluler.tambahKomponenMobile(aplikasi, sakelarNotif)
+  seluler.tambahKomponenMobile(aplikasi, tombolSimpan)
+
+  seluler.jalankanAplikasiMobile(aplikasi)
+  tampilkan("Aplikasi Profil Pengguna siap beroperasi.")
+selesai

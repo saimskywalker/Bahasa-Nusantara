@@ -2,12 +2,14 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_31:_authentication_session_&_access_control-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.31.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_37:_mobile_application_framework-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.37.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-27_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-33_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/pengenalan-mobile.md)
+[![Desktop](https://img.shields.io/badge/desktop-gui_framework-indigo.svg)](docs/desktop/pengenalan-gui.md)
 [![Autentikasi](https://img.shields.io/badge/keamanan-scrypt_&_rbac-red.svg)](docs/referensi/authentication.md)
 [![Web](https://img.shields.io/badge/web-framework_&_rest_api-cyan.svg)](docs/referensi/web-framework.md)
 [![Database](https://img.shields.io/badge/database-sqlite_native-amber.svg)](docs/referensi/database.md)
@@ -22,14 +24,14 @@ NUSANTARA bukan sekadar penerjemah sintaksis bahasa asing, melainkan ikhtiar man
 
 - **Ekstensi Berkas Resmi:** `.nusantara`
 - **Lisensi:** [Apache License 2.0](LISENSI)
-- **Status Saat Ini:** **Phase 31: Nusantara Authentication, Session & Access Control (Milestone v0.31.0).**
-- **Dokumentasi Autentikasi & Sesi:** [docs/referensi/authentication.md](docs/referensi/authentication.md) & [docs/pengembang/authentication-architecture.md](docs/pengembang/authentication-architecture.md)
-- **Panduan Login & Registrasi:** [docs/panduan/membuat-login.md](docs/panduan/membuat-login.md) & [docs/panduan/session.md](docs/panduan/session.md)
-- **Panduan Otorisasi (RBAC):** [docs/panduan/authorization.md](docs/panduan/authorization.md)
-- **Dokumentasi Web Framework:** [docs/referensi/web-framework.md](docs/referensi/web-framework.md) & [docs/panduan/membuat-rest-api.md](docs/panduan/membuat-rest-api.md)
-- **Dokumentasi Database:** [docs/referensi/database.md](docs/referensi/database.md)
-- **Dokumentasi Toolchain & Linter:** [docs/referensi/toolchain.md](docs/referensi/toolchain.md)
-- **Dokumentasi Testing:** [docs/referensi/testing.md](docs/referensi/testing.md)
+- **Status Saat Ini:** **Phase 37: Nusantara Mobile Application Framework — Android & iOS Development Support (Milestone v0.37.0).**
+- **Dokumentasi Mobile Framework:** [docs/mobile/pengenalan-mobile.md](docs/mobile/pengenalan-mobile.md) (18 berkas panduan lengkap)
+- **Dokumentasi GUI Desktop:** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
+- **Dokumentasi HTTP Client:** [docs/referensi/http.md](docs/referensi/http.md)
+- **Dokumentasi WebSocket & Background Tasks:** [docs/referensi/realtime.md](docs/referensi/realtime.md)
+- **Dokumentasi Autentikasi & Sesi:** [docs/referensi/authentication.md](docs/referensi/authentication.md)
+- **Dokumentasi Web Framework:** [docs/referensi/web-framework.md](docs/referensi/web-framework.md)
+- **Dokumentasi Database & ORM:** [docs/referensi/database.md](docs/referensi/database.md)
 - **Tata Bahasa Formal:** [GRAMMAR-EBNF.md](dokumentasi/GRAMMAR-EBNF.md)
 
 ---

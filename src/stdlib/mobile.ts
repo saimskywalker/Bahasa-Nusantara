@@ -1,0 +1,1172 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * NUSANTARA Programming Language - Phase 37
+ * Modul Standar: mobile (alias: seluler, android, ios)
+ */
+
+import {
+  NilaiRuntime,
+  JenisNilaiRuntime,
+  buatBilangan,
+  buatLogika,
+  buatTeks,
+  buatKosong,
+  buatDaftar,
+  buatPeta,
+  NilaiPeta,
+} from '../interpreter/nilai';
+import { GalatRuntime, JenisGalatRuntime } from '../interpreter/galat';
+import { InfoSimbolModul } from '../modul/jenisModul';
+import { Interpreter } from '../interpreter/interpreter';
+import {
+  AplikasiMobile,
+  KomponenMobile,
+  TeksMobile,
+  TombolMobile,
+  InputTeksMobile,
+  InputSandiMobile,
+  SakelarMobile,
+  KotakCentangMobile,
+  TombolRadioMobile,
+  DropdownMobile,
+  GambarMobile,
+  IkonMobile,
+  IndikatorProgresMobile,
+  IndikatorMemuatMobile,
+  KartuMobile,
+  PemisahMobile,
+  DaftarMobile,
+  GridMobile,
+  AreaAmanMobile,
+  TataLetakVertikalMobile,
+  TataLetakHorizontalMobile,
+  TataLetakTumpukMobile,
+  TampilanGulirMobile,
+  NavigatorTumpukanMobile,
+  NavigatorTabMobile,
+  NavigasiBawahMobile,
+  DialogMobile,
+  AlertMobile,
+  SnackbarMobile,
+  InfoPerangkatMobile,
+  StatusJaringanMobile,
+  StatusBateraiMobile,
+  GetaranMobile,
+  PapanKlipMobile,
+  LokasiPerangkatMobile,
+  NotifikasiLokalMobile,
+  BerbagiMobile,
+  JembatanMobileNative,
+  PenyimpananAmanMobile,
+  KonteksAplikasiMobile,
+  JenisIzinMobile,
+  KonfigurasiAplikasiMobile,
+} from '../mobile';
+import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
+
+// Map weak reference untuk mengaitkan NilaiPeta dengan instance obyek asli
+const petaKeKomponen = new WeakMap<NilaiPeta, KomponenMobile>();
+const petaKeAplikasi = new WeakMap<NilaiPeta, AplikasiMobile>();
+
+export function bungkusKomponenMobile(komponen: KomponenMobile): NilaiPeta {
+  const anggota = new Map<string, NilaiRuntime>();
+  anggota.set('id', buatTeks(komponen.id));
+  anggota.set('jenis', buatTeks(komponen.jenis));
+  anggota.set('aktif', buatLogika(komponen.aktif));
+  anggota.set('terlihat', buatLogika(komponen.terlihat));
+
+  const peta = buatPeta(anggota);
+  petaKeKomponen.set(peta, komponen);
+
+  // Method: tambahAnak
+  anggota.set('tambahAnak', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tambahAnak',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const anakKomp = petaKeKomponen.get(args[0] as NilaiPeta);
+        if (anakKomp) {
+          komponen.tambahAnak(anakKomp);
+        }
+      }
+      return peta;
+    },
+  });
+
+  // Method: hapusAnak
+  anggota.set('hapusAnak', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'hapusAnak',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const anakKomp = petaKeKomponen.get(args[0] as NilaiPeta);
+        if (anakKomp) {
+          const res = komponen.hapusAnak(anakKomp);
+          return buatLogika(res);
+        }
+      }
+      return buatLogika(false);
+    },
+  });
+
+  // Method: setGaya
+  anggota.set('setGaya', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'setGaya',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const gayaData = konversiDariNilaiRuntime(args[0]);
+        komponen.setGaya(gayaData);
+      }
+      return peta;
+    },
+  });
+
+  // Method: setAktif
+  anggota.set('setAktif', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'setAktif',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const status = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : true;
+      komponen.setAktif(status);
+      anggota.set('aktif', buatLogika(komponen.aktif));
+      return peta;
+    },
+  });
+
+  // Method: setTerlihat
+  anggota.set('setTerlihat', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'setTerlihat',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const status = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : true;
+      komponen.setTerlihat(status);
+      anggota.set('terlihat', buatLogika(komponen.terlihat));
+      return peta;
+    },
+  });
+
+  // Method: pasang
+  anggota.set('pasang', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'pasang',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length < 2 || args[0].jenis !== JenisNilaiRuntime.TEKS) {
+        throw new GalatRuntime(JenisGalatRuntime.ARGUMEN_TIDAK_VALID, "Metode 'pasang' membutuhkan jenis peristiwa (teks) dan fungsi penangan.");
+      }
+      const jenisPeristiwa = args[0].nilai as any;
+      const fn = args[1];
+
+      komponen.pasang(jenisPeristiwa, (peristiwa) => {
+        const argPeristiwa = buatPeta(
+          new Map<string, NilaiRuntime>([
+            ['idKomponen', buatTeks(peristiwa.idKomponen)],
+            ['jenis', buatTeks(peristiwa.jenis)],
+            ['stempelWaktu', buatBilangan(peristiwa.stempelWaktu)],
+            ['nilaiTeks', buatTeks(peristiwa.nilaiTeks || '')],
+            ['nilaiAngka', buatBilangan(peristiwa.nilaiAngka ?? 0)],
+            ['nilaiLogika', buatLogika(peristiwa.nilaiLogika ?? false)],
+          ])
+        );
+        Interpreter.panggilFungsiAktif(fn, [argPeristiwa]);
+      });
+
+      return buatKosong();
+    },
+  });
+
+  // Komponen khusus: TeksMobile
+  if (komponen instanceof TeksMobile) {
+    anggota.set('setTeks', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'setTeks',
+      eksekusi: (args: NilaiRuntime[]) => {
+        if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+          komponen.setTeks(args[0].nilai);
+        }
+        return peta;
+      },
+    });
+    anggota.set('dapatkanTeks', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'dapatkanTeks',
+      eksekusi: () => buatTeks(komponen.teks),
+    });
+  }
+
+  // Komponen khusus: TombolMobile
+  if (komponen instanceof TombolMobile) {
+    anggota.set('setMemuat', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'setMemuat',
+      eksekusi: (args: NilaiRuntime[]) => {
+        const loading = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : true;
+        komponen.setMemuat(loading);
+        return peta;
+      },
+    });
+    anggota.set('klik', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'klik',
+      eksekusi: () => {
+        komponen.picuKlik();
+        return buatKosong();
+      },
+    });
+  }
+
+  // Komponen khusus: InputTeksMobile
+  if (komponen instanceof InputTeksMobile) {
+    anggota.set('setTeks', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'setTeks',
+      eksekusi: (args: NilaiRuntime[]) => {
+        if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+          komponen.setTeks(args[0].nilai);
+        }
+        return peta;
+      },
+    });
+    anggota.set('dapatkanTeks', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'dapatkanTeks',
+      eksekusi: () => buatTeks(komponen.teks),
+    });
+  }
+
+  // Komponen khusus: SakelarMobile
+  if (komponen instanceof SakelarMobile) {
+    anggota.set('setAktifkan', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'setAktifkan',
+      eksekusi: (args: NilaiRuntime[]) => {
+        const status = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : true;
+        komponen.setAktifkan(status);
+        return peta;
+      },
+    });
+    anggota.set('apakahAktif', {
+      jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+      nama: 'apakahAktif',
+      eksekusi: () => buatLogika(komponen.statusAktif),
+    });
+  }
+
+  // Method: toJson
+  anggota.set('keJson', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'keJson',
+    eksekusi: () => konversiKeNilaiRuntime(komponen.toJson()),
+  });
+
+  return peta;
+}
+
+export function bungkusAplikasiMobile(app: AplikasiMobile): NilaiPeta {
+  const anggota = new Map<string, NilaiRuntime>();
+  const konfig = app.dapatkanKonfigurasi();
+
+  anggota.set('nama', buatTeks(konfig.nama));
+  anggota.set('id', buatTeks(konfig.id));
+  anggota.set('versi', buatTeks(konfig.versi));
+  anggota.set('nomorBuild', buatBilangan(konfig.nomorBuild));
+  anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+
+  const peta = buatPeta(anggota);
+  petaKeAplikasi.set(peta, app);
+
+  anggota.set('tambahKomponen', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tambahKomponen',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const komp = petaKeKomponen.get(args[0] as NilaiPeta);
+        if (komp) {
+          app.tambahKomponenAkar(komp);
+        }
+      }
+      return peta;
+    },
+  });
+
+  anggota.set('jalankan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'jalankan',
+    eksekusi: () => {
+      app.jalankan();
+      anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+      return buatKosong();
+    },
+  });
+
+  anggota.set('jeda', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'jeda',
+    eksekusi: () => {
+      app.jeda();
+      anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+      return buatKosong();
+    },
+  });
+
+  anggota.set('lanjutkan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'lanjutkan',
+    eksekusi: () => {
+      app.lanjutkan();
+      anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+      return buatKosong();
+    },
+  });
+
+  anggota.set('berhenti', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'berhenti',
+    eksekusi: () => {
+      app.berhenti();
+      anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+      return buatKosong();
+    },
+  });
+
+  anggota.set('hancurkan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'hancurkan',
+    eksekusi: () => {
+      app.hancurkan();
+      anggota.set('status', buatTeks(app.dapatkanStatusLifecycle()));
+      return buatKosong();
+    },
+  });
+
+  anggota.set('aturState', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'aturState',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const k = args[0].nilai;
+        const v = konversiDariNilaiRuntime(args[1]);
+        app.dapatkanState().atur(k, v);
+      }
+      return buatKosong();
+    },
+  });
+
+  anggota.set('dapatkanState', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanState',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const k = args[0].nilai;
+        const v = app.dapatkanState().dapatkan(k);
+        return konversiKeNilaiRuntime(v);
+      }
+      return buatKosong();
+    },
+  });
+
+  anggota.set('keJson', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'keJson',
+    eksekusi: () => konversiKeNilaiRuntime(app.toJson()),
+  });
+
+  return peta;
+}
+
+export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
+  ['buatAplikasiMobile', { nama: 'buatAplikasiMobile', kategori: 'fungsi', parameter: [{ nama: 'konfig', tipe: 'peta' }], tipeKembalian: 'peta', minParameter: 1 }],
+  ['jalankanAplikasiMobile', { nama: 'jalankanAplikasiMobile', kategori: 'fungsi', parameter: [{ nama: 'aplikasi', tipe: 'peta' }], tipeKembalian: 'kosong', minParameter: 1 }],
+  ['tambahKomponenMobile', { nama: 'tambahKomponenMobile', kategori: 'fungsi', parameter: [{ nama: 'wadah', tipe: 'peta' }, { nama: 'anak', tipe: 'peta' }], tipeKembalian: 'peta', minParameter: 2 }],
+  ['buatTeks', { nama: 'buatTeks', kategori: 'fungsi', parameter: [{ nama: 'teks', tipe: 'teks' }, { nama: 'ukuran', tipe: 'bilangan' }, { nama: 'ketebalan', tipe: 'teks' }, { nama: 'warna', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatTombol', { nama: 'buatTombol', kategori: 'fungsi', parameter: [{ nama: 'teks', tipe: 'teks' }, { nama: 'saatKlik', tipe: 'fungsi' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatInputTeks', { nama: 'buatInputTeks', kategori: 'fungsi', parameter: [{ nama: 'placeholder', tipe: 'teks' }, { nama: 'nilaiAwal', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatInputSandi', { nama: 'buatInputSandi', kategori: 'fungsi', parameter: [{ nama: 'placeholder', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatSakelar', { nama: 'buatSakelar', kategori: 'fungsi', parameter: [{ nama: 'aktif', tipe: 'logika' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatKotakCentang', { nama: 'buatKotakCentang', kategori: 'fungsi', parameter: [{ nama: 'label', tipe: 'teks' }, { nama: 'dicentang', tipe: 'logika' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatTombolRadio', { nama: 'buatTombolRadio', kategori: 'fungsi', parameter: [{ nama: 'label', tipe: 'teks' }, { nama: 'nilai', tipe: 'teks' }, { nama: 'grup', tipe: 'teks' }, { nama: 'terpilih', tipe: 'logika' }], tipeKembalian: 'peta', minParameter: 2, variadik: true }],
+  ['buatDropdown', { nama: 'buatDropdown', kategori: 'fungsi', parameter: [{ nama: 'opsi', tipe: 'daftar' }, { nama: 'nilaiAwal', tipe: 'teks' }, { nama: 'placeholder', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatGambar', { nama: 'buatGambar', kategori: 'fungsi', parameter: [{ nama: 'sumber', tipe: 'teks' }, { nama: 'lebar', tipe: 'bilangan' }, { nama: 'tinggi', tipe: 'bilangan' }, { nama: 'modeUkuran', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatIkon', { nama: 'buatIkon', kategori: 'fungsi', parameter: [{ nama: 'nama', tipe: 'teks' }, { nama: 'ukuran', tipe: 'bilangan' }, { nama: 'warna', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatIndikatorProgres', { nama: 'buatIndikatorProgres', kategori: 'fungsi', parameter: [{ nama: 'nilai', tipe: 'bilangan' }, { nama: 'nilaiMaks', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatIndikatorMemuat', { nama: 'buatIndikatorMemuat', kategori: 'fungsi', parameter: [{ nama: 'aktif', tipe: 'logika' }, { nama: 'warna', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatKartu', { nama: 'buatKartu', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatPemisah', { nama: 'buatPemisah', kategori: 'fungsi', parameter: [{ nama: 'arah', tipe: 'teks' }, { nama: 'warna', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatDaftar', { nama: 'buatDaftar', kategori: 'fungsi', parameter: [{ nama: 'data', tipe: 'daftar' }, { nama: 'pembuatItem', tipe: 'fungsi' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatGrid', { nama: 'buatGrid', kategori: 'fungsi', parameter: [{ nama: 'kolom', tipe: 'bilangan' }, { nama: 'jarak', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatAreaAman', { nama: 'buatAreaAman', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatTataLetakVertikal', { nama: 'buatTataLetakVertikal', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }, { nama: 'jarak', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatTataLetakHorizontal', { nama: 'buatTataLetakHorizontal', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }, { nama: 'jarak', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatTataLetakTumpuk', { nama: 'buatTataLetakTumpuk', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatTampilanGulir', { nama: 'buatTampilanGulir', kategori: 'fungsi', parameter: [{ nama: 'anak', tipe: 'daftar' }, { nama: 'arah', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatNavigatorTumpukan', { nama: 'buatNavigatorTumpukan', kategori: 'fungsi', parameter: [{ nama: 'ruteAwal', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatNavigatorTab', { nama: 'buatNavigatorTab', kategori: 'fungsi', parameter: [{ nama: 'daftarTab', tipe: 'daftar' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['buatNavigasiBawah', { nama: 'buatNavigasiBawah', kategori: 'fungsi', parameter: [{ nama: 'items', tipe: 'daftar' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['tampilkanDialog', { nama: 'tampilkanDialog', kategori: 'fungsi', parameter: [{ nama: 'judul', tipe: 'teks' }, { nama: 'pesan', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['tampilkanAlert', { nama: 'tampilkanAlert', kategori: 'fungsi', parameter: [{ nama: 'judul', tipe: 'teks' }, { nama: 'pesan', tipe: 'teks' }, { nama: 'konfirmasi', tipe: 'teks' }, { nama: 'batal', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 2, variadik: true }],
+  ['tampilkanSnackbar', { nama: 'tampilkanSnackbar', kategori: 'fungsi', parameter: [{ nama: 'pesan', tipe: 'teks' }, { nama: 'durasiMs', tipe: 'bilangan' }, { nama: 'tipe', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['dapatkanInfoPerangkat', { nama: 'dapatkanInfoPerangkat', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['dapatkanStatusJaringan', { nama: 'dapatkanStatusJaringan', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['dapatkanStatusBaterai', { nama: 'dapatkanStatusBaterai', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['getar', { nama: 'getar', kategori: 'fungsi', parameter: [{ nama: 'durasiMs', tipe: 'bilangan' }], tipeKembalian: 'logika', minParameter: 0, variadik: true }],
+  ['haptik', { nama: 'haptik', kategori: 'fungsi', parameter: [{ nama: 'jenis', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 0, variadik: true }],
+  ['salinPapanKlip', { nama: 'salinPapanKlip', kategori: 'fungsi', parameter: [{ nama: 'teks', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 1 }],
+  ['tempelPapanKlip', { nama: 'tempelPapanKlip', kategori: 'fungsi', parameter: [], tipeKembalian: 'teks', minParameter: 0 }],
+  ['dapatkanLokasi', { nama: 'dapatkanLokasi', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['jadwalkanNotifikasi', { nama: 'jadwalkanNotifikasi', kategori: 'fungsi', parameter: [{ nama: 'opsi', tipe: 'peta' }], tipeKembalian: 'logika', minParameter: 1 }],
+  ['batalkanNotifikasi', { nama: 'batalkanNotifikasi', kategori: 'fungsi', parameter: [{ nama: 'id', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 1 }],
+  ['bagikan', { nama: 'bagikan', kategori: 'fungsi', parameter: [{ nama: 'opsi', tipe: 'peta' }], tipeKembalian: 'logika', minParameter: 1 }],
+  ['periksaIzin', { nama: 'periksaIzin', kategori: 'fungsi', parameter: [{ nama: 'izin', tipe: 'teks' }], tipeKembalian: 'teks', minParameter: 1 }],
+  ['mintaIzin', { nama: 'mintaIzin', kategori: 'fungsi', parameter: [{ nama: 'izin', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 1, variadik: true }],
+  ['simpanAman', { nama: 'simpanAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }, { nama: 'nilai', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 2 }],
+  ['ambilAman', { nama: 'ambilAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }], tipeKembalian: 'teks', minParameter: 1 }],
+  ['hapusAman', { nama: 'hapusAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 1 }],
+  ['panggilJembatanNative', { nama: 'panggilJembatanNative', kategori: 'fungsi', parameter: [{ nama: 'modul', tipe: 'teks' }, { nama: 'metode', tipe: 'teks' }, { nama: 'argumen', tipe: 'sembarang' }], tipeKembalian: 'sembarang', minParameter: 2, variadik: true }],
+]);
+
+export function buatEksporMobile(): Map<string, NilaiRuntime> {
+  const ekspor = new Map<string, NilaiRuntime>();
+
+  // buatAplikasiMobile(konfigurasi)
+  ekspor.set('buatAplikasiMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatAplikasiMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let konfig: Partial<KonfigurasiAplikasiMobile> = {};
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        konfig = konversiDariNilaiRuntime(args[0]);
+      }
+      const app = new AplikasiMobile({
+        nama: konfig.nama || 'Aplikasi Mobile Nusantara',
+        id: konfig.id || 'id.nusantara.aplikasi',
+        versi: konfig.versi || '1.0.0',
+        nomorBuild: konfig.nomorBuild || 1,
+        ...konfig,
+      });
+      return bungkusAplikasiMobile(app);
+    },
+  });
+
+  // jalankanAplikasiMobile(app)
+  ekspor.set('jalankanAplikasiMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'jalankanAplikasiMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const app = petaKeAplikasi.get(args[0] as NilaiPeta);
+        if (app) {
+          app.jalankan();
+        }
+      }
+      return buatKosong();
+    },
+  });
+
+  // tambahKomponenMobile(wadah, anak)
+  ekspor.set('tambahKomponenMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tambahKomponenMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.PETA && args[1].jenis === JenisNilaiRuntime.PETA) {
+        const wadahPeta = args[0] as NilaiPeta;
+        const anakPeta = args[1] as NilaiPeta;
+
+        const wadahApp = petaKeAplikasi.get(wadahPeta);
+        const wadahKomp = petaKeKomponen.get(wadahPeta);
+        const anakKomp = petaKeKomponen.get(anakPeta);
+
+        if (anakKomp) {
+          if (wadahApp) {
+            wadahApp.tambahKomponenAkar(anakKomp);
+          } else if (wadahKomp) {
+            wadahKomp.tambahAnak(anakKomp);
+          }
+        }
+        return wadahPeta;
+      }
+      return buatKosong();
+    },
+  });
+
+  // buatTeks(teks, ukuran?, berat?, warna?)
+  ekspor.set('buatTeks', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTeks',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const teks = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const ukuran = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : 16;
+      const berat = args.length > 2 && args[2].jenis === JenisNilaiRuntime.TEKS ? (args[2].nilai as any) : 'normal';
+      const warna = args.length > 3 && args[3].jenis === JenisNilaiRuntime.TEKS ? args[3].nilai : undefined;
+
+      const komp = new TeksMobile({
+        teks,
+        gaya: {
+          ukuranFont: ukuran,
+          beratFont: berat,
+          warnaTeks: warna,
+        },
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatTombol(teks, saatKlik?, varian?, warna?)
+  ekspor.set('buatTombol', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTombol',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const teks = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : 'Tombol';
+      const fn = args.length > 1 && args[1].jenis === JenisNilaiRuntime.FUNGSI_BAWAAN || (args.length > 1 && (args[1] as any).jenis === JenisNilaiRuntime.FUNGSI) ? args[1] : undefined;
+      const varian = args.length > 2 && args[2].jenis === JenisNilaiRuntime.TEKS ? (args[2].nilai as any) : 'primer';
+
+      const komp = new TombolMobile({
+        teks,
+        varian,
+        padaKlik: fn
+          ? () => {
+              Interpreter.panggilFungsiAktif(fn, []);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatInputTeks(placeholder?, nilaiAwal?, saatBerubah?)
+  ekspor.set('buatInputTeks', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatInputTeks',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const placeholder = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const nilaiAwal = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : '';
+      const fn = args.length > 2 ? args[2] : undefined;
+
+      const komp = new InputTeksMobile({
+        placeholder,
+        teks: nilaiAwal,
+        padaBerubah: fn
+          ? (t: string) => {
+              Interpreter.panggilFungsiAktif(fn, [buatTeks(t)]);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatInputSandi(placeholder?, nilaiAwal?)
+  ekspor.set('buatInputSandi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatInputSandi',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const placeholder = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : 'Kata Sandi';
+      const nilaiAwal = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : '';
+
+      const komp = new InputSandiMobile({
+        placeholder,
+        teks: nilaiAwal,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatSakelar(aktif?, saatBerubah?)
+  ekspor.set('buatSakelar', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatSakelar',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const aktif = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : false;
+      const fn = args.length > 1 ? args[1] : undefined;
+
+      const komp = new SakelarMobile({
+        statusAktif: aktif,
+        padaBerubah: fn
+          ? (st: boolean) => {
+              Interpreter.panggilFungsiAktif(fn, [buatLogika(st)]);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatKotakCentang(label, dicentang?, saatBerubah?)
+  ekspor.set('buatKotakCentang', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatKotakCentang',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const label = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const dicentang = args.length > 1 && args[1].jenis === JenisNilaiRuntime.LOGIKA ? args[1].nilai : false;
+      const fn = args.length > 2 ? args[2] : undefined;
+
+      const komp = new KotakCentangMobile({
+        label,
+        dicentang,
+        padaBerubah: fn
+          ? (c: boolean) => {
+              Interpreter.panggilFungsiAktif(fn, [buatLogika(c)]);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatTombolRadio(label, nilai, terpilih?, saatPilih?)
+  ekspor.set('buatTombolRadio', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTombolRadio',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const label = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const nilai = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : label;
+      const terpilih = args.length > 2 && args[2].jenis === JenisNilaiRuntime.LOGIKA ? args[2].nilai : false;
+      const fn = args.length > 3 ? args[3] : undefined;
+
+      const komp = new TombolRadioMobile({
+        label,
+        nilai,
+        terpilih,
+        padaPilih: fn
+          ? (v: string) => {
+              Interpreter.panggilFungsiAktif(fn, [buatTeks(v)]);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatDropdown(opsi, nilaiAwal?, saatPilih?)
+  ekspor.set('buatDropdown', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatDropdown',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let daftarOpsi: any[] = [];
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        daftarOpsi = ((args[0] as any).elemen as NilaiRuntime[]).map(o => (o.jenis === JenisNilaiRuntime.TEKS ? { label: o.nilai, nilai: o.nilai } : konversiDariNilaiRuntime(o)));
+      }
+      const nilaiAwal = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : undefined;
+      const fn = args.length > 2 ? args[2] : undefined;
+
+      const komp = new DropdownMobile({
+        daftarOpsi,
+        nilaiTerpilih: nilaiAwal,
+        padaPilih: fn
+          ? (v: string) => {
+              Interpreter.panggilFungsiAktif(fn, [buatTeks(v)]);
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatGambar(sumber, lebar?, tinggi?)
+  ekspor.set('buatGambar', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatGambar',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const sumber = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const lebar = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : undefined;
+      const tinggi = args.length > 2 && args[2].jenis === JenisNilaiRuntime.BILANGAN ? args[2].nilai : undefined;
+
+      const komp = new GambarMobile({
+        sumber,
+        gaya: { lebar, tinggi },
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatIkon(nama, ukuran?, warna?)
+  ekspor.set('buatIkon', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatIkon',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const nama = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : 'info';
+      const ukuran = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : 24;
+      const warna = args.length > 2 && args[2].jenis === JenisNilaiRuntime.TEKS ? args[2].nilai : '#1976d2';
+
+      const komp = new IkonMobile({
+        nama,
+        ukuran,
+        warna,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatIndikatorProgres(nilai?, maks?)
+  ekspor.set('buatIndikatorProgres', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatIndikatorProgres',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const nilai = args.length > 0 && args[0].jenis === JenisNilaiRuntime.BILANGAN ? args[0].nilai : 0;
+      const maks = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : 100;
+
+      const komp = new IndikatorProgresMobile({ nilai, nilaiMaksimum: maks });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatIndikatorMemuat(aktif?, ukuran?)
+  ekspor.set('buatIndikatorMemuat', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatIndikatorMemuat',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const aktif = args.length > 0 && args[0].jenis === JenisNilaiRuntime.LOGIKA ? args[0].nilai : true;
+      const ukuran = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : 32;
+
+      const komp = new IndikatorMemuatMobile({ sedangMemuat: aktif, ukuran });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatKartu(anak?, elevasi?, radius?)
+  ekspor.set('buatKartu', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatKartu',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const komp = new KartuMobile();
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        for (const item of ((args[0] as any).elemen as NilaiRuntime[])) {
+          if (item.jenis === JenisNilaiRuntime.PETA) {
+            const c = petaKeKomponen.get(item as NilaiPeta);
+            if (c) komp.tambahAnak(c);
+          }
+        }
+      }
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatPemisah(arah?, warna?)
+  ekspor.set('buatPemisah', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatPemisah',
+    eksekusi: () => bungkusKomponenMobile(new PemisahMobile()),
+  });
+
+  // buatDaftar(data, pembuatItem?)
+  ekspor.set('buatDaftar', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatDaftar',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let dataList: any[] = [];
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        dataList = ((args[0] as any).elemen as NilaiRuntime[]).map(i => konversiDariNilaiRuntime(i));
+      }
+      const fn = args.length > 1 ? args[1] : undefined;
+
+      const komp = new DaftarMobile({
+        data: dataList,
+        pembuatItem: fn
+          ? (item: any, idx: number) => {
+              const res = Interpreter.panggilFungsiAktif(fn, [konversiKeNilaiRuntime(item), buatBilangan(idx)]);
+              if (res && res.jenis === JenisNilaiRuntime.PETA) {
+                const k = petaKeKomponen.get(res as NilaiPeta);
+                if (k) return k;
+              }
+              return new TeksMobile({ teks: String(item) });
+            }
+          : undefined,
+      });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatGrid(kolom?, data?)
+  ekspor.set('buatGrid', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatGrid',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const kolom = args.length > 0 && args[0].jenis === JenisNilaiRuntime.BILANGAN ? args[0].nilai : 2;
+      const komp = new GridMobile({ jumlahKolom: kolom });
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatAreaAman(anak?, inset?)
+  ekspor.set('buatAreaAman', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatAreaAman',
+    eksekusi: () => bungkusKomponenMobile(new AreaAmanMobile()),
+  });
+
+  // buatTataLetakVertikal(anak?, jarak?)
+  ekspor.set('buatTataLetakVertikal', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTataLetakVertikal',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const komp = new TataLetakVertikalMobile();
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        for (const item of ((args[0] as any).elemen as NilaiRuntime[])) {
+          if (item.jenis === JenisNilaiRuntime.PETA) {
+            const c = petaKeKomponen.get(item as NilaiPeta);
+            if (c) komp.tambahAnak(c);
+          }
+        }
+      }
+      if (args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN) {
+        komp.jarakAntarItem = args[1].nilai;
+      }
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatTataLetakHorizontal(anak?, jarak?)
+  ekspor.set('buatTataLetakHorizontal', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTataLetakHorizontal',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const komp = new TataLetakHorizontalMobile();
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        for (const item of ((args[0] as any).elemen as NilaiRuntime[])) {
+          if (item.jenis === JenisNilaiRuntime.PETA) {
+            const c = petaKeKomponen.get(item as NilaiPeta);
+            if (c) komp.tambahAnak(c);
+          }
+        }
+      }
+      if (args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN) {
+        komp.jarakAntarItem = args[1].nilai;
+      }
+      return bungkusKomponenMobile(komp);
+    },
+  });
+
+  // buatTataLetakTumpuk(anak?)
+  ekspor.set('buatTataLetakTumpuk', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTataLetakTumpuk',
+    eksekusi: () => bungkusKomponenMobile(new TataLetakTumpukMobile()),
+  });
+
+  // buatTampilanGulir(anak?, arah?)
+  ekspor.set('buatTampilanGulir', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatTampilanGulir',
+    eksekusi: () => bungkusKomponenMobile(new TampilanGulirMobile()),
+  });
+
+  // buatNavigatorTumpukan(ruteAwal?)
+  ekspor.set('buatNavigatorTumpukan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatNavigatorTumpukan',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const ruteAwal = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : undefined;
+      const nav = new NavigatorTumpukanMobile({ ruteAwal });
+      return bungkusKomponenMobile(nav);
+    },
+  });
+
+  // buatNavigatorTab(daftarTab)
+  ekspor.set('buatNavigatorTab', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatNavigatorTab',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let tabs: any[] = [];
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        tabs = ((args[0] as any).elemen as NilaiRuntime[]).map(t => konversiDariNilaiRuntime(t));
+      }
+      const nav = new NavigatorTabMobile({
+        daftarTab: tabs.map(t => ({
+          kunci: t.kunci || t.nama || 'tab',
+          label: t.label || t.nama || 'Tab',
+          ikon: t.ikon,
+          pembuatKonten: () => new TeksMobile({ teks: `Konten ${t.label || t.kunci}` }),
+        })),
+      });
+      return bungkusKomponenMobile(nav);
+    },
+  });
+
+  // buatNavigasiBawah(items, saatPilih?)
+  ekspor.set('buatNavigasiBawah', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatNavigasiBawah',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let items: any[] = [];
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.DAFTAR) {
+        items = ((args[0] as any).elemen as NilaiRuntime[]).map(i => konversiDariNilaiRuntime(i));
+      }
+      const nav = new NavigasiBawahMobile({ items });
+      return bungkusKomponenMobile(nav);
+    },
+  });
+
+  // tampilkanDialog(opsi)
+  ekspor.set('tampilkanDialog', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tampilkanDialog',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let opsiData: any = {};
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        opsiData = konversiDariNilaiRuntime(args[0]);
+      } else if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.TEKS && args[1].jenis === JenisNilaiRuntime.TEKS) {
+        opsiData = { judul: args[0].nilai, konten: args[1].nilai };
+      }
+      const dialog = new DialogMobile(opsiData);
+      dialog.buka();
+      return bungkusKomponenMobile(dialog);
+    },
+  });
+
+  // tampilkanAlert(judul, pesan, konfirmasi?, batal?)
+  ekspor.set('tampilkanAlert', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tampilkanAlert',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const judul = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : 'Pemberitahuan';
+      const pesan = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : '';
+      const konfirmasi = args.length > 2 && args[2].jenis === JenisNilaiRuntime.TEKS ? args[2].nilai : 'OK';
+      const batal = args.length > 3 && args[3].jenis === JenisNilaiRuntime.TEKS ? args[3].nilai : undefined;
+
+      const alert = new AlertMobile({
+        judul,
+        pesan,
+        teksKonfirmasi: konfirmasi,
+        teksBatal: batal,
+      });
+      alert.buka();
+      return bungkusKomponenMobile(alert);
+    },
+  });
+
+  // tampilkanSnackbar(pesan, durasiMs?, tipe?)
+  ekspor.set('tampilkanSnackbar', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tampilkanSnackbar',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const pesan = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const durasiMs = args.length > 1 && args[1].jenis === JenisNilaiRuntime.BILANGAN ? args[1].nilai : 3000;
+      const tipe = args.length > 2 && args[2].jenis === JenisNilaiRuntime.TEKS ? (args[2].nilai as any) : 'info';
+
+      const snackbar = new SnackbarMobile({
+        pesan,
+        durasiMs,
+        tipe,
+      });
+      snackbar.tampilkan();
+      return bungkusKomponenMobile(snackbar);
+    },
+  });
+
+  // dapatkanInfoPerangkat()
+  ekspor.set('dapatkanInfoPerangkat', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanInfoPerangkat',
+    eksekusi: () => konversiKeNilaiRuntime(InfoPerangkatMobile.dapatkanInfo()),
+  });
+
+  // dapatkanStatusJaringan()
+  ekspor.set('dapatkanStatusJaringan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanStatusJaringan',
+    eksekusi: () => konversiKeNilaiRuntime(StatusJaringanMobile.dapatkanStatus()),
+  });
+
+  // dapatkanStatusBaterai()
+  ekspor.set('dapatkanStatusBaterai', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanStatusBaterai',
+    eksekusi: () => konversiKeNilaiRuntime(StatusBateraiMobile.dapatkanStatus()),
+  });
+
+  // getar(durasiMs?)
+  ekspor.set('getar', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'getar',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const ms = args.length > 0 && args[0].jenis === JenisNilaiRuntime.BILANGAN ? args[0].nilai : 200;
+      const res = GetaranMobile.getar(ms);
+      return buatLogika(res);
+    },
+  });
+
+  // haptik(jenis?)
+  ekspor.set('haptik', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'haptik',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const jenis = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? (args[0].nilai as any) : 'ringan';
+      const res = GetaranMobile.haptik(jenis);
+      return buatLogika(res);
+    },
+  });
+
+  // salinPapanKlip(teks)
+  ekspor.set('salinPapanKlip', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'salinPapanKlip',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const teks = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      PapanKlipMobile.salin(teks);
+      return buatLogika(true);
+    },
+  });
+
+  // tempelPapanKlip()
+  ekspor.set('tempelPapanKlip', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'tempelPapanKlip',
+    eksekusi: () => {
+      let hasilTeks = '';
+      PapanKlipMobile.tempel().then(t => {
+        hasilTeks = t;
+      });
+      return buatTeks(hasilTeks);
+    },
+  });
+
+  // dapatkanLokasi()
+  ekspor.set('dapatkanLokasi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanLokasi',
+    eksekusi: () => {
+      let lokasiObj: any = { latitude: -6.2088, longitude: 106.8456 };
+      LokasiPerangkatMobile.dapatkanLokasiSaatIni().then(l => {
+        lokasiObj = l;
+      });
+      return konversiKeNilaiRuntime(lokasiObj);
+    },
+  });
+
+  // jadwalkanNotifikasi(opsi)
+  ekspor.set('jadwalkanNotifikasi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'jadwalkanNotifikasi',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const opsi = konversiDariNilaiRuntime(args[0]);
+        NotifikasiLokalMobile.jadwalkan(opsi);
+        return buatLogika(true);
+      }
+      return buatLogika(false);
+    },
+  });
+
+  // batalkanNotifikasi(id)
+  ekspor.set('batalkanNotifikasi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'batalkanNotifikasi',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const id = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : '';
+      const res = NotifikasiLokalMobile.batalkan(id);
+      return buatLogika(res);
+    },
+  });
+
+  // bagikan(opsi)
+  ekspor.set('bagikan', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'bagikan',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        const opsi = konversiDariNilaiRuntime(args[0]);
+        BerbagiMobile.bagikan(opsi);
+        return buatLogika(true);
+      }
+      return buatLogika(false);
+    },
+  });
+
+  // periksaIzin(izin)
+  ekspor.set('periksaIzin', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaIzin',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const izin = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? (args[0].nilai as JenisIzinMobile) : 'internet';
+      const konteks = KonteksAplikasiMobile.dapatkanKonteks();
+      const status = konteks.pengelolaIzin.dapatkanStatus(izin);
+      return buatTeks(status);
+    },
+  });
+
+  // mintaIzin(izin, alasan?)
+  ekspor.set('mintaIzin', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'mintaIzin',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const izin = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? (args[0].nilai as JenisIzinMobile) : 'internet';
+      const alasan = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? args[1].nilai : undefined;
+      const konteks = KonteksAplikasiMobile.dapatkanKonteks();
+      let diberikan = false;
+      konteks.pengelolaIzin.mintaIzin(izin, alasan).then((res: any) => {
+        diberikan = res.diberikan;
+      });
+      return buatLogika(diberikan);
+    },
+  });
+
+  // simpanAman(kunci, nilai)
+  ekspor.set('simpanAman', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'simpanAman',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.TEKS && args[1].jenis === JenisNilaiRuntime.TEKS) {
+        const k = args[0].nilai;
+        const v = args[1].nilai;
+        const res = PenyimpananAmanMobile.simpan(k, v);
+        return buatLogika(res);
+      }
+      return buatLogika(false);
+    },
+  });
+
+  // ambilAman(kunci)
+  ekspor.set('ambilAman', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'ambilAman',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const k = args[0].nilai;
+        const val = PenyimpananAmanMobile.ambil(k);
+        return val !== null ? buatTeks(val) : buatKosong();
+      }
+      return buatKosong();
+    },
+  });
+
+  // hapusAman(kunci)
+  ekspor.set('hapusAman', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'hapusAman',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const k = args[0].nilai;
+        const res = PenyimpananAmanMobile.hapus(k);
+        return buatLogika(res);
+      }
+      return buatLogika(false);
+    },
+  });
+
+  // panggilJembatanNative(modul, metode, argumen)
+  ekspor.set('panggilJembatanNative', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'panggilJembatanNative',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.TEKS && args[1].jenis === JenisNilaiRuntime.TEKS) {
+        const modul = args[0].nilai;
+        const metode = args[1].nilai;
+        const argumenData = args.length > 2 ? konversiDariNilaiRuntime(args[2]) : undefined;
+
+        const jembatan = JembatanMobileNative.dapatkanInstance();
+        let hasilNative: any = null;
+        jembatan.panggilNative(modul, metode, argumenData).then(res => {
+          hasilNative = res;
+        }).catch(err => {
+          hasilNative = { galat: err.message };
+        });
+
+        return konversiKeNilaiRuntime(hasilNative);
+      }
+      return buatKosong();
+    },
+  });
+
+  return ekspor;
+}

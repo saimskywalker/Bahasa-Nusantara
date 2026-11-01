@@ -34,6 +34,7 @@ import { PelariMigrasi } from '../migration/migrationRunner';
 import { PelariSeeder } from '../seeder/seederRunner';
 import { ProjectGenerator, ValidatorProyek } from '../generator';
 import { AntreanTugasMemori, PekerjaLatarBelakang } from '../realtime';
+import { MobileCLI } from '../mobile/cli/mobile_cli';
 
 export interface OpsiCLI {
   pengelola?: PengelolaPaket;
@@ -226,6 +227,8 @@ export class NusantaraCLI {
             'profil',
             'profile',
             'profiler',
+            'mobile',
+            'seluler',
           ].includes(perintah) &&
             this.pembaca.apakahAda(perintah)))
       ) {
@@ -428,6 +431,11 @@ export class NusantaraCLI {
             warna: opsiWarna,
             verbose: opsiVerbose,
           });
+        }
+
+        case 'mobile':
+        case 'seluler': {
+          return MobileCLI.jalankan(argumenTambahan);
         }
 
         case 'terbit':
@@ -2037,6 +2045,14 @@ Penggunaan:
 Perintah Pekerja Latar Belakang & Antrean (Phase 34):
   worker status          Menampilkan status dan statistik antrean background task
   worker start           Memulai siklus pemrosesan antrean tugas latar belakang
+
+Perintah Nusantara Mobile Application Framework (Phase 37):
+  mobile baru <nama>     Membuat proyek aplikasi mobile Android & iOS baru
+  mobile platform        Mengelola target platform aplikasi (android, ios, desktop)
+  mobile periksa         Memeriksa kesiapan SDK Android, JDK, macOS, dan Xcode
+  mobile build <target>  Membangun paket aplikasi mobile (APK/AAB/IPA)
+  mobile jalankan        Menjalankan aplikasi di emulator atau simulator desktop
+  mobile info            Informasi lengkap framework Nusantara Mobile
 
 Perintah Pembuat Proyek & Generator Aplikasi (Phase 33):
   new <nama> [--template <id>] [--force] [--no-interactive]

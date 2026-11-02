@@ -110,7 +110,29 @@ selesai
 `
     );
 
-    // 4. Berkas Pengujian Unit
+    // 4. Percontohan Mobile Networking & Cloud (Phase 39)
+    this.berkasPeta.set(
+      '/proyek/src/mobile_demo.nusantara',
+      `// Percontohan Mobile Networking & Cloud Services
+program DemoMobileCloud
+gunakan "std:mobile" sebagai seluler
+
+mulai
+    tampilkan("=== Demo Nusantara Mobile Networking ===")
+    status : peta = seluler.periksaJaringanMobile()
+    tampilkan("Status Jaringan:", status["status"], "Tipe:", status["tipe"])
+
+    klien : peta = seluler.buatKlienAPI({ "baseUrl": "https://api.nusantara.internal" })
+    respon : peta = klien.kirim("/data", { "judul": "Catatan Mobile", "waktu": 2026 })
+    tampilkan("Respon API:", respon["status"], respon["statusTeks"])
+
+    hasilSync : peta = seluler.sinkronkanDataMobile()
+    tampilkan("Sinkronisasi Cloud:", hasilSync["catatan"])
+selesai
+`
+    );
+
+    // 5. Berkas Pengujian Unit
     this.berkasPeta.set(
       '/proyek/pengujian/utama_test.nusantara',
       `// Berkas Pengujian Unit Proyek

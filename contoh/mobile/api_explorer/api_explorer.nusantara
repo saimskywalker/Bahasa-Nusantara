@@ -1,0 +1,59 @@
+# ==============================================================================
+# CONTOH APLIKASI: API Explorer Mobile (Nusantara Mobile Phase 39)
+# Menguji REST API, Pengiriman JSON, Metode HTTP, Header, dan Tanggapan
+# ==============================================================================
+
+program APIExplorerMobile
+gunakan "std:mobile" sebagai seluler
+
+mulai
+    tampilkan("======================================================")
+    tampilkan("  NUSANTARA MOBILE - API Explorer Demo")
+    tampilkan("======================================================")
+
+    # 1. Periksa Status Koneksi Internet
+    statusJaringan : peta = seluler.periksaJaringanMobile()
+    tampilkan("Koneksi Internet :", statusJaringan["terhubung"])
+    tampilkan("Tipe Jaringan    :", statusJaringan["tipe"])
+    tampilkan("Status Akses     :", statusJaringan["status"])
+
+    # 2. Inisialisasi Klien REST API Mobile
+    konfig : peta = {
+        "baseUrl": "https://api.nusantara.internal/v1",
+        "batasWaktuMs": 10000,
+        "validasiTLS": benar
+    }
+    klien : peta = seluler.buatKlienAPI(konfig)
+
+    # 3. Permintaan GET (Mengambil Data Produk)
+    tampilkan("\n[1] Mengirim Permintaan GET /produk...")
+    responGet : peta = klien.dapatkan("/produk", { "kategori": "elektronik" })
+    tampilkan("  Status HTTP :", responGet["status"], responGet["statusTeks"])
+    tampilkan("  Sukses      :", responGet["sukses"])
+    tampilkan("  Idempotency :", responGet["idempotencyKey"])
+
+    # 4. Permintaan POST (Membuat Data Pesanan Baru dengan JSON)
+    tampilkan("\n[2] Mengirim Permintaan POST /pesanan...")
+    pesananBaru : peta = {
+        "produkId": "PRD-998",
+        "jumlah": 2,
+        "pelanggan": "Budi Santoso",
+        "metodeBayar": "qris"
+    }
+    responPost : peta = klien.kirim("/pesanan", pesananBaru)
+    tampilkan("  Status HTTP :", responPost["status"])
+    tampilkan("  Pesan       :", responPost["data"]["pesan"])
+
+    # 5. Permintaan PUT (Pembaruan Data)
+    tampilkan("\n[3] Mengirim Permintaan PUT /pesanan/PRD-998...")
+    responPut : peta = klien.perbarui("/pesanan/PRD-998", { "status": "lunas" })
+    tampilkan("  Status HTTP :", responPut["status"])
+
+    # 6. Permintaan DELETE (Menghapus Data)
+    tampilkan("\n[4] Mengirim Permintaan DELETE /pesanan/PRD-998...")
+    responDel : peta = klien.hapusData("/pesanan/PRD-998")
+    tampilkan("  Status HTTP :", responDel["status"])
+
+    tampilkan("\nAPI Explorer berhasil mengeksekusi siklus REST API secara sukses.")
+    tampilkan("======================================================")
+selesai

@@ -1,0 +1,51 @@
+# ==============================================================================
+# CONTOH APLIKASI: Cloud Login & Secure Storage Demo (Phase 39)
+# Demonstrasi Autentikasi Pengguna, JWT Token, & Penyimpanan Aman Keystore
+# ==============================================================================
+
+program CloudLoginDemo
+gunakan "std:mobile" sebagai seluler
+
+mulai
+    tampilkan("======================================================")
+    tampilkan("  NUSANTARA MOBILE - Cloud Login & Token Demo")
+    tampilkan("======================================================")
+
+    # Inisialisasi Klien Autentikasi
+    auth : peta = seluler.buatKlienAutentikasi()
+
+    tampilkan("\n[1] Memeriksa Status Autentikasi Awal...")
+    statusAwal : logika = auth.apakahTerautentikasi()
+    tampilkan("  Terautentikasi :", statusAwal)
+
+    # Melakukan Login
+    tampilkan("\n[2] Memulai Proses Masuk (Login)...")
+    email : teks = "pengembang@nusantara.id"
+    sandi : teks = "RahasiaSangatAman#2026"
+    hasilLogin : peta = auth.masuk(email, sandi)
+
+    tampilkan("  Sukses  :", hasilLogin["sukses"])
+    tampilkan("  Pesan   :", hasilLogin["pesan"])
+    tampilkan("  Pengguna:", hasilLogin["pengguna"]["nama"], "-", hasilLogin["pengguna"]["email"])
+
+    # Memeriksa Token yang Tersimpan di Android Keystore / iOS Keychain
+    tokenAkses : teks = auth.dapatkanToken()
+    tampilkan("\n[3] Memeriksa Token Akses di Penyimpanan Aman:")
+    tampilkan("  Token Terpasang :", tokenAkses)
+    tampilkan("  Status Login    :", auth.apakahTerautentikasi())
+
+    # Menggunakan Token pada Klien API
+    klien : peta = seluler.buatKlienAPI({ "baseUrl": "https://api.nusantara.id" })
+    klien.aturToken(tokenAkses)
+    tampilkan("\n[4] Mengirim Permintaan Terotorisasi dengan Bearer Token...")
+    responProfil : peta = klien.dapatkan("/pengguna/profil")
+    tampilkan("  Status Profil :", responProfil["status"])
+
+    # Melakukan Logout
+    tampilkan("\n[5] Melakukan Keluar (Logout) & Menghapus Token...")
+    auth.keluar()
+    tampilkan("  Status Pasca Logout :", auth.apakahTerautentikasi())
+
+    tampilkan("\nCloud Login Demo berhasil diselesaikan dengan aman.")
+    tampilkan("======================================================")
+selesai

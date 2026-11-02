@@ -1,0 +1,40 @@
+# ==============================================================================
+# CONTOH APLIKASI: Cloud File Manager & Transfer Berkas Mobile (Phase 39)
+# Demonstrasi Unggah Berkas, Unduh, Validasi Jalur, dan Metadata Cloud
+# ==============================================================================
+
+program CloudFileManagerMobile
+gunakan "std:mobile" sebagai seluler
+
+mulai
+    tampilkan("======================================================")
+    tampilkan("  NUSANTARA MOBILE - Cloud File Manager")
+    tampilkan("======================================================")
+
+    # 1. Menampilkan Konfigurasi Cloud Saat Ini
+    konfigCloud : peta = seluler.dapatkanKonfigurasiCloud()
+    tampilkan("Lingkungan Aktif :", konfigCloud["namaLingkungan"])
+    tampilkan("Penyedia Cloud   :", konfigCloud["penyediaCloud"])
+    tampilkan("Storage Endpoint :", konfigCloud["storageEndpoint"])
+
+    # 2. Mengunggah Berkas Teks Laporan
+    tampilkan("\n[1] Mengunggah Berkas Laporan ke Cloud Storage...")
+    namaBerkas : teks = "laporan_keuangan_q4.csv"
+    isiKonten : teks = "id,nama,jumlah,status\n1,Server Cloud,5000000,lunas\n2,Domain API,250000,lunas"
+
+    hasilUnggah : peta = seluler.unggahBerkasCloud(namaBerkas, isiKonten, { "folder": "laporan" })
+    tampilkan("  Status Unggah :", hasilUnggah["sukses"])
+    tampilkan("  Nama Berkas   :", hasilUnggah["berkas"]["nama"])
+    tampilkan("  Ukuran (Byte) :", hasilUnggah["berkas"]["ukuran"])
+    tampilkan("  URL Akses     :", hasilUnggah["berkas"]["url"])
+
+    # 3. Mengunduh Berkas dari Cloud
+    tampilkan("\n[2] Mengunduh Berkas Berdasarkan URL/ID...")
+    hasilUnduh : peta = seluler.unduhBerkasCloud(hasilUnggah["berkas"]["id"])
+    tampilkan("  Status Unduh  :", hasilUnduh["sukses"])
+    tampilkan("  Tipe MIME     :", hasilUnduh["mimeType"])
+    tampilkan("  Isi Konten    :\n", hasilUnduh["data"])
+
+    tampilkan("\nCloud File Manager berhasil mentransfer berkas secara aman.")
+    tampilkan("======================================================")
+selesai

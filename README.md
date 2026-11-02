@@ -2,12 +2,13 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_38:_mobile_native_api_integration-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.38.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_39:_mobile_networking_&_cloud-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.39.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-34_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-35_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Networking](https://img.shields.io/badge/networking-offline_first_&_cloud-blue.svg)](docs/mobile/networking/01_arsitektur_networking_mobile.md)
 [![Native API](https://img.shields.io/badge/native_api-android_&_ios-purple.svg)](docs/mobile/native-api/pengenalan-native-api.md)
 [![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/01_pendahuluan.md)
 [![Desktop](https://img.shields.io/badge/desktop-gui_framework-indigo.svg)](docs/desktop/pengenalan-gui.md)
@@ -25,7 +26,8 @@ NUSANTARA bukan sekadar penerjemah sintaksis bahasa asing, melainkan ikhtiar man
 
 - **Ekstensi Berkas Resmi:** `.nusantara`
 - **Lisensi:** [Apache License 2.0](LISENSI)
-- **Status Saat Ini:** **Phase 38: Nusantara Mobile Native API & Device Integration — Integrasi Fitur Asli Smartphone Android & iOS (Milestone v0.38.0).**
+- **Status Saat Ini:** **Phase 39: Nusantara Mobile Networking & Cloud Services — Konektivitas Internet Mobile, Integrasi REST API, Sinkronisasi Data Offline-First, dan Layanan Cloud Multi-Provider (Milestone v0.39.0).**
+- **Dokumentasi Mobile Networking:** [docs/mobile/networking/01_arsitektur_networking_mobile.md](docs/mobile/networking/01_arsitektur_networking_mobile.md) (13 berkas panduan lengkap)
 - **Dokumentasi Native Device API:** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 berkas panduan lengkap)
 - **Dokumentasi Mobile Framework:** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)
 - **Dokumentasi GUI Desktop:** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)

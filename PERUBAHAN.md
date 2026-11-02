@@ -4,6 +4,50 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.39.0] — 2026-11-01
+### Phase 39: Nusantara Mobile Networking & Cloud Services
+
+Fase ini menghadirkan kemampuan konektivitas internet mobile, integrasi REST API, manajemen token otentikasi aman (JWT & OAuth 2.0 PKCE), sinkronisasi data offline-first dengan resolusi konflik terdistribusi, transfer berkas cloud anti-path traversal, WebSocket mobile sadar status latar belakang, dan arsitektur penyedia multi-cloud pada bahasa pemrograman NUSANTARA.
+
+#### Ditambahkan:
+- **Networking Core & Manajemen Permintaan (`src/mobile/networking/core/`):**
+  - `types.ts`: Kontrak tipe data lengkap untuk metode HTTP, opsi permintaan, hasil respon API, token otentikasi, antrean offline, resolusi konflik, dan metadata cloud.
+  - `request_manager.ts`: `ManajerPermintaanMobile` dengan antrean prioritas (`tinggi`, `normal`, `rendah`), pembatasan konkurensi (maks 4 koneksi bersamaan), pembuatan UUID `Idempotency-Key`, dan kebijakan coba ulang (*retry*) dengan *exponential backoff* dan *jitter*.
+  - `api_client.ts`: `KlienAPIMobile` yang mendukung metode `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, encoding URL query aman, intersepsi otomatis ke antrean offline saat jaringan terputus, dan eksekusi sinkron untuk interpreter NUSANTARA.
+- **Autentikasi Mobile & OAuth 2.0 PKCE (`src/mobile/networking/auth/`):**
+  - `auth_client.ts`: `KlienAutentikasiMobile` mengelola siklus hidup token JWT, auto-refresh token sebelum kedaluwarsa, generator PKCE (RFC 7636) dengan `code_verifier` dan `code_challenge` SHA-256 base64url, serta integrasi penyimpanan aman Keystore / Keychain.
+- **Pola Offline-First & Mesin Sinkronisasi Data (`src/mobile/networking/offline/`, `sync/`):**
+  - `offline_queue.ts`: `PengelolaOperasiOffline` dengan antrean FIFO persisten, de-duplikasi otomatis berdasarkan idempotency key, pelacakan percobaan, dan pembersihan berkala operasi yang berhasil.
+  - `sync_engine.ts`: `MesinSinkronisasiMobile` untuk pengiriman otomatis mutasi tertunda saat koneksi pulih, dilengkapi 4 strategi resolusi konflik: *Last-Write-Wins* (LWW dengan toleransi *clock drift*), *Server Wins*, *Client Wins*, dan *Manual*.
+- **Cloud Storage & Transfer Berkas Aman (`src/mobile/networking/storage/`):**
+  - `cloud_storage.ts`: Abstraksi `PenyediaStorageNetral` dengan adaptor `mock_local` (in-memory sandbox) dan `s3_compatible`, pelacak progres transfer `(persen, byteTerkirim, totalByte)`, batas ukuran mobile 50 MB, dan proteksi anti-path traversal.
+- **WebSocket & Background Tasks (`src/mobile/networking/realtime/`, `background/`):**
+  - `websocket_client.ts`: `KlienWebSocketMobile` dengan interval heartbeat ping/pong (25s) hemat daya seluler, serta penangguhan saat aplikasi berada di latar belakang (*background*) dan pemulihan saat di latar depan (*foreground*).
+  - `background_sync.ts`: `PengelolaTugasBackgroundMobile` berbasis kontrak Android WorkManager dan iOS BackgroundTasks dengan batasan jaringan dan daya baterai.
+- **Cloud Database REST & Push Notifications (`src/mobile/networking/database/`, `push/`):**
+  - `cloud_database.ts`: `KlienDatabaseCloudMobile` untuk operasi CRUD, paginasi, dan penyaringan tanpa mengekspos kredensial administrator.
+  - `push_notification.ts`: `PengelolaNotifikasiPushMobile` untuk pengelolaan token registrasi FCM / APNs dan perutean deep link.
+- **Multi-Cloud Provider & Konfigurasi (`src/mobile/networking/providers/`, `config/`):**
+  - `provider_registry.ts`: `RegistriPenyediaCloud` mendukung `mock_local`, `supabase`, `firebase`, dan `rest_kustom`.
+  - `cloud_config.ts`: `PengelolaKonfigurasiCloud` dengan profil lingkungan (`pengembangan`, `staging`, `produksi`) dan penegakan TLS wajib.
+- **Lapisan Keamanan & Sensor Rahasia (`src/mobile/networking/security/`):**
+  - `cloud_security.ts`: `LapisanKeamananMobile` menyensor otomatis header dan data sensitif (`Authorization`, `token`, `password`, `secret`), memvalidasi URL produksi wajib HTTPS, serta memblokir upaya injeksi role di sisi klien.
+- **Integrasi CLI Nusantara Mobile:**
+  - Subperintah `nusantara mobile jaringan periksa`.
+  - Subperintah `nusantara mobile cloud <info|konfigurasi|validasi>`.
+  - Subperintah `nusantara mobile sync <periksa|sinkronkan>`.
+- **Integrasi Pustaka Standar `std:mobile` (`src/stdlib/mobile.ts`):**
+  - `buatKlienAPI`, `buatKlienAutentikasi`, `sinkronkanDataMobile`, `antreanOfflineMobile`, `periksaJaringanMobile`, `unggahBerkasCloud`, `unduhBerkasCloud`, `dapatkanKonfigurasiCloud`.
+- **Contoh Aplikasi Nyata (.nusantara):**
+  - `contoh/mobile/api_explorer/api_explorer.nusantara` (REST API Client demo).
+  - `contoh/mobile/cloud_login/cloud_login.nusantara` (Autentikasi token JWT & Keystore demo).
+  - `contoh/mobile/offline_notes/offline_notes.nusantara` (Aplikasi catatan offline-first & sinkronisasi data).
+  - `contoh/mobile/cloud_file_manager/cloud_file_manager.nusantara` (Transfer berkas cloud & metadata demo).
+- **Dokumentasi Lengkap (13 Berkas):**
+  - `docs/mobile/networking/` (01 s/d 13 panduan komprehensif Bahasa Indonesia).
+- **Pengujian Terotomasi:**
+  - `pengujian/mobile/uji_mobile_networking_fase39.ts`: 32/32 skenario pengujian lulus 100%.
+
 ## [v0.38.0] — 2026-11-01
 ### Phase 38: Nusantara Mobile Native API & Device Integration
 

@@ -65,6 +65,13 @@ import {
   KonfigurasiAplikasiMobile,
   RegistriNativeAPI,
   PengelolaKemampuanPerangkat,
+  KlienAPIMobile,
+  KlienAutentikasiMobile,
+  MesinSinkronisasiMobile,
+  PengelolaOperasiOffline,
+  PengawasJaringanMobile,
+  PengelolaTransferBerkasMobile,
+  PengelolaKonfigurasiCloud,
 } from '../mobile';
 import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
 
@@ -430,6 +437,14 @@ export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
   ['daftarNativeAPI', { nama: 'daftarNativeAPI', kategori: 'fungsi', parameter: [], tipeKembalian: 'daftar', minParameter: 0 }],
   ['periksaNativeAPI', { nama: 'periksaNativeAPI', kategori: 'fungsi', parameter: [{ nama: 'namaApi', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1 }],
   ['dapatkanKemampuanPerangkat', { nama: 'dapatkanKemampuanPerangkat', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['buatKlienAPI', { nama: 'buatKlienAPI', kategori: 'fungsi', parameter: [{ nama: 'konfig', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatKlienAutentikasi', { nama: 'buatKlienAutentikasi', kategori: 'fungsi', parameter: [{ nama: 'konfig', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['sinkronkanDataMobile', { nama: 'sinkronkanDataMobile', kategori: 'fungsi', parameter: [{ nama: 'opsi', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['antreanOfflineMobile', { nama: 'antreanOfflineMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['periksaJaringanMobile', { nama: 'periksaJaringanMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['unggahBerkasCloud', { nama: 'unggahBerkasCloud', kategori: 'fungsi', parameter: [{ nama: 'namaBerkas', tipe: 'teks' }, { nama: 'konten', tipe: 'teks' }, { nama: 'opsi', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 2, variadik: true }],
+  ['unduhBerkasCloud', { nama: 'unduhBerkasCloud', kategori: 'fungsi', parameter: [{ nama: 'urlAtauId', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1 }],
+  ['dapatkanKonfigurasiCloud', { nama: 'dapatkanKonfigurasiCloud', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
 ]);
 
 export function buatEksporMobile(): Map<string, NilaiRuntime> {
@@ -1245,5 +1260,218 @@ export function buatEksporMobile(): Map<string, NilaiRuntime> {
     },
   });
 
+  // buatKlienAPI(konfigurasi?)
+  ekspor.set('buatKlienAPI', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatKlienAPI',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let cfg: any = {};
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        cfg = konversiDariNilaiRuntime(args[0]);
+      }
+      const klien = new KlienAPIMobile(cfg);
+      const anggota = new Map<string, NilaiRuntime>();
+
+      anggota.set('dapatkan', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'dapatkan',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const endpoint = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '/';
+          const opsi = p.length > 1 ? konversiDariNilaiRuntime(p[1]) : {};
+          const res = klien.permintaanSinkron(endpoint, { ...opsi, metode: 'GET' });
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('kirim', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'kirim',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const endpoint = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '/';
+          const data = p.length > 1 ? konversiDariNilaiRuntime(p[1]) : {};
+          const opsi = p.length > 2 ? konversiDariNilaiRuntime(p[2]) : {};
+          const res = klien.permintaanSinkron(endpoint, { ...opsi, metode: 'POST', body: data });
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('perbarui', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'perbarui',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const endpoint = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '/';
+          const data = p.length > 1 ? konversiDariNilaiRuntime(p[1]) : {};
+          const opsi = p.length > 2 ? konversiDariNilaiRuntime(p[2]) : {};
+          const res = klien.permintaanSinkron(endpoint, { ...opsi, metode: 'PUT', body: data });
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('tambal', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'tambal',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const endpoint = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '/';
+          const data = p.length > 1 ? konversiDariNilaiRuntime(p[1]) : {};
+          const opsi = p.length > 2 ? konversiDariNilaiRuntime(p[2]) : {};
+          const res = klien.permintaanSinkron(endpoint, { ...opsi, metode: 'PATCH', body: data });
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('hapus', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'hapus',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const endpoint = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '/';
+          const opsi = p.length > 1 ? konversiDariNilaiRuntime(p[1]) : {};
+          const res = klien.permintaanSinkron(endpoint, { ...opsi, metode: 'DELETE' });
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('hapusData', anggota.get('hapus')!);
+      anggota.set('buang', anggota.get('hapus')!);
+
+      anggota.set('aturToken', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'aturToken',
+        eksekusi: (p: NilaiRuntime[]) => {
+          if (p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS) {
+            klien.setTokenHeader(p[0].nilai);
+          }
+          return buatKosong();
+        },
+      });
+
+      return buatPeta(anggota);
+    },
+  });
+
+  // buatKlienAutentikasi(konfigurasi?)
+  ekspor.set('buatKlienAutentikasi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatKlienAutentikasi',
+    eksekusi: (args: NilaiRuntime[]) => {
+      let cfg: any = {};
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.PETA) {
+        cfg = konversiDariNilaiRuntime(args[0]);
+      }
+      const auth = new KlienAutentikasiMobile(cfg);
+      const anggota = new Map<string, NilaiRuntime>();
+
+      anggota.set('masuk', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'masuk',
+        eksekusi: (p: NilaiRuntime[]) => {
+          const email = p.length > 0 && p[0].jenis === JenisNilaiRuntime.TEKS ? p[0].nilai : '';
+          const sandi = p.length > 1 && p[1].jenis === JenisNilaiRuntime.TEKS ? p[1].nilai : '';
+          const res = auth.masukSinkron(email, sandi);
+          return konversiKeNilaiRuntime(res);
+        },
+      });
+
+      anggota.set('keluar', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'keluar',
+        eksekusi: () => {
+          auth.keluar();
+          return buatKosong();
+        },
+      });
+
+      anggota.set('apakahTerautentikasi', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'apakahTerautentikasi',
+        eksekusi: () => buatLogika(auth.apakahTerautentikasi()),
+      });
+
+      anggota.set('dapatkanToken', {
+        jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+        nama: 'dapatkanToken',
+        eksekusi: () => {
+          const tok = auth.dapatkanTokenAkses();
+          return tok ? buatTeks(tok) : buatKosong();
+        },
+      });
+
+      return buatPeta(anggota);
+    },
+  });
+
+  // sinkronkanDataMobile(opsi?)
+  ekspor.set('sinkronkanDataMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'sinkronkanDataMobile',
+    eksekusi: () => {
+      const res = MesinSinkronisasiMobile.dapatkanInstance().sinkronkanSinkron();
+      return konversiKeNilaiRuntime(res);
+    },
+  });
+
+  // antreanOfflineMobile()
+  ekspor.set('antreanOfflineMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'antreanOfflineMobile',
+    eksekusi: () => {
+      const hitung = PengelolaOperasiOffline.dapatkanInstance().hitung();
+      return konversiKeNilaiRuntime(hitung);
+    },
+  });
+
+  // periksaJaringanMobile()
+  ekspor.set('periksaJaringanMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaJaringanMobile',
+    eksekusi: () => {
+      const status = PengawasJaringanMobile.dapatkanInstance().dapatkanStatus();
+      return konversiKeNilaiRuntime(status);
+    },
+  });
+
+  // unggahBerkasCloud(namaBerkas, konten, opsi?)
+  ekspor.set('unggahBerkasCloud', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'unggahBerkasCloud',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 2 && args[0].jenis === JenisNilaiRuntime.TEKS && args[1].jenis === JenisNilaiRuntime.TEKS) {
+        const nama = args[0].nilai;
+        const konten = args[1].nilai;
+        const folder = args.length > 2 && args[2].jenis === JenisNilaiRuntime.PETA ? (konversiDariNilaiRuntime(args[2]).folder || 'publik') : 'publik';
+        const res = PengelolaTransferBerkasMobile.dapatkanInstance().unggahSinkron(nama, konten, folder);
+        return konversiKeNilaiRuntime(res);
+      }
+      return konversiKeNilaiRuntime({ sukses: false, galat: 'Argumen nama berkas dan konten teks wajib diisi.' });
+    },
+  });
+
+  // unduhBerkasCloud(urlAtauId)
+  ekspor.set('unduhBerkasCloud', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'unduhBerkasCloud',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const id = args[0].nilai;
+        return konversiKeNilaiRuntime({
+          sukses: true,
+          data: `Konten simulasi unduhan berkas ${id}`,
+          mimeType: 'text/plain',
+        });
+      }
+      return buatKosong();
+    },
+  });
+
+  // dapatkanKonfigurasiCloud()
+  ekspor.set('dapatkanKonfigurasiCloud', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanKonfigurasiCloud',
+    eksekusi: () => {
+      const cfg = PengelolaKonfigurasiCloud.dapatkanInstance().dapatkanKonfigurasi();
+      return konversiKeNilaiRuntime(cfg);
+    },
+  });
+
   return ekspor;
 }
+

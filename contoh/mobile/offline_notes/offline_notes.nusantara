@@ -1,0 +1,57 @@
+# ==============================================================================
+# CONTOH APLIKASI: Offline-First Notes & Data Sync (Phase 39)
+# Demonstrasi Antrean Operasi Offline & Sinkronisasi Data Otomatis
+# ==============================================================================
+
+program CatatanOfflineMobile
+gunakan "std:mobile" sebagai seluler
+
+mulai
+    tampilkan("======================================================")
+    tampilkan("  NUSANTARA MOBILE - Catatan Offline & Sinkronisasi")
+    tampilkan("======================================================")
+
+    klien : peta = seluler.buatKlienAPI({ "baseUrl": "https://api.nusantara.id" })
+
+    # 1. Membuat Catatan Lokal saat Offline
+    tampilkan("\n[1] Membuat Catatan Baru saat Koneksi Terputus...")
+    catatanA : peta = {
+        "judul": "Rencana Peluncuran Nusantara Mobile",
+        "isi": "Integrasi Native API & Layanan Cloud telah siap.",
+        "prioritas": "tinggi"
+    }
+    responA : peta = klien.kirim("/catatan", catatanA)
+    tampilkan("  Respon Operasi :", responA["status"], "-", responA["statusTeks"])
+    tampilkan("  Idempotency Key:", responA["idempotencyKey"])
+
+    # 2. Membuat Catatan Kedua
+    tampilkan("\n[2] Menambahkan Catatan Kedua...")
+    catatanB : peta = {
+        "judul": "Daftar Belanja Server",
+        "isi": "Cloud Storage S3, WorkManager, dan APNs Gateway.",
+        "prioritas": "normal"
+    }
+    responB : peta = klien.kirim("/catatan", catatanB)
+    tampilkan("  Respon Operasi :", responB["status"])
+
+    # 3. Memeriksa Status Antrean Operasi Tertunda
+    tampilkan("\n[3] Memeriksa Antrean Operasi Offline...")
+    antrean : peta = seluler.antreanOfflineMobile()
+    tampilkan("  Total Operasi   :", antrean["total"])
+    tampilkan("  Operasi Tertunda:", antrean["tertunda"])
+
+    # 4. Sinkronisasi Data ke Server saat Jaringan Tersedia
+    tampilkan("\n[4] Memicu Sinkronisasi Data ke Cloud...")
+    hasilSync : peta = seluler.sinkronkanDataMobile()
+    tampilkan("  Sukses          :", hasilSync["sukses"])
+    tampilkan("  Jumlah Terkirim :", hasilSync["jumlahTerkirim"])
+    tampilkan("  Catatan Mesin   :", hasilSync["catatan"])
+
+    # 5. Memeriksa Kembali Antrean Pasca Sinkronisasi
+    antreanAkhir : peta = seluler.antreanOfflineMobile()
+    tampilkan("\n[5] Status Antrean Pasca Sinkronisasi:")
+    tampilkan("  Sisa Tertunda   :", antreanAkhir["tertunda"])
+
+    tampilkan("\nAplikasi Catatan Offline-First berhasil beroperasi dengan sempurna.")
+    tampilkan("======================================================")
+selesai

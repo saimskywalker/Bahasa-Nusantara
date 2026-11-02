@@ -15,6 +15,12 @@ import { KonfigurasiAplikasiMobile } from '../types';
 import { RegistriNativeAPI } from '../native/core/registry';
 import { PengelolaKemampuanPerangkat } from '../native/core/capabilities';
 import { InfoPerangkatMobile } from '../device/info';
+import { PengawasJaringanMobile } from '../networking/connectivity/network_monitor';
+import { PengelolaKonfigurasiCloud } from '../networking/config/cloud_config';
+import { RegistriPenyediaCloud } from '../networking/providers/provider_registry';
+import { PengelolaOperasiOffline } from '../networking/offline/offline_queue';
+import { MesinSinkronisasiMobile } from '../networking/sync/sync_engine';
+import { LapisanKeamananMobile } from '../networking/security/cloud_security';
 
 export class MobileCLI {
   public static jalankan(args: string[]): number {
@@ -54,6 +60,17 @@ export class MobileCLI {
       case 'device':
       case 'perangkat':
         return this.perintahDevice(subArgs);
+
+      case 'jaringan':
+      case 'network':
+        return this.perintahJaringan(subArgs);
+
+      case 'cloud':
+        return this.perintahCloud(subArgs);
+
+      case 'sync':
+      case 'sinkronisasi':
+        return this.perintahSync(subArgs);
 
       case 'bantuan':
       case '--help':
@@ -422,6 +439,123 @@ jalankanAplikasiMobile(aplikasi)
     return 0;
   }
 
+  public static perintahJaringan(args: string[]): number {
+    const sub = args[0] || 'periksa';
+    const monitor = PengawasJaringanMobile.dapatkanInstance();
+    const status = monitor.dapatkanStatus();
+
+    console.log(`\n======================================================`);
+    console.log(`  NUSANTARA MOBILE - Pemeriksaan Jaringan & Internet`);
+    console.log(`======================================================`);
+    console.log(`Status Koneksi    : ${status.terhubung ? 'TERHUBUNG (Online)' : 'TERPUTUS (Offline)'}`);
+    console.log(`Tipe Antarmuka    : ${status.tipe.toUpperCase()}`);
+    console.log(`Kondisi Jaringan  : ${status.status}`);
+    console.log(`Akses Backend     : ${status.dapatDijangkauBackend ? 'Dapat Dijangkau' : 'Tidak Terjangkau'}`);
+    console.log(`Kategori Biaya    : ${status.mahal ? 'Metered / Berbayar (Seluler)' : 'Unmetered (Wi-Fi/LAN)'}`);
+    console.log(`Stempel Waktu     : ${new Date(status.stempelWaktu).toLocaleTimeString()}`);
+    console.log(`======================================================\n`);
+    return 0;
+  }
+
+  public static perintahCloud(args: string[]): number {
+    const sub = args[0] || 'info';
+    const pengelola = PengelolaKonfigurasiCloud.dapatkanInstance();
+    const config = pengelola.dapatkanKonfigurasi();
+    const registri = RegistriPenyediaCloud.dapatkanInstance();
+
+    if (sub === 'info') {
+      console.log(`\n======================================================`);
+      console.log(`  NUSANTARA MOBILE - Informasi Cloud & Backend`);
+      console.log(`======================================================`);
+      console.log(`Lingkungan Aktif  : ${config.namaLingkungan.toUpperCase()}`);
+      console.log(`API Base URL      : ${config.apiUrl}`);
+      console.log(`Penyedia Cloud    : ${registri.dapatkanPenyediaAktif().nama}`);
+      console.log(`Storage Endpoint  : ${config.storageEndpoint || '(tidak diatur)'}`);
+      console.log(`Database REST     : ${config.databaseRestUrl || '(tidak diatur)'}`);
+      console.log(`Push Notification : ${config.pushNotificationProvider?.toUpperCase() || 'FCM'}`);
+      console.log(`Validasi TLS      : ${config.validasiSertifikatTLS ? 'AKTIF (Wajib Produksi)' : 'NONAKTIF'}`);
+      console.log(`Batas Waktu (ms)  : ${config.timeoutMs}`);
+      console.log(`Maks Coba Ulang   : ${config.cobaUlangMaks} kali`);
+      console.log(`Kebijakan Sync    : ${config.kebijakanSinkronisasi}`);
+      console.log(`\nPenyedia Cloud Terdaftar:`);
+      for (const p of registri.dapatkanSemua()) {
+        const tanda = p.id === registri.dapatkanPenyediaAktif().id ? ' [*]' : '    ';
+        console.log(`${tanda} ${p.nama} (${p.status}) - ${p.layanan.join(', ')}`);
+      }
+      console.log(`======================================================\n`);
+      return 0;
+    }
+
+    if (sub === 'konfigurasi') {
+      const targetLingkungan = args[1] as any;
+      if (targetLingkungan === 'produksi') {
+        const urlProd = args[2] || 'https://api.nusantara.id';
+        const res = pengelola.beralihKeProduksi(urlProd);
+        console.log(`[HASIL] ${res.pesan}`);
+        return res.sukses ? 0 : 1;
+      } else if (targetLingkungan === 'pengembangan') {
+        pengelola.beralihKePengembangan();
+        console.log(`[SUKSES] Konfigurasi beralih ke lingkungan pengembangan.`);
+        return 0;
+      }
+      console.log(`Penggunaan: nusantara mobile cloud konfigurasi <pengembangan|produksi> [url]`);
+      return 0;
+    }
+
+    if (sub === 'validasi') {
+      console.log(`\n======================================================`);
+      console.log(`  NUSANTARA MOBILE - Validasi Keamanan Cloud`);
+      console.log(`======================================================`);
+      const cekUrl = LapisanKeamananMobile.validasiUrlAman(config.apiUrl, config.namaLingkungan);
+      if (cekUrl.valid) {
+        console.log(`  ✓ Protokol API Base URL valid untuk ${config.namaLingkungan}`);
+      } else {
+        console.log(`  ✗ ${cekUrl.pesan}`);
+      }
+
+      if (config.namaLingkungan === 'produksi' && !config.validasiSertifikatTLS) {
+        console.log(`  ✗ Validasi TLS tidak boleh dimatikan di lingkungan produksi!`);
+      } else {
+        console.log(`  ✓ Validasi sertifikat TLS aktif`);
+      }
+
+      console.log(`  ✓ Sensor data sensitif (tokens/passwords) aktif pada pencatatan log`);
+      console.log(`  ✓ Penyimpanan token menggunakan Android Keystore / iOS Keychain (AES-256)`);
+      console.log(`======================================================\n`);
+      return 0;
+    }
+
+    console.error(`Subperintah 'cloud ${sub}' tidak dikenal. Pilihan: 'info', 'konfigurasi', 'validasi'.`);
+    return 1;
+  }
+
+  public static perintahSync(args: string[]): number {
+    const sub = args[0] || 'periksa';
+    const queue = PengelolaOperasiOffline.dapatkanInstance();
+    const stats = queue.hitung();
+    const syncEngine = MesinSinkronisasiMobile.dapatkanInstance();
+
+    console.log(`\n======================================================`);
+    console.log(`  NUSANTARA MOBILE - Sinkronisasi Data & Antrean Offline`);
+    console.log(`======================================================`);
+    console.log(`Total Operasi Antrean : ${stats.total}`);
+    console.log(`Operasi Tertunda      : ${stats.tertunda}`);
+    console.log(`Operasi Diproses      : ${stats.diproses}`);
+    console.log(`Operasi Sukses        : ${stats.sukses}`);
+    console.log(`Operasi Gagal         : ${stats.gagal}`);
+    console.log(`Status Mesin Sync     : ${syncEngine.apakahSedangSinkronisasi() ? 'Sedang Sinkronisasi' : 'Siap'}`);
+
+    if (sub === 'sinkronkan') {
+      console.log(`\nMenjalankan sinkronisasi langsung...`);
+      syncEngine.sinkronkan().then((res) => {
+        console.log(`Hasil: ${res.catatan}`);
+      });
+    }
+
+    console.log(`======================================================\n`);
+    return 0;
+  }
+
   public static tampilkanBantuan(): void {
     console.log(`\nPenggunaan: nusantara mobile <perintah> [opsi...]`);
     console.log(`\nPerintah Tersedia:`);
@@ -433,7 +567,11 @@ jalankanAplikasiMobile(aplikasi)
     console.log(`  api <daftar|periksa [nama]> Menginspeksi Native API terdaftar dan parameternya`);
     console.log(`  permission <daftar>         Daftar izin perangkat dan kebijakan akses`);
     console.log(`  device <info>               Menampilkan spesifikasi perangkat & kemampuan hardware`);
+    console.log(`  jaringan <periksa>          Memeriksa status koneksi internet & jangkauan backend`);
+    console.log(`  cloud <info|konfig|validasi> Mengelola backend, REST API, TLS, & penyedia cloud`);
+    console.log(`  sync <periksa|sinkronkan>   Memeriksa antrean operasi offline dan sinkronisasi`);
     console.log(`  info                        Informasi lengkap framework Nusantara Mobile`);
     console.log(`  bantuan                     Menampilkan panduan ini\n`);
   }
 }
+

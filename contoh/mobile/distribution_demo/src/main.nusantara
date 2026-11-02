@@ -1,0 +1,42 @@
+gunakan "std:mobile" sebagai seluler
+
+program DemonstrasiDistribusiMobile
+mulai
+    tampilkan("======================================================")
+    tampilkan("  NUSANTARA MOBILE - DEMONSTRASI DISTRIBUSI & PUBLIKASI")
+    tampilkan("======================================================")
+
+    // 1. Mengambil Informasi Konfigurasi Distribusi Aktif
+    info : peta = seluler.dapatkanInfoDistribusi()
+    aplikasi : peta = info["aplikasi"]
+    android : peta = info["android"]
+    ios : peta = info["ios"]
+
+    tampilkan("Nama Aplikasi      :", aplikasi["nama"])
+    tampilkan("Application ID     :", aplikasi["id"])
+    tampilkan("Versi Semantik     :", aplikasi["versi"])
+    tampilkan("Lingkungan Aktif   :", info["lingkungan"])
+    tampilkan("Android Target SDK :", android["targetSdk"])
+    tampilkan("iOS Deployment     :", ios["deploymentTarget"])
+
+    // 2. Pemeriksaan Aset Ikon & Splash Screen
+    tampilkan("\nMemeriksa status aset visual aplikasi...")
+    hasilAset : peta = seluler.periksaAsetMobile()
+    tampilkan("Total Aset Dicek   :", hasilAset["totalAsetDiperiksa"])
+    tampilkan("Apakah Aset Valid  :", hasilAset["valid"])
+
+    // 3. Validasi Kelayakan Rilis (Checklist Toko Aplikasi)
+    tampilkan("\nMenjalankan evaluasi checklist rilis...")
+    hasilValidasi : peta = seluler.validasiRilisMobile("development")
+    tampilkan("Pemeriksaan Total  :", hasilValidasi["totalPemeriksaan"])
+    tampilkan("Kriteria Lulus     :", hasilValidasi["totalLulus"])
+    tampilkan("Status Siap Rilis  :", hasilValidasi["siapRilis"])
+
+    // 4. Simulasi Pengelolaan Kenaikan Versi (Version Bumping)
+    tampilkan("\nMenguji manajemen versi aplikasi...")
+    versiAwal : peta = seluler.kelolaVersiMobile("tampil", "patch")
+    tampilkan("Versi Saat Ini     :", versiAwal["versi"])
+
+    tampilkan("======================================================")
+    tampilkan("Aplikasi demonstrasi distribusi mobile berhasil dijalankan.")
+selesai

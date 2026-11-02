@@ -38,8 +38,16 @@ export class ManajerPermintaanMobile {
   }
 
   public buatIdempotencyKey(awalan = 'req'): string {
-    if (typeof crypto.randomUUID === 'function') {
-      return `${awalan}_${crypto.randomUUID()}`;
+    const gCrypto = typeof globalThis !== 'undefined' ? (globalThis.crypto as any) : null;
+    if (gCrypto && typeof gCrypto.randomUUID === 'function') {
+      return `${awalan}_${gCrypto.randomUUID()}`;
+    }
+    try {
+      if (typeof (crypto as any)?.randomUUID === 'function') {
+        return `${awalan}_${(crypto as any).randomUUID()}`;
+      }
+    } catch {
+      // Abaikan jika modul externalized
     }
     const acak = Math.random().toString(36).substring(2, 10);
     return `${awalan}_${Date.now()}_${acak}`;

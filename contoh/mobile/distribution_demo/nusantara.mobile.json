@@ -1,0 +1,28 @@
+{
+  "application": {
+    "name": "Nusantara Mobile Demo",
+    "id": "id.nusantara.demo.distribusi",
+    "version": "1.0.0",
+    "versionCode": 1,
+    "buildNumber": 1
+  },
+  "android": {
+    "minSdk": 24,
+    "targetSdk": 34,
+    "buildTypes": ["debug", "release"],
+    "output": "dist/mobile/android",
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE"
+    ]
+  },
+  "ios": {
+    "deploymentTarget": "15.0",
+    "bundleId": "id.nusantara.demo.distribusi",
+    "output": "dist/mobile/ios"
+  },
+  "assets": {
+    "icon": "assets/icon/app-icon.png",
+    "splash": "assets/splash/splash.png"
+  }
+}

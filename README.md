@@ -2,12 +2,13 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_39:_mobile_networking_&_cloud-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.39.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_40:_mobile_distribution_&_publishing-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.40.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-35_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-36_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Distribusi](https://img.shields.io/badge/distribusi-android_apk_aab_&_ios-blue.svg)](docs/mobile/distribution/index.md)
 [![Networking](https://img.shields.io/badge/networking-offline_first_&_cloud-blue.svg)](docs/mobile/networking/01_arsitektur_networking_mobile.md)
 [![Native API](https://img.shields.io/badge/native_api-android_&_ios-purple.svg)](docs/mobile/native-api/pengenalan-native-api.md)
 [![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/01_pendahuluan.md)
@@ -26,7 +27,8 @@ NUSANTARA bukan sekadar penerjemah sintaksis bahasa asing, melainkan ikhtiar man
 
 - **Ekstensi Berkas Resmi:** `.nusantara`
 - **Lisensi:** [Apache License 2.0](LISENSI)
-- **Status Saat Ini:** **Phase 39: Nusantara Mobile Networking & Cloud Services — Konektivitas Internet Mobile, Integrasi REST API, Sinkronisasi Data Offline-First, dan Layanan Cloud Multi-Provider (Milestone v0.39.0).**
+- **Status Saat Ini:** **Phase 40: Nusantara Mobile App Distribution & Publishing — Android APK & AAB Builder, Keystore Signing, Apple iOS Archive & Code Signing, TestFlight & App Store Preparation, Version Management, Asset Manager, Release Validator, dan Build Reports (Milestone v0.40.0).**
+- **Dokumentasi Mobile Distribution:** [docs/mobile/distribution/index.md](docs/mobile/distribution/index.md) (14 berkas panduan lengkap)
 - **Dokumentasi Mobile Networking:** [docs/mobile/networking/01_arsitektur_networking_mobile.md](docs/mobile/networking/01_arsitektur_networking_mobile.md) (13 berkas panduan lengkap)
 - **Dokumentasi Native Device API:** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 berkas panduan lengkap)
 - **Dokumentasi Mobile Framework:** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)

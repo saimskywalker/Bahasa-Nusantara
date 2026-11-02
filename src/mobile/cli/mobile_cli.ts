@@ -21,6 +21,17 @@ import { RegistriPenyediaCloud } from '../networking/providers/provider_registry
 import { PengelolaOperasiOffline } from '../networking/offline/offline_queue';
 import { MesinSinkronisasiMobile } from '../networking/sync/sync_engine';
 import { LapisanKeamananMobile } from '../networking/security/cloud_security';
+import {
+  DistributionManager,
+  AndroidDistributionManager,
+  IOSDistributionManager,
+  VersionManager,
+  AssetValidator,
+  IconManager,
+  AndroidSigningManager,
+  ReleaseValidator,
+  ReleaseManager,
+} from '../distribution';
 
 export class MobileCLI {
   public static jalankan(args: string[]): number {
@@ -28,6 +39,9 @@ export class MobileCLI {
     const subArgs = args.slice(1);
 
     switch (perintah) {
+      case 'distribusi':
+      case 'distribution':
+        return this.perintahDistribusi(subArgs);
       case 'baru':
       case 'buat':
         return this.perintahBaru(subArgs);
@@ -556,6 +570,233 @@ jalankanAplikasiMobile(aplikasi)
     return 0;
   }
 
+  public static perintahDistribusi(args: string[]): number {
+    const sub = args[0] || 'periksa';
+    const subArgs = args.slice(1);
+    const distMgr = DistributionManager.dapatkanInstance();
+    const konfig = distMgr.dapatkanKonfigurasi();
+
+    switch (sub) {
+      case 'periksa': {
+        const env = distMgr.periksaLingkunganSistem();
+        console.log(`\n======================================================`);
+        console.log(`  NUSANTARA MOBILE - Pemeriksaan Lingkungan Distribusi`);
+        console.log(`======================================================`);
+        console.log(`[ Toolchain Android ]`);
+        console.log(`  Android SDK : ${env.android.androidHome || '(belum dikonfigurasi)'}`);
+        console.log(`  Java JDK    : ${env.android.versiJdk || '(belum dikonfigurasi)'}`);
+        console.log(`  Gradle      : ${env.android.adaGradle ? 'Tersedia' : '(tidak ditemukan di PATH)'}`);
+        console.log(`  Status      : ${env.android.siapBuildNative ? 'SIAP BUILD NATIVE' : 'STANDALONE ENGINE READY'}`);
+        env.android.catatan.forEach((c) => console.log(`  * ${c}`));
+
+        console.log(`\n[ Toolchain iOS ]`);
+        console.log(`  Host OS     : ${process.platform} (${env.ios.apakahMacOS ? 'macOS Sah' : 'Bukan macOS'})`);
+        console.log(`  Xcode Tools : ${env.ios.versiXcode || '(tidak tersedia)'}`);
+        console.log(`  Status      : ${env.ios.siapBuildNativeIOS ? 'SIAP EXPORT ARCHIVE' : 'VALIDASI & BUNDLE PREP READY'}`);
+        env.ios.catatan.forEach((c) => console.log(`  * ${c}`));
+        console.log(`======================================================\n`);
+        return 0;
+      }
+
+      case 'konfigurasi': {
+        const envTujuan = subArgs[0] as any;
+        if (envTujuan && ['development', 'testing', 'staging', 'production'].includes(envTujuan)) {
+          distMgr.aturLingkungan(envTujuan);
+          console.log(`[SUKSES] Profil lingkungan distribusi dialihkan ke: ${envTujuan.toUpperCase()}`);
+        } else {
+          console.log(`\n======================================================`);
+          console.log(`  NUSANTARA MOBILE - Konfigurasi Distribusi Aktif`);
+          console.log(`======================================================`);
+          console.log(`Nama Aplikasi    : ${konfig.aplikasi.nama}`);
+          console.log(`Application ID   : ${konfig.aplikasi.id}`);
+          console.log(`Versi Semantik   : ${konfig.aplikasi.versi}`);
+          console.log(`Android Code     : ${konfig.aplikasi.kodeVersiAndroid}`);
+          console.log(`iOS Build Number : ${konfig.aplikasi.nomorBuild}`);
+          console.log(`Lingkungan Aktif : ${konfig.lingkungan.toUpperCase()}`);
+          console.log(`Android Min/Tgt  : SDK ${konfig.android.minSdk} / ${konfig.android.targetSdk}`);
+          console.log(`iOS Deployment   : iOS ${konfig.ios.deploymentTarget}`);
+          console.log(`======================================================\n`);
+        }
+        return 0;
+      }
+
+      case 'android': {
+        const aksi = subArgs[0] || 'apk';
+        console.log(`\n======================================================`);
+        console.log(`  NUSANTARA MOBILE - Distribusi Android`);
+        console.log(`======================================================`);
+
+        if (aksi === 'apk' || aksi === 'debug') {
+          const tipe = aksi === 'apk' && subArgs[1] === 'release' ? 'release' : 'debug';
+          const hasil = tipe === 'release'
+            ? AndroidDistributionManager.bangunReleaseAPK(konfig)
+            : AndroidDistributionManager.bangunDebugAPK(konfig);
+
+          console.log(hasil.pesan);
+          if (hasil.artefak) {
+            console.log(`Artefak : ${hasil.artefak.jalurLokal}`);
+            console.log(`SHA-256 : ${hasil.artefak.sha256}`);
+          }
+          hasil.daftarPeringatan.forEach((p) => console.log(`[PERINGATAN] ${p}`));
+          hasil.daftarGalat.forEach((g) => console.log(`[GALAT] ${g}`));
+          console.log(`======================================================\n`);
+          return hasil.sukses ? 0 : 1;
+        }
+
+        if (aksi === 'release') {
+          const hasil = AndroidDistributionManager.bangunReleaseAPK(konfig);
+          console.log(hasil.pesan);
+          if (hasil.artefak) {
+            console.log(`Artefak : ${hasil.artefak.jalurLokal}`);
+            console.log(`SHA-256 : ${hasil.artefak.sha256}`);
+          }
+          console.log(`======================================================\n`);
+          return hasil.sukses ? 0 : 1;
+        }
+
+        if (aksi === 'aab') {
+          const hasil = AndroidDistributionManager.bangunReleaseAAB(konfig);
+          console.log(hasil.pesan);
+          if (hasil.artefak) {
+            console.log(`Artefak : ${hasil.artefak.jalurLokal}`);
+            console.log(`SHA-256 : ${hasil.artefak.sha256}`);
+          }
+          hasil.daftarPeringatan.forEach((p) => console.log(`[PERINGATAN] ${p}`));
+          hasil.daftarGalat.forEach((g) => console.log(`[GALAT] ${g}`));
+          console.log(`======================================================\n`);
+          return hasil.sukses ? 0 : 1;
+        }
+
+        if (aksi === 'tanda-tangan' || aksi === 'signing') {
+          const res = AndroidSigningManager.validasiSigning(konfig.android.signing, true);
+          console.log(`Status Keystore : ${res.adaKeystore ? 'Ditemukan' : 'Belum Ada'}`);
+          console.log(`Key Alias       : ${konfig.android.signing.keyAlias || '(belum diatur)'}`);
+          console.log(`Skema Signature : ${res.skemaAktif.join(', ')}`);
+          if (res.sidikJariSha256) {
+            console.log(`SHA-256 Digest  : ${res.sidikJariSha256}`);
+          }
+          res.pesanPeringatan.forEach((p) => console.log(`[PERINGATAN] ${p}`));
+          res.daftarGalat.forEach((g) => console.log(`[GALAT] ${g}`));
+          console.log(`\nContoh Perintah Pembuatan Keystore Resmi:\n`);
+          console.log(AndroidSigningManager.buatPanduanKeytool());
+          console.log(`======================================================\n`);
+          return res.valid ? 0 : 1;
+        }
+
+        console.log(`Perintah android tidak dikenal: '${aksi}'. Gunakan: apk, aab, debug, release, tanda-tangan.`);
+        console.log(`======================================================\n`);
+        return 1;
+      }
+
+      case 'ios': {
+        const aksi = subArgs[0] || 'periksa';
+        console.log(`\n======================================================`);
+        console.log(`  NUSANTARA MOBILE - Distribusi iOS`);
+        console.log(`======================================================`);
+
+        if (aksi === 'periksa') {
+          const env = IOSDistributionManager.periksaLingkungan();
+          console.log(`Host OS        : ${process.platform}`);
+          console.log(`Xcode Tools    : ${env.adaXcode ? 'Tersedia' : 'Tidak Ditemukan'}`);
+          console.log(`Bundle ID      : ${konfig.ios.bundleId}`);
+          console.log(`Target Minimum : iOS ${konfig.ios.deploymentTarget}`);
+          env.catatan.forEach((c) => console.log(`  * ${c}`));
+          console.log(`======================================================\n`);
+          return 0;
+        }
+
+        if (aksi === 'archive') {
+          const res = IOSDistributionManager.siapkanArchive(konfig);
+          console.log(res.pesan);
+          if (res.artefak) {
+            console.log(`Lokasi Archive : ${res.artefak.jalurLokal}`);
+            console.log(`TestFlight Ready: ${res.siapTestFlight ? 'SIAP' : 'BELUM'}`);
+            console.log(`App Store Ready : ${res.siapAppStore ? 'SIAP' : 'BELUM'}`);
+          }
+          res.daftarPeringatan.forEach((p) => console.log(`[PERINGATAN] ${p}`));
+          res.daftarGalat.forEach((g) => console.log(`[GALAT] ${g}`));
+          console.log(`======================================================\n`);
+          return res.sukses ? 0 : 1;
+        }
+
+        if (aksi === 'validasi') {
+          const checklist = IOSDistributionManager.dapatkanChecklistAppStore();
+          console.log(`Checklist Persiapan Apple App Store:`);
+          checklist.forEach((item, idx) => {
+            console.log(`  ${idx + 1}. [${item.wajib ? 'WAJIB' : 'OPSIONAL'}] ${item.item}`);
+          });
+          console.log(`======================================================\n`);
+          return 0;
+        }
+
+        console.log(`Perintah ios tidak dikenal: '${aksi}'. Gunakan: periksa, archive, validasi.`);
+        console.log(`======================================================\n`);
+        return 1;
+      }
+
+      case 'versi': {
+        const aksi = subArgs[0] || 'tampil';
+        if (aksi === 'naikkan') {
+          const tipe = (subArgs[1] || 'patch') as any;
+          const info = distMgr.naikkanVersi(tipe);
+          console.log(`[SUKSES] Versi berhasil dinaikkan (${tipe}): ${info.versiSemantik}`);
+          console.log(`Android Code : ${info.kodeVersiAndroid}`);
+          console.log(`iOS Build    : ${info.nomorBuildIOS}`);
+        } else {
+          console.log(`\n======================================================`);
+          console.log(`  NUSANTARA MOBILE - Informasi Versi Aplikasi`);
+          console.log(`======================================================`);
+          console.log(`Versi Semantik   : ${konfig.aplikasi.versi}`);
+          console.log(`Android Code     : ${konfig.aplikasi.kodeVersiAndroid}`);
+          console.log(`iOS Build Number : ${konfig.aplikasi.nomorBuild}`);
+          console.log(`======================================================\n`);
+        }
+        return 0;
+      }
+
+      case 'aset': {
+        const res = distMgr.validasiAset();
+        console.log(`\n======================================================`);
+        console.log(`  NUSANTARA MOBILE - Pemeriksaan Aset Aplikasi`);
+        console.log(`======================================================`);
+        console.log(`Status Validasi : ${res.valid ? 'VALID' : 'BELUM LENGKAP'}`);
+        console.log(`Total Diperiksa : ${res.totalAsetDiperiksa}`);
+        console.log(`Aset Sah di Disk: ${res.asetLulus}`);
+        if (res.asetHilang.length > 0) {
+          console.log(`Aset Belum Ada  : ${res.asetHilang.join(', ')}`);
+        }
+        res.peringatan.forEach((p) => console.log(`[PERINGATAN] ${p}`));
+        res.daftarGalat.forEach((g) => console.log(`[GALAT] ${g}`));
+        console.log(`======================================================\n`);
+        return res.valid ? 0 : 1;
+      }
+
+      case 'rilis': {
+        const aksi = subArgs[0] || 'laporan';
+        if (aksi === 'checklist') {
+          const validasi = distMgr.validasiKesiapanRilis();
+          console.log(ReleaseValidator.formatLaporanTeks(validasi));
+          return validasi.siapRilis ? 0 : 1;
+        }
+
+        console.log(`Menjalankan pipeline rilis distribusi lengkap...`);
+        const res = ReleaseManager.jalankanPipelineRilis(konfig);
+        console.log(`\n${res.pesan}`);
+        console.log(`Laporan Rilis Disimpan di : ${res.jalurLaporanMarkdown}`);
+        console.log(`Total Artefak Dihasilkan  : ${res.artefak.length}`);
+        res.artefak.forEach((a) => {
+          console.log(`  - [${a.platform.toUpperCase()} ${a.format.toUpperCase()}] ${a.namaBerkas} (${(a.ukuranBytes / 1024).toFixed(1)} KB)`);
+        });
+        return res.sukses ? 0 : 1;
+      }
+
+      default:
+        console.log(`Subperintah distribusi tidak dikenal: '${sub}'.`);
+        console.log(`Gunakan: periksa, konfigurasi, android, ios, versi, aset, rilis.`);
+        return 1;
+    }
+  }
+
   public static tampilkanBantuan(): void {
     console.log(`\nPenggunaan: nusantara mobile <perintah> [opsi...]`);
     console.log(`\nPerintah Tersedia:`);
@@ -563,6 +804,7 @@ jalankanAplikasiMobile(aplikasi)
     console.log(`  platform <daftar|tambah>    Mengelola target platform (android, ios)`);
     console.log(`  periksa                     Memeriksa kesiapan lingkungan (SDK, JDK, Xcode)`);
     console.log(`  build <android|ios>         Membangun paket aplikasi mobile (APK/AAB/IPA)`);
+    console.log(`  distribusi <periksa|...>    Distribusi mobile, build APK/AAB, iOS archive, signing, & rilis`);
     console.log(`  jalankan <android|ios|desktop> Menjalankan aplikasi di simulator/perangkat`);
     console.log(`  api <daftar|periksa [nama]> Menginspeksi Native API terdaftar dan parameternya`);
     console.log(`  permission <daftar>         Daftar izin perangkat dan kebijakan akses`);

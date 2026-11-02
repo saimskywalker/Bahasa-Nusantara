@@ -49,10 +49,31 @@ export class AdaptorStorageMock implements PenyediaStorageNetral {
       opsi.padaProgres(100, ukuran, ukuran);
     }
 
-    const id = `file_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    let randomPart = '';
+    try {
+      if (typeof (crypto as any)?.randomBytes === 'function') {
+        randomPart = (crypto as any).randomBytes(4).toString('hex');
+      }
+    } catch {
+      // Abaikan jika di browser
+    }
+    if (!randomPart) {
+      randomPart = Math.random().toString(16).substring(2, 10);
+    }
+    const id = `file_${Date.now()}_${randomPart}`;
     const folder = opsi.folder || 'publik';
     const mimeType = opsi.mimeType || 'application/octet-stream';
-    const etag = crypto.createHash('md5').update(opsi.konten).digest('hex');
+    let etag = '';
+    try {
+      if (typeof (crypto as any)?.createHash === 'function') {
+        etag = (crypto as any).createHash('md5').update(opsi.konten).digest('hex');
+      }
+    } catch {
+      // Abaikan jika di browser
+    }
+    if (!etag) {
+      etag = `etag_${Date.now()}_${randomPart}`;
+    }
 
     const meta: MetadataBerkasCloud = {
       id,

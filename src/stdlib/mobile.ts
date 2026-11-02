@@ -72,6 +72,11 @@ import {
   PengawasJaringanMobile,
   PengelolaTransferBerkasMobile,
   PengelolaKonfigurasiCloud,
+  DistributionManager,
+  ReleaseValidator,
+  ReleaseManager,
+  AssetValidator,
+  VersionManager,
 } from '../mobile';
 import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
 
@@ -445,6 +450,11 @@ export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
   ['unggahBerkasCloud', { nama: 'unggahBerkasCloud', kategori: 'fungsi', parameter: [{ nama: 'namaBerkas', tipe: 'teks' }, { nama: 'konten', tipe: 'teks' }, { nama: 'opsi', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 2, variadik: true }],
   ['unduhBerkasCloud', { nama: 'unduhBerkasCloud', kategori: 'fungsi', parameter: [{ nama: 'urlAtauId', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1 }],
   ['dapatkanKonfigurasiCloud', { nama: 'dapatkanKonfigurasiCloud', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['dapatkanInfoDistribusi', { nama: 'dapatkanInfoDistribusi', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['validasiRilisMobile', { nama: 'validasiRilisMobile', kategori: 'fungsi', parameter: [{ nama: 'lingkungan', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['kelolaVersiMobile', { nama: 'kelolaVersiMobile', kategori: 'fungsi', parameter: [{ nama: 'aksi', tipe: 'teks' }, { nama: 'tipe', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['periksaAsetMobile', { nama: 'periksaAsetMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['buatLaporanDistribusi', { nama: 'buatLaporanDistribusi', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
 ]);
 
 export function buatEksporMobile(): Map<string, NilaiRuntime> {
@@ -1469,6 +1479,94 @@ export function buatEksporMobile(): Map<string, NilaiRuntime> {
     eksekusi: () => {
       const cfg = PengelolaKonfigurasiCloud.dapatkanInstance().dapatkanKonfigurasi();
       return konversiKeNilaiRuntime(cfg);
+    },
+  });
+
+  // dapatkanInfoDistribusi()
+  ekspor.set('dapatkanInfoDistribusi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanInfoDistribusi',
+    eksekusi: () => {
+      const dist = DistributionManager.dapatkanInstance();
+      const cfg = dist.dapatkanKonfigurasi();
+      const env = dist.periksaLingkunganSistem();
+      return konversiKeNilaiRuntime({
+        aplikasi: cfg.aplikasi,
+        lingkungan: cfg.lingkungan,
+        android: {
+          minSdk: cfg.android.minSdk,
+          targetSdk: cfg.android.targetSdk,
+          outputDir: cfg.android.outputDir,
+          sdkTerdeteksi: env.android.siapBuildNative,
+        },
+        ios: {
+          deploymentTarget: cfg.ios.deploymentTarget,
+          bundleId: cfg.ios.bundleId,
+          outputDir: cfg.ios.outputDir,
+          xcodeTerdeteksi: env.ios.siapBuildNativeIOS,
+        },
+      });
+    },
+  });
+
+  // validasiRilisMobile(lingkungan?)
+  ekspor.set('validasiRilisMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'validasiRilisMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const dist = DistributionManager.dapatkanInstance();
+      if (args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        dist.aturLingkungan(args[0].nilai as any);
+      }
+      const laporan = dist.validasiKesiapanRilis();
+      return konversiKeNilaiRuntime(laporan);
+    },
+  });
+
+  // kelolaVersiMobile(aksi?, tipe?)
+  ekspor.set('kelolaVersiMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'kelolaVersiMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const dist = DistributionManager.dapatkanInstance();
+      const aksi = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? args[0].nilai : 'tampil';
+      if (aksi === 'naikkan') {
+        const tipe = args.length > 1 && args[1].jenis === JenisNilaiRuntime.TEKS ? (args[1].nilai as any) : 'patch';
+        const res = dist.naikkanVersi(tipe);
+        return konversiKeNilaiRuntime(res);
+      }
+      const cfg = dist.dapatkanKonfigurasi();
+      return konversiKeNilaiRuntime({
+        versi: cfg.aplikasi.versi,
+        kodeVersiAndroid: cfg.aplikasi.kodeVersiAndroid,
+        nomorBuildIOS: cfg.aplikasi.nomorBuild,
+      });
+    },
+  });
+
+  // periksaAsetMobile()
+  ekspor.set('periksaAsetMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaAsetMobile',
+    eksekusi: () => {
+      const res = DistributionManager.dapatkanInstance().validasiAset();
+      return konversiKeNilaiRuntime(res);
+    },
+  });
+
+  // buatLaporanDistribusi()
+  ekspor.set('buatLaporanDistribusi', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatLaporanDistribusi',
+    eksekusi: () => {
+      const res = DistributionManager.dapatkanInstance().jalankanDistribusiRilis();
+      return konversiKeNilaiRuntime({
+        sukses: res.sukses,
+        pesan: res.pesan,
+        totalArtefak: res.artefak.length,
+        jalurLaporan: res.jalurLaporanMarkdown,
+        siapRilis: res.validasi.siapRilis,
+      });
     },
   });
 

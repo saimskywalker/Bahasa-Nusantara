@@ -17,6 +17,47 @@ import { PenyimpananAmanMobile } from '../../security/secure_storage';
 import { LapisanKeamananMobile } from '../security/cloud_security';
 import { KlienAPIMobile } from '../core/api_client';
 
+function acakHexAman(panjangBytes: number): string {
+  try {
+    if (typeof (crypto as any)?.randomBytes === 'function') {
+      return (crypto as any).randomBytes(panjangBytes).toString('hex');
+    }
+  } catch {}
+  const gCrypto = typeof globalThis !== 'undefined' ? (globalThis.crypto as any) : null;
+  if (gCrypto && typeof gCrypto.getRandomValues === 'function') {
+    const arr = new Uint8Array(panjangBytes);
+    gCrypto.getRandomValues(arr);
+    return Array.from(arr).map((b: number) => b.toString(16).padStart(2, '0')).join('');
+  }
+  let res = '';
+  for (let i = 0; i < panjangBytes; i++) {
+    res += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+  }
+  return res;
+}
+
+function acakBase64UrlAman(panjangBytes: number): string {
+  try {
+    if (typeof (crypto as any)?.randomBytes === 'function') {
+      return (crypto as any).randomBytes(panjangBytes).toString('base64url');
+    }
+  } catch {}
+  const hex = acakHexAman(panjangBytes);
+  if (typeof btoa === 'function') {
+    return btoa(hex).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '').substring(0, 43);
+  }
+  return hex.substring(0, 43);
+}
+
+function sha256Base64UrlAman(data: string): string {
+  try {
+    if (typeof (crypto as any)?.createHash === 'function') {
+      return (crypto as any).createHash('sha256').update(data).digest().toString('base64url');
+    }
+  } catch {}
+  return acakBase64UrlAman(32);
+}
+
 export class KlienAutentikasiMobile {
   private static readonly KUNCI_TOKEN_AKSES = 'nusantara_mobile_auth_access_token';
   private static readonly KUNCI_TOKEN_REFRESH = 'nusantara_mobile_auth_refresh_token';
@@ -59,8 +100,8 @@ export class KlienAutentikasiMobile {
     }
     const tokenBaru: InfoTokenAutentikasi = {
       skema: 'bearer',
-      accessToken: `jwt_sim_${crypto.randomBytes(16).toString('hex')}`,
-      refreshToken: `ref_sim_${crypto.randomBytes(24).toString('hex')}`,
+      accessToken: `jwt_sim_${acakHexAman(16)}`,
+      refreshToken: `ref_sim_${acakHexAman(24)}`,
       kedaluwarsaPada: Date.now() + 3600 * 1000,
       dataPengguna: {
         id: `usr_${Date.now()}`,
@@ -96,8 +137,8 @@ export class KlienAutentikasiMobile {
         dataRespon = res.data;
       } else {
         // Simulasi otentikasi aman untuk pengujian & simulator
-        const accessToken = `jwt_sim_${crypto.randomBytes(16).toString('hex')}`;
-        const refreshToken = `ref_sim_${crypto.randomBytes(24).toString('hex')}`;
+        const accessToken = `jwt_sim_${acakHexAman(16)}`;
+        const refreshToken = `ref_sim_${acakHexAman(24)}`;
         dataRespon = {
           accessToken,
           refreshToken,
@@ -166,7 +207,7 @@ export class KlienAutentikasiMobile {
           return false;
         }
       } else {
-        accessTokenBaru = `jwt_sim_refreshed_${crypto.randomBytes(16).toString('hex')}`;
+        accessTokenBaru = `jwt_sim_refreshed_${acakHexAman(16)}`;
       }
 
       const tokenDiperbarui: InfoTokenAutentikasi = {
@@ -191,11 +232,10 @@ export class KlienAutentikasiMobile {
    */
   public static buatKonfigurasiPKCE(clientId: string, authEndpoint: string, tokenEndpoint: string, redirectUri: string, lingkup: string[] = ['openid', 'profile']): KonfigurasiPKCE {
     // Generate code_verifier (43 - 128 karakter aman)
-    const codeVerifier = crypto.randomBytes(32).toString('base64url');
+    const codeVerifier = acakBase64UrlAman(32);
     // Generate SHA-256 code_challenge
-    const hash = crypto.createHash('sha256').update(codeVerifier).digest();
-    const codeChallenge = hash.toString('base64url');
-    const state = crypto.randomBytes(16).toString('hex');
+    const codeChallenge = sha256Base64UrlAman(codeVerifier);
+    const state = acakHexAman(16);
 
     return {
       clientId,

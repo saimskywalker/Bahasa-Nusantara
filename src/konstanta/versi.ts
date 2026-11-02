@@ -6,10 +6,10 @@
  * Target Milestone: Phase 25 (v0.25.0)
  */
 
-export const VERSI_NUSANTARA = '0.39.0';
-export const LABEL_VERSI_NUSANTARA = 'v0.39.0';
-export const FASE_TERAKHIR = 39;
-export const NAMA_FASE_TERAKHIR = 'Mobile Networking & Cloud Services';
+export const VERSI_NUSANTARA = '0.40.0';
+export const LABEL_VERSI_NUSANTARA = 'v0.40.0';
+export const FASE_TERAKHIR = 40;
+export const NAMA_FASE_TERAKHIR = 'Mobile App Distribution & Publishing';
 
 export interface InfoRilisNUSANTARA {
   versi: string;

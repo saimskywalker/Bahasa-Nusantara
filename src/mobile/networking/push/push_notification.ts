@@ -29,11 +29,17 @@ export class PengelolaNotifikasiPushMobile {
   }
 
   public dapatkanToken(): string {
-    if (!this.tokenPerangkat) {
-      // Inisialisasi token simulasi deterministik
-      this.tokenPerangkat = `fcm_token_${crypto.randomBytes(24).toString('hex')}`;
+      let acak = '';
+      try {
+        if (typeof (crypto as any)?.randomBytes === 'function') {
+          acak = (crypto as any).randomBytes(24).toString('hex');
+        }
+      } catch {}
+      if (!acak) {
+        acak = Math.random().toString(16).substring(2) + Math.random().toString(16).substring(2);
+      }
+      this.tokenPerangkat = `fcm_token_${acak}`;
       PenyimpananAmanMobile.simpan(this.kunciPenyimpananToken, this.tokenPerangkat);
-    }
     return this.tokenPerangkat;
   }
 

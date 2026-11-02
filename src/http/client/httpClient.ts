@@ -8,7 +8,6 @@
 
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { URL } from 'node:url';
 import {
   MetodeHTTP,
   OpsiPermintaanHTTP,
@@ -45,8 +44,8 @@ export class KlienHTTP {
   public readonly cookieJar: PengelolaCookie;
   public readonly retryBawaan?: PengelolaRetryHTTP;
   public readonly autentikasiBawaan?: any;
-  private readonly agenHttp: http.Agent;
-  private readonly agenHttps: https.Agent;
+  private readonly agenHttp?: any;
+  private readonly agenHttps?: any;
   private readonly batasUkuranTubuhBytes: number;
 
   constructor(konfigurasi?: KonfigurasiKlienOpsional) {
@@ -62,9 +61,16 @@ export class KlienHTTP {
       this.retryBawaan = new PengelolaRetryHTTP(retryCfg);
     }
 
-    // Agent dengan keep-alive pooling
-    this.agenHttp = new http.Agent({ keepAlive: true, maxSockets: 50 });
-    this.agenHttps = new https.Agent({ keepAlive: true, maxSockets: 50 });
+    // Agent dengan keep-alive pooling hanya diinisialisasi jika berada di lingkungan Node.js
+    const isNode = typeof window === 'undefined' && typeof process !== 'undefined' && Boolean(process?.versions?.node);
+    if (isNode) {
+      try {
+        this.agenHttp = new http.Agent({ keepAlive: true, maxSockets: 50 });
+        this.agenHttps = new https.Agent({ keepAlive: true, maxSockets: 50 });
+      } catch {
+        // Fallback jika lib http tidak mendukung konstruktor Agent
+      }
+    }
   }
 
   public dapatkanCookieJar(): PengelolaCookie {
@@ -320,6 +326,11 @@ export class KlienHTTP {
     rawSetCookies?: string[];
     buffer: Buffer;
   }> {
+    const isNode = typeof window === 'undefined' && typeof process !== 'undefined' && Boolean(process?.versions?.node);
+    if (!isNode && typeof fetch === 'function') {
+      return this.kirimBrowser(params);
+    }
+
     return new Promise((resolve, reject) => {
       const isHttps = params.urlObj.protocol === 'https:';
       const lib = isHttps ? https : http;
@@ -497,6 +508,88 @@ export class KlienHTTP {
       url1.hostname === url2.hostname &&
       url1.port === url2.port
     );
+  }
+
+  private async kirimBrowser(params: {
+    urlObj: URL;
+    metode: MetodeHTTP;
+    headers: PetaHeader;
+    body: Buffer | null;
+    timeoutMs: number;
+    abaikanTLS: boolean;
+    sinyal?: AbortSignal;
+  }): Promise<{
+    status: number;
+    statusTeks: string;
+    headers: Map<string, string>;
+    petaHeader: PetaHeader;
+    rawSetCookies?: string[];
+    buffer: Buffer;
+  }> {
+    const headerObj = params.headers.keObjek();
+    delete (headerObj as any)['Host'];
+    delete (headerObj as any)['host'];
+
+    const controller = new AbortController();
+    let timeoutTimer: any = null;
+
+    if (params.timeoutMs > 0) {
+      timeoutTimer = setTimeout(() => {
+        controller.abort();
+      }, params.timeoutMs);
+    }
+
+    if (params.sinyal) {
+      if (params.sinyal.aborted) {
+        controller.abort();
+      } else {
+        params.sinyal.addEventListener('abort', () => controller.abort());
+      }
+    }
+
+    try {
+      const resp = await fetch(params.urlObj.toString(), {
+        method: params.metode,
+        headers: headerObj,
+        body: (params.metode === 'GET' || params.metode === 'HEAD') ? undefined : (params.body as any),
+        signal: controller.signal,
+      });
+
+      if (timeoutTimer) clearTimeout(timeoutTimer);
+
+      const arrayBuf = await resp.arrayBuffer();
+      const buffer = typeof Buffer !== 'undefined' ? Buffer.from(arrayBuf) : (new Uint8Array(arrayBuf) as any);
+
+      const petaHeaderRes = new PetaHeader();
+      const mapHeader = new Map<string, string>();
+      resp.headers.forEach((val, key) => {
+        petaHeaderRes.tetapkan(key, val);
+        mapHeader.set(key.toLowerCase(), val);
+      });
+
+      return {
+        status: resp.status,
+        statusTeks: resp.statusText,
+        headers: mapHeader,
+        petaHeader: petaHeaderRes,
+        rawSetCookies: [],
+        buffer,
+      };
+    } catch (err: any) {
+      if (timeoutTimer) clearTimeout(timeoutTimer);
+      if (err.name === 'AbortError') {
+        throw new GalatTimeoutHTTP(
+          `Permintaan HTTP melebihi batas waktu ${params.timeoutMs}ms.`,
+          undefined,
+          params.urlObj.toString()
+        );
+      }
+      throw new GalatJaringanHTTP(
+        `Galat jaringan di lingkungan browser: ${err.message}`,
+        err,
+        params.urlObj.toString()
+      );
+    }
   }
 
   private tunda(ms: number): Promise<void> {

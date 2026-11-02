@@ -4,6 +4,56 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.40.0] — 2026-11-02
+### Phase 40: Mobile App Distribution & Publishing
+
+Fase ini menghadirkan sistem distribusi dan penerbitan aplikasi mobile profesional, modular, dan aman untuk platform Android dan Apple iOS pada bahasa pemrograman NUSANTARA.
+
+#### Ditambahkan:
+- **Arsitektur Inti Distribusi (`src/mobile/distribution/core/`):**
+  - `DistributionManager`: Fasad terpadu orkestrasi distribusi aplikasi mobile.
+  - `BuildManager`: Orkestrator kompilasi multi-platform (Android APK, Android AAB, iOS archive).
+  - `ReleaseManager`: Pipeline rilis terpadu, penataan checklist kelayakan, dan penyusunan laporan rilis.
+  - `VersionManager`: Pengelola Semantic Versioning (SemVer), kenaikan otomatis `versionCode` Android dan `CFBundleVersion` iOS, saluran rilis (`debug`, `internal`, `beta`, `produksi`), dan generator catatan rilis otomatis.
+- **Sistem Distribusi Android (`src/mobile/distribution/android/`):**
+  - `AndroidManifestManager`: Generator dan validator `AndroidManifest.xml` resmi dengan integrasi package name, versioning, permissions, dan metadata.
+  - `AndroidSigningManager`: Pengelolaan penandatanganan keystore, key alias, validasi skema signature v1/v2/v3, perhitungan sidik jari SHA-256, dan pencegahan kata sandi plaintext (menggunakan environment variables).
+  - `APKBuilder`: Generator paket instalasi APK Debug dan Release dengan verifikasi integritas biner dan SHA-256.
+  - `AABBuilder`: Generator Android App Bundle (`.aab`) resmi Google Play Store dengan konfigurasi bundletool dan optimasi ukuran.
+  - `AndroidDistributionManager`: Pemeriksaan lingkungan Android SDK, JDK, Gradle, dan eksekusi build terpadu.
+- **Sistem Distribusi Apple iOS (`src/mobile/distribution/ios/`):**
+  - `IOSDistributionManager`: Pemeriksaan lingkungan macOS, Xcode, dan `xcodebuild` dengan pelaporan transparan.
+  - `CodeSigningManager`: Validasi identitas sertifikat Apple Distribution, Team ID, dan generator `ExportOptions.plist`.
+  - `ProvisioningManager`: Validasi berkas provisioning profile (`.mobileprovision`), App ID, UUID, dan entitlements.
+  - `ArchiveManager`: Persiapan struktur Xcode Archive (`.xcarchive`), `Info.plist`, dan checklist kesiapan TestFlight serta Apple App Store.
+- **Pengelolaan Aset Visual Mobile (`src/mobile/distribution/assets/`):**
+  - `IconManager`: Spesifikasi resmi Android adaptive icon (foreground/background) dan iOS AppIcon (1024x1024 App Store, iPhone, iPad).
+  - `SplashManager`: Generator Android 12+ SplashScreen API (`Theme.SplashScreen`) dan storyboard iOS LaunchScreen.
+  - `AssetValidator`: Validasi dimensi, aspek rasio 1:1 untuk ikon, format gambar (`.png`, `.webp`, `.svg`), dan batasan ukuran berkas.
+- **Validasi & Laporan Rilis (`src/mobile/distribution/validation/`, `reports/`):**
+  - `BuildValidator`: Verifikasi integritas berkas artefak build biner.
+  - `SigningValidator`: Audit keamanan kredensial dan deteksi kebocoran rahasia (*secret leak detection*).
+  - `ReleaseValidator`: Evaluasi otomatis seluruh kriteria toko aplikasi (Android & iOS).
+  - `BuildReportGenerator`: Pembuat laporan build JSON (`build-report.json`).
+  - `ReleaseReportGenerator`: Pembuat laporan rilis Markdown terstruktur (`release-report.md`).
+- **Antarmuka GUI Dashboard (`src/komponen/StudioDistribusiMobile.tsx`):**
+  - Halaman interaktif *NUSANTARA Mobile Distribution Center* di tab Studio.
+  - Menampilkan ringkasan proyek, status toolchain SDK/JDK/Xcode, pemicu build APK/AAB/Archive, pengelola versi, checklist kelayakan, dan penampil laporan Markdown.
+- **Integrasi CLI Nusantara Mobile:**
+  - `nusantara mobile distribusi periksa`
+  - `nusantara mobile distribusi konfigurasi [lingkungan]`
+  - `nusantara mobile distribusi android <apk|aab|debug|release|tanda-tangan>`
+  - `nusantara mobile distribusi ios <periksa|archive|validasi>`
+  - `nusantara mobile distribusi versi <tampil|naikkan>`
+  - `nusantara mobile distribusi aset <periksa|daftar>`
+  - `nusantara mobile distribusi rilis <laporan|checklist>`
+- **Integrasi Standard Library `std:mobile` (`src/stdlib/mobile.ts`):**
+  - `dapatkanInfoDistribusi()`, `validasiRilisMobile()`, `kelolaVersiMobile()`, `periksaAsetMobile()`, `buatLaporanDistribusi()`.
+- **Proyek Percontohan Nyata:**
+  - `contoh/mobile/distribution_demo/` memuat `nusantara.mobile.json`, `src/main.nusantara`, dan `README.md`.
+- **Dokumentasi Komprehensif:**
+  - 14 berkas dokumentasi di `docs/mobile/distribution/`.
+
 ## [v0.39.0] — 2026-11-01
 ### Phase 39: Nusantara Mobile Networking & Cloud Services
 

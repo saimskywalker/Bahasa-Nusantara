@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "Mobile Networking & Cloud Services (REST API Client, Autentikasi JWT & PKCE, Secure Storage AES-256, Offline-First Queue, Data Synchronization & Conflict Resolution, Cloud Storage, WebSockets, Push Notifications, Multi-Cloud Providers), Mobile Native API & Device Integration, Android & iOS Development, Desktop GUI Framework, WebSocket, Background Tasks, CLI Generator, ORM, Autentikasi, Web Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.39.0.",
+  "description": "Mobile App Distribution & Publishing (Android APK & AAB Builder, Android Keystore Signing, Apple iOS Archive & Code Signing, TestFlight & App Store Preparation, Version Management, Asset Manager, Release Validator, Build Reports), Mobile Networking & Cloud Services, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.40.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

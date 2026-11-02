@@ -19,7 +19,7 @@ export class LokasiPerangkatMobile {
     stempelWaktu: Date.now(),
   };
 
-  public static async dapatkanLokasiSaatIni(): Promise<KoordinatLokasi> {
+  public static async dapatkanLokasiSaatIni(_opsi?: { akurasiTinggi?: boolean; timeoutMs?: number }): Promise<KoordinatLokasi> {
     const konteks = KonteksAplikasiMobile.dapatkanKonteks();
     const statusIzin = await konteks.pengelolaIzin.periksaIzin('lokasi');
 

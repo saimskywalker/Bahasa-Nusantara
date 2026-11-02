@@ -22,3 +22,4 @@ export * from './bridge';
 export * from './assets';
 export * from './build';
 export * from './cli';
+export * from './native';

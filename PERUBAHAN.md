@@ -4,6 +4,50 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.38.0] — 2026-11-01
+### Phase 38: Nusantara Mobile Native API & Device Integration
+
+Fase ini menghadirkan sistem integrasi fitur asli (native) smartphone Android dan iOS pada bahasa pemrograman NUSANTARA, memungkinkan aplikasi seluler NUSANTARA memanfaatkan kamera, sensor gerak, Bluetooth, geolokasi, notifikasi lokal, audio, sistem berkas sandbox, papan klip, lembar berbagi, dan penyimpanan terenkripsi hardware secara aman dan transparan.
+
+#### Ditambahkan:
+- **Native API Core & Registri (`src/mobile/native/`):**
+  - `core/result.ts`: Standar hasil operasi native (`HasilOperasiNative<T>`), enum `KodeGalatNative`, dan pembantu pembuatan respon (`buatHasilSukses`, `buatHasilGagal`, `buatHasilIzinDitolak`, `buatHasilTidakDidukung`, `buatHasilDibatalkan`).
+  - `core/capabilities.ts`: `PengelolaKemampuanPerangkat` untuk deteksi kapabilitas perangkat keras (kamera, sensor 3-sumbu, Bluetooth BLE, GPS, Keystore/Keychain, audio) tanpa pelacakan sensitif (anti-fingerprinting).
+  - `core/events.ts`: `PengirimPeristiwaNative` (Native Event Dispatcher) untuk pub/sub peristiwa perangkat keras (sensor stream, perubahan jaringan/baterai, status Bluetooth).
+  - `core/registry.ts`: `RegistriNativeAPI` terpusat mengelola registrasi 25+ native API, verifikasi perizinan dinamis otomatis, validasi parameter, dan penanganan galat terstandarisasi.
+- **Adaptor Platform Native (`src/mobile/native/adapters/`):**
+  - `platform_adapter.ts`: Kontrak antarmuka `AdaptorPlatformNative`.
+  - `simulator_adapter.ts`: Implementasi simulator responsif untuk pengembangan cepat di desktop/peramban dengan simulasi sensor, berkas sandbox, kamera, dan clipboard.
+  - `android_adapter.ts`: Adaptor Android terintegrasi dengan Android Jetpack Contracts (`TakePicture`, `PickVisualMedia`), Google Location Services, dan Android Keystore AES-256-GCM.
+  - `ios_adapter.ts`: Adaptor iOS terintegrasi dengan Apple Frameworks (`AVFoundation`, `PHPickerViewController`, `CoreLocation`, `UserNotifications`, `CoreMotion`, `Keychain Services`).
+- **Layanan API Perangkat Lengkap (`src/mobile/native/services/`):**
+  - Kamera: `kamera.ketersediaan`, `kamera.ambil`.
+  - Galeri & Media Picker: `galeri.pilih_foto`, `galeri.pilih_video`.
+  - Lokasi GPS: `lokasi.ambil`, `lokasi.pantau`, `lokasi.henti`.
+  - Notifikasi Lokal: `notifikasi.kirim`, `notifikasi.jadwal`, `notifikasi.batal`.
+  - Sensor Perangkat: `sensor.akselerometer`, `sensor.giroskop`, `sensor.magnetometer`, `sensor.kedekatan`, `sensor.cahaya`.
+  - Bluetooth & BLE: `bluetooth.status`, `bluetooth.pindai`.
+  - Daya & Baterai: `baterai.info`.
+  - Jaringan: `jaringan.status`.
+  - Audio & Mikrofon: `audio.putar`, `audio.rekam`, `audio.henti`.
+  - Sistem Berkas Sandbox: `berkas.baca`, `berkas.tulis`, `berkas.hapus` dengan proteksi anti-path traversal (`..`).
+  - Papan Klip: `papan_klip.salin`, `papan_klip.tempel`.
+  - Lembar Berbagi: `bagikan.konten`.
+  - Penyimpanan Aman: `simpan_aman.tulis`, `simpan_aman.baca`, `simpan_aman.hapus` (AES-256).
+  - Haptik: `haptik.getar`, `haptik.pola`.
+  - Siklus Hidup: `lifecycle.status`.
+- **Integrasi Pustaka Standar (`std:mobile`):**
+  - Fungsi bawaan `seluler.panggilNative(namaApi, parameter)`, `seluler.daftarNativeAPI()`, `seluler.periksaNativeAPI(namaApi)`, `seluler.dapatkanKemampuanPerangkat()`.
+- **Ekstensi CLI Nusantara Mobile (`nusantara mobile`):**
+  - `nusantara mobile api daftar`: Menampilkan seluruh API terdaftar per kategori beserta kebutuhan izin dan status implementasi.
+  - `nusantara mobile api periksa <nama>`: Inspeksi detail parameter, tipe kembalian, versi minimum OS, dan kode galat API.
+  - `nusantara mobile permission daftar`: Daftar kebijakan izin perangkat.
+  - `nusantara mobile device info`: Spesifikasi teknis perangkat dan matriks kapabilitas hardware.
+- **Aplikasi Percontohan Nyata (`contoh/mobile/device_explorer/`):**
+  - `device_explorer.nusantara`: Aplikasi Device Explorer interaktif yang mendemonstrasikan akses kamera, sensor akselerometer, notifikasi lokal, dan secure storage AES-256.
+- **Dokumentasi Lengkap 25 Berkas (`docs/mobile/native-api/`):**
+  - Panduan lengkap arsitektur, izin, penanganan galat, integrasi Android/iOS, matriks kapabilitas, dan troubleshooting.
+
 ## [v0.37.0] — 2026-10-31
 ### Phase 37: Nusantara Mobile Application Framework (Android & iOS Development Support)
 

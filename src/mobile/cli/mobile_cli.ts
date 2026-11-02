@@ -12,6 +12,9 @@ import { VERSI_NUSANTARA } from '../../konstanta/versi';
 import { AndroidBuildManager } from '../build/android';
 import { IOSBuildManager } from '../build/ios';
 import { KonfigurasiAplikasiMobile } from '../types';
+import { RegistriNativeAPI } from '../native/core/registry';
+import { PengelolaKemampuanPerangkat } from '../native/core/capabilities';
+import { InfoPerangkatMobile } from '../device/info';
 
 export class MobileCLI {
   public static jalankan(args: string[]): number {
@@ -40,6 +43,17 @@ export class MobileCLI {
 
       case 'info':
         return this.perintahInfo();
+
+      case 'api':
+        return this.perintahAPI(subArgs);
+
+      case 'permission':
+      case 'izin':
+        return this.perintahPermission(subArgs);
+
+      case 'device':
+      case 'perangkat':
+        return this.perintahDevice(subArgs);
 
       case 'bantuan':
       case '--help':
@@ -294,6 +308,116 @@ jalankanAplikasiMobile(aplikasi)
     console.log(`API Perangkat        : Jaringan, Baterai, Haptik, Papan Klip, Lokasi, Notifikasi, Berbagi`);
     console.log(`Sistem Keamanan      : Manajemen Izin Dinamis & AES-256 Secure Storage`);
     console.log(`Jembatan Native      : IPC Message Protocol (Bidirectional Native Bridge)`);
+    console.log(`Registri Native API  : Tersedia (Terpadu Android, iOS, & Simulator)`);
+    console.log(`======================================================\n`);
+    return 0;
+  }
+
+  public static perintahAPI(args: string[]): number {
+    const sub = (args[0] || 'daftar').toLowerCase();
+    const registri = RegistriNativeAPI.dapatkanInstance();
+
+    if (sub === 'daftar' || sub === 'list') {
+      const daftar = registri.dapatkanSemua();
+      console.log(`\n======================================================`);
+      console.log(`  NUSANTARA MOBILE - Daftar Native Device API`);
+      console.log(`======================================================`);
+      console.log(`Total API Terdaftar: ${daftar.length}\n`);
+
+      const perKategori = new Map<string, typeof daftar>();
+      for (const api of daftar) {
+        if (!perKategori.has(api.kategori)) perKategori.set(api.kategori, []);
+        perKategori.get(api.kategori)!.push(api);
+      }
+
+      for (const [kat, list] of perKategori.entries()) {
+        console.log(`[ Kategori: ${kat.toUpperCase()} ]`);
+        for (const item of list) {
+          const izinText = item.izin.length > 0 ? `(Izin: ${item.izin.join(', ')})` : '(Tanpa Izin)';
+          console.log(`  - ${item.nama.padEnd(24)} : [${item.status}] ${izinText}`);
+        }
+        console.log('');
+      }
+      return 0;
+    }
+
+    if (sub === 'periksa' || sub === 'info') {
+      const nama = args[1];
+      if (!nama) {
+        console.error('Silakan tentukan nama API yang ingin diperiksa (misal: kamera.ambil).');
+        return 1;
+      }
+      const api = registri.dapatkan(nama);
+      if (!api) {
+        console.error(`API '${nama}' tidak terdaftar pada registri native.`);
+        return 1;
+      }
+      console.log(`\n======================================================`);
+      console.log(`  Detail Native API: ${api.nama}`);
+      console.log(`======================================================`);
+      console.log(`Kategori        : ${api.kategori}`);
+      console.log(`Status          : ${api.status}`);
+      console.log(`Platform        : ${api.platform.join(', ')}`);
+      console.log(`Versi Min OS    : Android >= ${api.versiMinOS.android || '-'}, iOS >= ${api.versiMinOS.ios || '-'}`);
+      console.log(`Izin Diperlukan : ${api.izin.length > 0 ? api.izin.join(', ') : 'Tidak ada'}`);
+      console.log(`Tipe Hasil      : ${api.tipeHasil}`);
+      console.log(`Kemungkinan Galat: ${api.kemungkinanError.join(', ')}`);
+      console.log(`Deskripsi       : ${api.dokumentasi}`);
+      console.log(`Parameter       :`);
+      if (api.parameter.length === 0) {
+        console.log(`  (Tidak memerlukan parameter)`);
+      } else {
+        for (const p of api.parameter) {
+          console.log(`  - ${p.nama} (${p.tipe}) [${p.wajib ? 'Wajib' : 'Opsional'}]: ${p.deskripsi}`);
+        }
+      }
+      console.log('');
+      return 0;
+    }
+
+    console.error(`Subperintah 'api ${sub}' tidak dikenal. Pilihan: 'daftar' atau 'periksa <nama>'.`);
+    return 1;
+  }
+
+  public static perintahPermission(args: string[]): number {
+    console.log(`\n======================================================`);
+    console.log(`  NUSANTARA MOBILE - Daftar Izin Perangkat (Permissions)`);
+    console.log(`======================================================`);
+    console.log(`Daftar Izin & Kebijakan Akses:`);
+    console.log(`  - internet      : Akses jaringan internet (Bawaan: Diberikan)`);
+    console.log(`  - kamera        : Akses modul kamera foto & video (Sensitif, Butuh Izin Pengguna)`);
+    console.log(`  - lokasi        : Lokasi presisi GPS saat aplikasi digunakan (Sensitif)`);
+    console.log(`  - lokasi_latar  : Lokasi latar belakang (Izin Khusus, Kebijakan Ketat)`);
+    console.log(`  - notifikasi    : Menampilkan notifikasi lokal pada status bar`);
+    console.log(`  - foto_media    : Akses galeri foto dan video via Photo Picker`);
+    console.log(`  - mikrofon      : Akses rekaman suara mikrofon (Sensitif)`);
+    console.log(`  - bluetooth     : Akses pemindaian & koneksi BLE (Sensitif)`);
+    console.log(`  - penyimpanan   : Sandbox file lokal aplikasi (Akses aman terbatas)`);
+    console.log(`  - sensor        : Akses sensor gerak & akselerometer`);
+    console.log(`======================================================\n`);
+    return 0;
+  }
+
+  public static perintahDevice(args: string[]): number {
+    const info = InfoPerangkatMobile.dapatkanInfo();
+    const kemampuan = PengelolaKemampuanPerangkat.dapatkanInstance().dapatkanKemampuan();
+
+    console.log(`\n======================================================`);
+    console.log(`  NUSANTARA MOBILE - Informasi Perangkat & Kemampuan`);
+    console.log(`======================================================`);
+    console.log(`Platform Sistem   : ${info.platform}`);
+    console.log(`Model Perangkat   : ${info.model}`);
+    console.log(`Versi OS          : ${info.versiOS}`);
+    console.log(`Resolusi Layar    : ${info.lebarLayar} x ${info.tinggiLayar} (${info.skalaPiksel}x)`);
+    console.log(`Arsitektur CPU    : ${kemampuan.sistem.arsitektur}`);
+    console.log(`Mode Simulator    : ${info.apakahSimulator ? 'YA' : 'TIDAK (Perangkat Fisik)'}`);
+    console.log(`\nKemampuan Perangkat Keras:`);
+    console.log(`  Kamera Depan/Belakang : ${kemampuan.kamera.tersedia ? 'Tersedia' : 'Tidak'}`);
+    console.log(`  Akselerometer/Giroskop: ${kemampuan.sensor.akselerometer ? 'Tersedia' : 'Tidak'}`);
+    console.log(`  Geolokasi (GPS)       : ${kemampuan.konektivitas.gps ? 'Tersedia' : 'Tidak'}`);
+    console.log(`  Bluetooth / BLE       : ${kemampuan.konektivitas.bluetooth ? 'Tersedia' : 'Tidak'}`);
+    console.log(`  Penyimpanan Aman (AES): ${kemampuan.keamanan.penyimpananAman ? 'Tersedia' : 'Tidak'}`);
+    console.log(`  Umpan Balik Haptik    : ${kemampuan.haptik ? 'Tersedia' : 'Tidak'}`);
     console.log(`======================================================\n`);
     return 0;
   }
@@ -306,6 +430,9 @@ jalankanAplikasiMobile(aplikasi)
     console.log(`  periksa                     Memeriksa kesiapan lingkungan (SDK, JDK, Xcode)`);
     console.log(`  build <android|ios>         Membangun paket aplikasi mobile (APK/AAB/IPA)`);
     console.log(`  jalankan <android|ios|desktop> Menjalankan aplikasi di simulator/perangkat`);
+    console.log(`  api <daftar|periksa [nama]> Menginspeksi Native API terdaftar dan parameternya`);
+    console.log(`  permission <daftar>         Daftar izin perangkat dan kebijakan akses`);
+    console.log(`  device <info>               Menampilkan spesifikasi perangkat & kemampuan hardware`);
     console.log(`  info                        Informasi lengkap framework Nusantara Mobile`);
     console.log(`  bantuan                     Menampilkan panduan ini\n`);
   }

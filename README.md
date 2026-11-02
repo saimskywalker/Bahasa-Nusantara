@@ -2,13 +2,14 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_37:_mobile_application_framework-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.37.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_38:_mobile_native_api_integration-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.38.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-33_suites_lulus_100%25-green.svg)](pengujian/README.md)
-[![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/pengenalan-mobile.md)
+[![Testing](https://img.shields.io/badge/testing-34_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Native API](https://img.shields.io/badge/native_api-android_&_ios-purple.svg)](docs/mobile/native-api/pengenalan-native-api.md)
+[![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/01_pendahuluan.md)
 [![Desktop](https://img.shields.io/badge/desktop-gui_framework-indigo.svg)](docs/desktop/pengenalan-gui.md)
 [![Autentikasi](https://img.shields.io/badge/keamanan-scrypt_&_rbac-red.svg)](docs/referensi/authentication.md)
 [![Web](https://img.shields.io/badge/web-framework_&_rest_api-cyan.svg)](docs/referensi/web-framework.md)
@@ -24,8 +25,9 @@ NUSANTARA bukan sekadar penerjemah sintaksis bahasa asing, melainkan ikhtiar man
 
 - **Ekstensi Berkas Resmi:** `.nusantara`
 - **Lisensi:** [Apache License 2.0](LISENSI)
-- **Status Saat Ini:** **Phase 37: Nusantara Mobile Application Framework — Android & iOS Development Support (Milestone v0.37.0).**
-- **Dokumentasi Mobile Framework:** [docs/mobile/pengenalan-mobile.md](docs/mobile/pengenalan-mobile.md) (18 berkas panduan lengkap)
+- **Status Saat Ini:** **Phase 38: Nusantara Mobile Native API & Device Integration — Integrasi Fitur Asli Smartphone Android & iOS (Milestone v0.38.0).**
+- **Dokumentasi Native Device API:** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 berkas panduan lengkap)
+- **Dokumentasi Mobile Framework:** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)
 - **Dokumentasi GUI Desktop:** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
 - **Dokumentasi HTTP Client:** [docs/referensi/http.md](docs/referensi/http.md)
 - **Dokumentasi WebSocket & Background Tasks:** [docs/referensi/realtime.md](docs/referensi/realtime.md)

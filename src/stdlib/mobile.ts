@@ -63,6 +63,8 @@ import {
   KonteksAplikasiMobile,
   JenisIzinMobile,
   KonfigurasiAplikasiMobile,
+  RegistriNativeAPI,
+  PengelolaKemampuanPerangkat,
 } from '../mobile';
 import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
 
@@ -423,7 +425,11 @@ export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
   ['simpanAman', { nama: 'simpanAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }, { nama: 'nilai', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 2 }],
   ['ambilAman', { nama: 'ambilAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }], tipeKembalian: 'teks', minParameter: 1 }],
   ['hapusAman', { nama: 'hapusAman', kategori: 'fungsi', parameter: [{ nama: 'kunci', tipe: 'teks' }], tipeKembalian: 'logika', minParameter: 1 }],
-  ['panggilJembatanNative', { nama: 'panggilJembatanNative', kategori: 'fungsi', parameter: [{ nama: 'modul', tipe: 'teks' }, { nama: 'metode', tipe: 'teks' }, { nama: 'argumen', tipe: 'sembarang' }], tipeKembalian: 'sembarang', minParameter: 2, variadik: true }],
+  ['panggilJembatanNative', { nama: 'panggilJembatanNative', kategori: 'fungsi', parameter: [{ nama: 'modul', tipe: 'teks' }, { nama: 'metode', tipe: 'teks' }, { nama: 'argumen', tipe: 'apapun' }], tipeKembalian: 'apapun', minParameter: 2, variadik: true }],
+  ['panggilNative', { nama: 'panggilNative', kategori: 'fungsi', parameter: [{ nama: 'namaApi', tipe: 'teks' }, { nama: 'argumen', tipe: 'apapun' }], tipeKembalian: 'peta', minParameter: 1, variadik: true }],
+  ['daftarNativeAPI', { nama: 'daftarNativeAPI', kategori: 'fungsi', parameter: [], tipeKembalian: 'daftar', minParameter: 0 }],
+  ['periksaNativeAPI', { nama: 'periksaNativeAPI', kategori: 'fungsi', parameter: [{ nama: 'namaApi', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 1 }],
+  ['dapatkanKemampuanPerangkat', { nama: 'dapatkanKemampuanPerangkat', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
 ]);
 
 export function buatEksporMobile(): Map<string, NilaiRuntime> {
@@ -1165,6 +1171,77 @@ export function buatEksporMobile(): Map<string, NilaiRuntime> {
         return konversiKeNilaiRuntime(hasilNative);
       }
       return buatKosong();
+    },
+  });
+
+  // panggilNative(namaApi, argumen?)
+  ekspor.set('panggilNative', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'panggilNative',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const nama = args[0].nilai;
+        const argumenData = args.length > 1 ? konversiDariNilaiRuntime(args[1]) : undefined;
+        const registri = RegistriNativeAPI.dapatkanInstance();
+
+        let hasil: any = { sukses: false, status: 'memproses', stempelWaktu: Date.now() };
+        const p = registri.panggil(nama, argumenData);
+        if (p && typeof p.then === 'function') {
+          p.then((res) => {
+            hasil = res;
+          }).catch((err) => {
+            hasil = { sukses: false, status: 'gagal', pesan: err.message, stempelWaktu: Date.now() };
+          });
+        } else {
+          hasil = p;
+        }
+
+        return konversiKeNilaiRuntime(hasil);
+      }
+      return konversiKeNilaiRuntime({ sukses: false, status: 'gagal', pesan: 'Nama API wajib bertipe teks.' });
+    },
+  });
+
+  // daftarNativeAPI()
+  ekspor.set('daftarNativeAPI', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'daftarNativeAPI',
+    eksekusi: () => {
+      const daftar = RegistriNativeAPI.dapatkanInstance().dapatkanSemua().map((a) => a.nama);
+      return konversiKeNilaiRuntime(daftar);
+    },
+  });
+
+  // periksaNativeAPI(namaApi)
+  ekspor.set('periksaNativeAPI', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaNativeAPI',
+    eksekusi: (args: NilaiRuntime[]) => {
+      if (args.length >= 1 && args[0].jenis === JenisNilaiRuntime.TEKS) {
+        const nama = args[0].nilai;
+        const api = RegistriNativeAPI.dapatkanInstance().dapatkan(nama);
+        if (api) {
+          return konversiKeNilaiRuntime({
+            nama: api.nama,
+            kategori: api.kategori,
+            status: api.status,
+            platform: api.platform,
+            izin: api.izin,
+            dokumentasi: api.dokumentasi,
+          });
+        }
+      }
+      return buatKosong();
+    },
+  });
+
+  // dapatkanKemampuanPerangkat()
+  ekspor.set('dapatkanKemampuanPerangkat', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanKemampuanPerangkat',
+    eksekusi: () => {
+      const kemampuan = PengelolaKemampuanPerangkat.dapatkanInstance().dapatkanKemampuan();
+      return konversiKeNilaiRuntime(kemampuan);
     },
   });
 

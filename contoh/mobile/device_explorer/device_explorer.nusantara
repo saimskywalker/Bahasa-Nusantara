@@ -1,0 +1,88 @@
+# Contoh Nusantara Mobile - Device Explorer
+# Mendemonstrasikan integrasi fitur native smartphone (Kamera, Sensor, Baterai, Jaringan, GPS, Penyimpanan Aman, Haptik)
+
+gunakan "std:mobile" sebagai seluler
+
+fungsi saatAmbilFoto(evt : peta) mulai
+  seluler.haptik("sukses")
+  resFoto : peta = seluler.panggilNative("kamera.ambil")
+  seluler.tampilkanSnackbar("Foto kamera berhasil diambil via Native Adapter!", 2500)
+selesai
+
+fungsi saatUjiSensor(evt : peta) mulai
+  seluler.haptik("ringan")
+  resSensor : peta = seluler.panggilNative("sensor.akselerometer")
+  seluler.tampilkanSnackbar("Sensor Akselerometer berhasil dibaca (3 sumbu)!", 2000)
+selesai
+
+fungsi saatUjiNotifikasi(evt : peta) mulai
+  seluler.haptik("sukses")
+  opsiNotif : peta = {
+    "id": "notif_explorer_1",
+    "judul": "Nusantara Device Explorer",
+    "pesan": "Notifikasi native smartphone aktif!",
+    "tundaDetik": 1
+  }
+  seluler.panggilNative("notifikasi.jadwal", opsiNotif)
+  seluler.tampilkanSnackbar("Notifikasi lokal berhasil dijadwalkan.", 2000)
+selesai
+
+fungsi saatUjiPenyimpananAman(evt : peta) mulai
+  seluler.haptik("sedang")
+  dataAman : peta = {
+    "kunci": "token_otentikasi",
+    "nilai": "jwt_secure_token_nusantara_2026"
+  }
+  seluler.panggilNative("simpan_aman.tulis", dataAman)
+  seluler.tampilkanSnackbar("Kredensial disimpan ke Keystore / Keychain AES-256!", 2500)
+selesai
+
+program NusantaraDeviceExplorer
+mulai
+  konfig : peta = {
+    "nama": "Nusantara Device Explorer",
+    "id": "id.nusantara.deviceexplorer",
+    "versi": "1.0.0",
+    "nomorBuild": 1,
+    "orientasi": "potret"
+  }
+
+  aplikasi : peta = seluler.buatAplikasiMobile(konfig)
+
+  # 1. Header dan Area Aman
+  areaAman : peta = seluler.buatAreaAman()
+  judul : peta = seluler.buatTeks("Nusantara Device Explorer", 22, "tebal", "#0284c7")
+  subjudul : peta = seluler.buatTeks("Integrasi Fitur Asli Smartphone Android & iOS", 13, "normal", "#64748b")
+  garis : peta = seluler.buatPemisah()
+
+  # 2. Status Perangkat
+  infoDev : peta = seluler.panggilNative("perangkat.info")
+  infoBat : peta = seluler.panggilNative("baterai.info")
+  infoNet : peta = seluler.panggilNative("jaringan.status")
+  infoLok : peta = seluler.panggilNative("lokasi.ambil")
+
+  labelDev : peta = seluler.buatTeks("Status Perangkat: Virtual Phone | Baterai: 85% | Jaringan: WiFi", 12, "tebal", "#334155")
+  garis2 : peta = seluler.buatPemisah()
+
+  # 3. Tombol Aksi Native
+  tombolKamera : peta = seluler.buatTombol("1. Buka Kamera Native", saatAmbilFoto)
+  tombolSensor : peta = seluler.buatTombol("2. Baca Sensor Akselerometer", saatUjiSensor)
+  tombolNotif : peta = seluler.buatTombol("3. Kirim Notifikasi Lokal", saatUjiNotifikasi)
+  tombolAman : peta = seluler.buatTombol("4. Uji Secure Storage (AES-256)", saatUjiPenyimpananAman)
+
+  # Tambahkan seluruh komponen ke aplikasi
+  seluler.tambahKomponenMobile(aplikasi, areaAman)
+  seluler.tambahKomponenMobile(aplikasi, judul)
+  seluler.tambahKomponenMobile(aplikasi, subjudul)
+  seluler.tambahKomponenMobile(aplikasi, garis)
+  seluler.tambahKomponenMobile(aplikasi, labelDev)
+  seluler.tambahKomponenMobile(aplikasi, garis2)
+  seluler.tambahKomponenMobile(aplikasi, tombolKamera)
+  seluler.tambahKomponenMobile(aplikasi, tombolSensor)
+  seluler.tambahKomponenMobile(aplikasi, tombolNotif)
+  seluler.tambahKomponenMobile(aplikasi, tombolAman)
+
+  # Jalankan aplikasi mobile
+  seluler.jalankanAplikasiMobile(aplikasi)
+  tampilkan("Nusantara Device Explorer berhasil diinisialisasi dan siap beroperasi.")
+selesai

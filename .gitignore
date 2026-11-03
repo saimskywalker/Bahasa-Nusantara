@@ -1,7 +1,7 @@
 # Ketergantungan Paket
 node_modules/
 dist/
-build/
+/build/
 bin/
 
 # Berkas Artefak Kompilator & Biner

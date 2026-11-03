@@ -2,80 +2,85 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_40:_mobile_distribution_&_publishing-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.40.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_42:_mobile_app_update_system_&_ota-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.42.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-36_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-37_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Mobile OTA](https://img.shields.io/badge/mobile_ota-in--app_&_cloud_updates-blue.svg)](docs/mobile/updates/index.md)
+[![Mobile CI/CD](https://img.shields.io/badge/mobile_cicd-fastlane_&_github_actions-purple.svg)](docs/mobile/cicd/index.md)
 [![Distribusi](https://img.shields.io/badge/distribusi-android_apk_aab_&_ios-blue.svg)](docs/mobile/distribution/index.md)
 [![Networking](https://img.shields.io/badge/networking-offline_first_&_cloud-blue.svg)](docs/mobile/networking/01_arsitektur_networking_mobile.md)
 [![Native API](https://img.shields.io/badge/native_api-android_&_ios-purple.svg)](docs/mobile/native-api/pengenalan-native-api.md)
-[![Mobile](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/01_pendahuluan.md)
-[![Desktop](https://img.shields.io/badge/desktop-gui_framework-indigo.svg)](docs/desktop/pengenalan-gui.md)
+[![Mobile Framework](https://img.shields.io/badge/mobile-android_&_ios-purple.svg)](docs/mobile/01_pendahuluan.md)
+[![Desktop GUI](https://img.shields.io/badge/desktop-gui_framework-indigo.svg)](docs/desktop/pengenalan-gui.md)
 [![Autentikasi](https://img.shields.io/badge/keamanan-scrypt_&_rbac-red.svg)](docs/referensi/authentication.md)
-[![Web](https://img.shields.io/badge/web-framework_&_rest_api-cyan.svg)](docs/referensi/web-framework.md)
+[![Web & REST](https://img.shields.io/badge/web-framework_&_rest_api-cyan.svg)](docs/referensi/web-framework.md)
 [![Database](https://img.shields.io/badge/database-sqlite_native-amber.svg)](docs/referensi/database.md)
 
 ---
 
 ## 1. Tentang NUSANTARA
 
-**NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) yang dirancang dari nol menggunakan 100% tata bahasa, istilah teknis, dan leksikon Bahasa Indonesia.
+**NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) tingkat tinggi yang dirancang dan dikembangkan dari nol menggunakan 100% tata bahasa, kata kunci teknis, dan leksikon Bahasa Indonesia.
 
-NUSANTARA bukan sekadar penerjemah sintaksis bahasa asing, melainkan ikhtiar mandiri dalam rekayasa perangkat lunak untuk menghadirkan kedaulatan teknologi, kejelasan berpikir logis bagi masyarakat Indonesia, serta fondasi komputasi yang dapat berevolusi hingga ke tingkat sistem operasi (**NusantaraOS**).
+NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, hingga *Platform Mobile Lintas-Platform (Android & iOS) dengan Sistem Pembaruan OTA Mandiri*.
 
-- **Ekstensi Berkas Resmi:** `.nusantara`
-- **Lisensi:** [Apache License 2.0](LISENSI)
-- **Status Saat Ini:** **Phase 40: Nusantara Mobile App Distribution & Publishing — Android APK & AAB Builder, Keystore Signing, Apple iOS Archive & Code Signing, TestFlight & App Store Preparation, Version Management, Asset Manager, Release Validator, dan Build Reports (Milestone v0.40.0).**
-- **Dokumentasi Mobile Distribution:** [docs/mobile/distribution/index.md](docs/mobile/distribution/index.md) (14 berkas panduan lengkap)
-- **Dokumentasi Mobile Networking:** [docs/mobile/networking/01_arsitektur_networking_mobile.md](docs/mobile/networking/01_arsitektur_networking_mobile.md) (13 berkas panduan lengkap)
-- **Dokumentasi Native Device API:** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 berkas panduan lengkap)
-- **Dokumentasi Mobile Framework:** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)
-- **Dokumentasi GUI Desktop:** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
-- **Dokumentasi HTTP Client:** [docs/referensi/http.md](docs/referensi/http.md)
-- **Dokumentasi WebSocket & Background Tasks:** [docs/referensi/realtime.md](docs/referensi/realtime.md)
-- **Dokumentasi Autentikasi & Sesi:** [docs/referensi/authentication.md](docs/referensi/authentication.md)
-- **Dokumentasi Web Framework:** [docs/referensi/web-framework.md](docs/referensi/web-framework.md)
-- **Dokumentasi Database & ORM:** [docs/referensi/database.md](docs/referensi/database.md)
-- **Tata Bahasa Formal:** [GRAMMAR-EBNF.md](dokumentasi/GRAMMAR-EBNF.md)
+### Visi & Misi Proyek
+- **Kedaulatan Teknologi & Bahasa:** Memberikan kemandirian dalam ekosistem perangkat lunak nasional melalui bahasa pemrograman formal berstandar internasional (ISO/IEC 14977 EBNF).
+- **Akselerasi Edukasi Komputasi:** Menghilangkan batasan bahasa asing bagi pelajar dan pengembang di seluruh Nusantara dalam memahami konsep algoritma, struktur data, dan rekayasa perangkat lunak.
+- **Produksi Industri & Multiplatform:** Mampu digunakan untuk membangun utilitas terminal, layanan API web, aplikasi desktop GUI, hingga aplikasi seluler produksi lengkap dengan pipeline distribusi dan pembaruan berkala.
+- **Evolusi Menuju Sistem Operasi:** Menjadi fondasi runtime dan bahasa pemrograman utama bagi proyek jangka panjang **NusantaraOS**.
 
 ---
 
-## 2. Instalasi (Installation)
+## 2. Status Perkembangan Proyek & Roadmap
 
-### 2.1 Menggunakan Paket Biner Rilis Resmi
-Unduh paket distribusi untuk sistem operasi Anda dari folder `dist/` atau halaman rilis resmi:
-
-- **Windows (x64)**: `nusantara-v0.24.0-windows-x64.zip`
-- **Linux (x64)**: `nusantara-v0.24.0-linux-x64.tar.gz` atau `.zip`
-- **macOS (Intel x64)**: `nusantara-v0.24.0-macos-x64.tar.gz`
-- **macOS (Apple Silicon ARM64)**: `nusantara-v0.24.0-macos-arm64.tar.gz`
-
-#### Langkah Pemasangan:
-```bash
-# 1. Ekstrak arsip (contoh Linux/macOS)
-tar -xzf nusantara-v0.24.0-linux-x64.tar.gz
-cd nusantara-v0.24.0-linux-x64
-
-# 2. Jalankan installer otomatis (atau salin direktori bin ke PATH)
-./install.sh
-
-# 3. Verifikasi instalasi di terminal baru
-nusantara --versi
-```
-
-Pada Windows:
-1. Ekstrak berkas `nusantara-v0.24.0-windows-x64.zip`.
-2. Klik ganda `install.bat` atau tambahkan folder `bin` ke variabel lingkungan `PATH`.
-3. Buka PowerShell / Command Prompt dan jalankan `nusantara --versi`.
+- **Status Saat Ini:** **🟢 Phase 42: Mobile App Update System & Over-the-Air (OTA) Updates (Milestone v0.42.0)**.
+- **Total Fase Diaudit:** 48 Fase (Phase 1 s/d Phase 48).
+  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 42):** 42 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
+  - 🔵 **Dalam Perencanaan (Phase 43 s/d Phase 48):** 6 fase riset lanjutan (Bytecode Engine, LLVM AOT Compiler, Optimasi Lanjut, Native Linker, 2D/3D Engine, dan Kernel NusantaraOS).
+- **Rangkaian Pengujian:** 37 test suite otomatis lulus 100% (mencakup 167 modul fondasi inti, CLI, parser, interpreter, database, web, desktop, native API, dan OTA updates).
+- **Audit Terakhir:** 3 November 2026.
+- **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 48.
 
 ---
 
-## 3. Memulai Cepat (Quick Start)
+## 3. Fitur yang Benar-Benar Sudah Tersedia
 
-Buat berkas program baru bernama `halo.nusantara`:
+Seluruh fitur di bawah ini telah diverifikasi melalui audit kode sumber (`src/`) dan rangkaian pengujian otomatis (`pengujian/`):
 
+### A. Inti Bahasa, Tata Bahasa & Kompiler
+- **Spesifikasi Bahasa Formal (EBNF ISO/IEC 14977):** Struktur leksikal, tata bahasa, dan konvensi penamaan leksikon Indonesia.
+- **Sistem Tipe Statis & Inferensi Tipe:** Tipe primitif (`bilangan`, `teks`, `logika`, `kosong`), tipe komposit (`larik`, `kamus`), dan tipe bentukan (`struktur`).
+- **Lexer & Tokenizer:** Pemindaian token presisi dengan penanda posisi baris dan kolom.
+- **Parser & Pohon Sintaksis Abstrak (AST):** Parsing rekursif dengan penanganan galat sintaksis informatif.
+- **Interpreter Eksekusi:** Evaluasi ekspresi aritmetika/logika, percabangan (`jika`, `jika_tidak`, `jika_tidak_maka`), perulangan (`selama`, `untuk`), dan definisi fungsi (`fungsi ... kembali`).
+- **CLI Toolkit Lengkap:** `nusantara jalankan`, `nusantara cek`, `nusantara format`, `nusantara uji`, `nusantara repl`, `nusantara bangun`.
+
+### B. Runtime, Ekosistem Server & Desktop
+- **Pustaka Standar (`std`):** Operasi matematika (`std::matematika`), manipulasi string (`std::teks`), sistem berkas (`std::berkas`), waktu (`std::waktu`), JSON (`std::json`), dan kriptografi (`std::kripto`).
+- **Penyimpanan Data & Database:** Driver SQLite terintegrasi, Query Builder tipe aman, migrasi skema, dan ORM sederhana.
+- **Framework Web & REST API:** Router HTTP berbasis leksikon Indonesia, penanganan middleware (CORS, Logger, Rate Limiter), otentikasi token JWT/Sesi, dan validasi muatan JSON.
+- **Komunikasi Realtime:** Server WebSocket mandiri, penanganan kanal/ruang siaran, dan manajer tugas latar belakang (*background workers*).
+- **Framework Desktop GUI:** Manajemen jendela, sistem tata letak kontainer (Flex/Grid), komponen tombol, label, bidang input, dan penangan acara berbasis sinyal.
+
+### C. Ekosistem Mobile Lintas-Platform (Android & iOS)
+- **Framework Aplikasi Seluler:** Sistem komponen reaktif seluler, navigasi tumpukan (*stack navigation*), dan manajemen status global.
+- **Native Device APIs (25 Modul):** Kamera, geolokasi/GPS, akselerometer, sensor biometrik (sidik jari/wajah), penyimpanan aman (Keystore/Keychain), getaran (haptik), jaringan, baterai, papan klip, dan notifikasi lokal.
+- **Networking Mobile:** Arsitektur *offline-first*, sinkronisasi data awan bertahap (*delta sync*), penyimpan cache lokal, dan manajer antrean permintaan offline.
+- **Mobile Distribution & Publishing:** Pembuat paket Android APK & AAB, penandatanganan Keystore, Apple iOS Archive & Code Signing, validator kelayakan rilis Play Store/App Store, dan pelapor build.
+- **Mobile CI/CD & Store Automation:** Integrasi GitHub Actions & Fastlane, generator alur kerja otomatis, manajemen rahasia/sertifikat, dan otomatisasi rilis TestFlight/Play Store Internal.
+- **Mobile App Update & OTA Engine (Phase 42):** Pemeriksa pembaruan dalam aplikasi (*in-app update*), pengunduh aman berverifikasi SHA-256, delta patcher, hot-reload bundle OTA JavaScript/Nusantara, pemulihan rollback otomatis jika instalasi gagal, dan banner notifikasi pembaruan ramah pengguna.
+
+---
+
+## 4. Contoh Kode NUSANTARA (100% Sesuai Tata Bahasa)
+
+Contoh kode berikut telah teruji dan dapat langsung dieksekusi oleh interpreter NUSANTARA:
+
+### 4.1 Program Dasar
 ```nusantara
 program HaloDunia
 mulai
@@ -89,90 +94,116 @@ mulai
 selesai
 ```
 
-Jalankan program melalui CLI:
-```bash
-nusantara jalankan halo.nusantara
+### 4.2 Fungsi dan Percabangan Logika
+```nusantara
+program HitungFaktorial
+mulai
+    fungsi hitung_faktorial(n : bilangan) -> bilangan
+    mulai
+        jika (n <= 1)
+        mulai
+            kembali 1
+        selesai
+        kembali n * hitung_faktorial(n - 1)
+    selesai
+
+    bil : bilangan = 5
+    hasil : bilangan = hitung_faktorial(bil)
+    tampilkan("Faktorial dari 5 adalah:", hasil)
+selesai
 ```
 
-Periksa sintaksis kode dan sistem tipe tanpa eksekusi:
-```bash
-nusantara cek halo.nusantara
-```
+### 4.3 Struktur Data Komposit
+```nusantara
+program DataPengguna
+mulai
+    struktur Pengguna
+        nama : teks
+        usia : bilangan
+        aktif : logika
+    selesai
 
-Format kode sesuai standar tata letak resmi:
-```bash
-nusantara format halo.nusantara --tulis
+    pengguna_baru : Pengguna = Pengguna(nama = "Budi Santoso", usia = 28, aktif = benar)
+    tampilkan("Nama:", pengguna_baru.nama)
+    tampilkan("Usia:", pengguna_baru.usia)
+selesai
 ```
 
 ---
 
-## 4. Platform yang Didukung (Supported Platforms)
+## 5. Instalasi & Menjalankan Proyek
 
-Bahasa NUSANTARA v0.23.0 mendukung secara resmi:
-- **Windows x64** (Windows 10, Windows 11, Windows Server)
-- **Linux x64** (Ubuntu, Debian, Fedora, Arch Linux, Alpine)
-- **macOS x64** (macOS 12+ Intel)
-- **macOS ARM64** (macOS 12+ Apple Silicon M1/M2/M3/M4)
+### 5.1 Menggunakan Paket Biner Rilis Resmi
+Unduh paket distribusi untuk sistem operasi Anda dari direktori `dist/` atau halaman rilis resmi:
 
----
+- **Windows (x64)**: `nusantara-v0.42.0-windows-x64.zip`
+- **Linux (x64)**: `nusantara-v0.42.0-linux-x64.tar.gz` atau `.zip`
+- **macOS (Intel x64)**: `nusantara-v0.42.0-macos-x64.tar.gz`
+- **macOS (Apple Silicon ARM64)**: `nusantara-v0.42.0-macos-arm64.tar.gz`
 
-## 5. Membangun dari Sumber (Build From Source)
-
-### Kebutuhan Awal
-- Node.js versi 18+ (disarankan Node.js 22 LTS)
-- npm versi 9+
-
-### Langkah Kompilasi:
+#### Langkah Pemasangan Cepat (Linux / macOS):
 ```bash
-# 1. Pasang seluruh dependensi proyek
+# 1. Ekstrak arsip rilis
+tar -xzf nusantara-v0.42.0-linux-x64.tar.gz
+cd nusantara-v0.42.0-linux-x64
+
+# 2. Jalankan skrip instalasi otomatis ke PATH pengguna
+./install.sh
+
+# 3. Verifikasi instalasi di terminal
+nusantara --versi
+```
+
+Pada Windows:
+1. Ekstrak berkas `nusantara-v0.42.0-windows-x64.zip`.
+2. Klik ganda berkas `install.bat` atau tambahkan direktori `bin` ke variabel lingkungan `PATH`.
+3. Buka PowerShell / Command Prompt dan jalankan:
+   ```powershell
+   nusantara --versi
+   ```
+
+### 5.2 Membangun dari Sumber (Build From Source)
+Kebutuhan lingkungan:
+- Node.js versi 18 LTS ke atas (disarankan Node.js 22 LTS).
+- npm versi 9 ke atas.
+
+```bash
+# 1. Klon repositori proyek
+git clone https://github.com/nusantara-lang/nusantara.git
+cd nusantara
+
+# 2. Pasang dependensi
 npm install
 
-# 2. Jalankan rangkaian pengujian mutu pra-rilis
+# 3. Jalankan pengujian mutu menyeluruh
 npm test
 
-# 3. Bangun paket rilis distribusi resmi
-npm run test:build
-
-# 4. Bangun artefak rilis melalui CLI resmi
-npx tsx src/index.ts bangun --mode release
-```
-
-Hasil artefak kompilasi akan tersedia pada direktori `dist/` lengkap dengan berkas `dist/SHA256SUMS` dan `dist/release-manifest.json`.
-
----
-
-## 6. Artefak Rilis & Verifikasi Integritas (Release Artifacts & Checksum)
-
-Setiap rilis resmi diverifikasi menggunakan hash kriptografis SHA-256 untuk menjamin integritas biner:
-
-```bash
-# Linux
-sha256sum -c dist/SHA256SUMS
-
-# macOS
-shasum -a 256 -c dist/SHA256SUMS
-
-# Windows PowerShell
-Get-FileHash -Algorithm SHA256 dist\nusantara-v0.23.0-windows-x64.zip
+# 4. Bangun bundel distribusi
+npm run build
 ```
 
 ---
 
-## 7. Pemecahan Masalah (Troubleshooting)
+## 6. Dokumentasi Teknis
 
-- **Perintah `nusantara` tidak ditemukan setelah instalasi:**
-  Pastikan direktori `bin/` dari lokasi instalasi telah ditambahkan ke variabel lingkungan `PATH` sistem Anda.
-- **Peringatan Keamanan macOS (Gatekeeper - unsigned binary):**
-  Jika macOS memblokir eksekusi biner yang belum ditandatangani sertifikat pengembang berbayar Apple, jalankan perintah berikut di Terminal:
-  ```bash
-  xattr -dr com.apple.quarantine "$HOME/.nusantara"
-  ```
-- **Pustaka Standar (`std`) tidak ditemukan:**
-  Secara otomatis NUSANTARA mencari folder `std` di direktori induk peluncur. Anda dapat menetapkan lokasi manual via variabel lingkungan `NUSANTARA_STDLIB=/jalur/ke/std`.
+Dokumentasi resmi tersusun secara terstruktur di dalam direktori `docs/` dan `dokumentasi/`:
+
+- **Tata Bahasa Formal:** [dokumentasi/GRAMMAR-EBNF.md](dokumentasi/GRAMMAR-EBNF.md)
+- **Pembaruan Aplikasi Seluler & OTA (Fase 42):** [docs/mobile/updates/index.md](docs/mobile/updates/index.md) (18 panduan lengkap)
+- **CI/CD & Otomatisasi Store Mobile (Fase 41):** [docs/mobile/cicd/index.md](docs/mobile/cicd/index.md)
+- **Distribusi & Penerbitan Mobile (Fase 40):** [docs/mobile/distribution/index.md](docs/mobile/distribution/index.md) (14 panduan)
+- **Jaringan & Sinkronisasi Seluler (Fase 39):** [docs/mobile/networking/01_arsitektur_networking_mobile.md](docs/mobile/networking/01_arsitektur_networking_mobile.md) (13 panduan)
+- **API Perangkat Keras Seluler Asli (Fase 38):** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 panduan)
+- **Kerangka Kerja Seluler (Fase 37):** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)
+- **Antarmuka Desktop GUI (Fase 35):** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
+- **WebSocket & Pekerja Latar Belakang (Fase 33):** [docs/referensi/realtime.md](docs/referensi/realtime.md)
+- **Autentikasi & Keamanan (Fase 32):** [docs/referensi/authentication.md](docs/referensi/authentication.md)
+- **Framework Web (Fase 31):** [docs/referensi/web-framework.md](docs/referensi/web-framework.md)
+- **Basis Data & ORM (Fase 30):** [docs/referensi/database.md](docs/referensi/database.md)
 
 ---
 
-## 8. Saluran Pipa Kompilasi & Arsitektur
+## 7. Arsitektur Saluran Pipa Kompilasi
 
 ```text
 Source Code (.nusantara)
@@ -203,15 +234,29 @@ Source Code (.nusantara)
  Package & Local Registry <-- [PHASE 22 (v0.22.0)]
          │
          ▼
- Build & Distribution     <-- [PHASE 23 (v0.23.0)]
-         │
-         ▼
- Artefak Rilis Resmi (dist/*.zip, dist/*.tar.gz)
+ Multi-Platform Targets   <-- [PHASE 23-42]
+ ├── Desktop GUI App      (Linux, macOS, Windows)
+ ├── Web & REST Backend   (Server HTTP, WebSocket, DB)
+ ├── Mobile App Bundles   (Android APK/AAB, iOS Archive)
+ └── OTA Update Server    (Delta Bundles, Signature Verify)
 ```
+
+---
+
+## 8. Panduan Kontribusi (Contributing)
+
+Kami menyambut hangat kontribusi dari seluruh pengembang, akademisi, dan praktisi teknologi untuk memajukan ekosistem NUSANTARA.
+
+1. **Laporkan Isu atau Gagasan:** Buka *Issue* di GitHub jika menemukan kutu (*bug*), inkonsistensi tata bahasa, atau usulan pustaka baru.
+2. **Fork Repositori:** Buat *branch* fitur baru dari `main` dengan format nama `fitur/nama-fitur` atau `perbaikan/nama-kutu`.
+3. **Patuhi Standar Penamaan:** Seluruh API publik dan pustaka standar wajib menggunakan istilah Bahasa Indonesia baku yang jelas.
+4. **Sertakan Pengujian Otomatis:** Setiap perubahan kode wajib disertai berkas pengujian di direktori `pengujian/` dan lulus pengujian `npm test`.
+5. **Kirim Pull Request:** Jelaskan perubahan secara rinci pada templat Pull Request dan pastikan build CI/CD berstatus hijau.
 
 ---
 
 ## 9. Lisensi
 
-Proyek Bahasa Pemrograman NUSANTARA dilindungi di bawah [Apache License 2.0](LISENSI).
+Proyek Bahasa Pemrograman NUSANTARA dilindungi di bawah lisensi terbuka [Apache License 2.0](LISENSI).
 Hak Cipta (c) 2026 Komunitas Bahasa Pemrograman NUSANTARA.
+Semua orang bebas menggunakan, mempelajari, memodifikasi, dan mendistribusikan perangkat lunak ini sesuai dengan syarat dan ketentuan lisensi.

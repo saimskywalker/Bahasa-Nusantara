@@ -1,0 +1,108 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * NUSANTARA Programming Language - Phase 42
+ * Manajer Aktivasi Atomik Resource OTA (Activation Manager)
+ */
+
+import { HasilAktivasiResource } from '../types';
+import { RollbackManager } from '../storage/RollbackManager';
+
+export class ActivationManager {
+  private static instance: ActivationManager;
+  private resourceAktif: Map<string, string | Uint8Array> = new Map();
+  private versiAktif = '0.41.0';
+
+  private constructor() {
+    this.inisialisasiResourceBawaan();
+  }
+
+  public static dapatkanInstance(): ActivationManager {
+    if (!ActivationManager.instance) {
+      ActivationManager.instance = new ActivationManager();
+    }
+    return ActivationManager.instance;
+  }
+
+  private inisialisasiResourceBawaan(): void {
+    this.resourceAktif.set('themes/default.json', JSON.stringify({ nama: 'Tema Nusantara Bawaan', mode: 'gelap' }));
+    this.resourceAktif.set('locales/id.json', JSON.stringify({ sambutan: 'Selamat Datang' }));
+  }
+
+  public dapatkanVersiAktif(): string {
+    return this.versiAktif;
+  }
+
+  public dapatkanSemuaResourceAktif(): Map<string, string | Uint8Array> {
+    return new Map(this.resourceAktif);
+  }
+
+  public bacaResource(jalurRelatif: string): string | Uint8Array | undefined {
+    return this.resourceAktif.get(jalurRelatif);
+  }
+
+  /**
+   * Mengaktifkan paket resource baru melalui daftar item resource.
+   */
+  public aktifkanResource(
+    versiBaru: string,
+    resources: any[],
+    platform = 'android'
+  ): HasilAktivasiResource {
+    const map = new Map<string, string | Uint8Array>();
+    for (const r of resources) {
+      map.set(r.jalurRelatif || r.id, typeof r.konten !== 'undefined' ? r.konten : 'mock_konten_resource');
+    }
+    return this.aktifkanAtomik(versiBaru, map);
+  }
+
+  /**
+   * Mengaktifkan paket resource baru secara atomik:
+   * 1. Salin resource aktif saat ini ke backup RollbackManager.
+   * 2. Terapkan paket baru ke memori aktif.
+   * 3. Perbarui pointer versi.
+   */
+  public aktifkanAtomik(
+    versiBaru: string,
+    berkasBaru: Map<string, string | Uint8Array>
+  ): HasilAktivasiResource {
+    if (!berkasBaru || berkasBaru.size === 0) {
+      return {
+        sukses: false,
+        versiAktif: this.versiAktif,
+        resourceDiaktifkan: [],
+        pesan: 'Tidak ada berkas resource baru yang dapat diaktifkan.',
+        stempelWaktu: new Date().toISOString(),
+      };
+    }
+
+    const versiLama = this.versiAktif;
+
+    // 1. Simpan cadangan untuk rollback
+    RollbackManager.dapatkanInstance().simpanCadangan(
+      versiLama,
+      Array.from(this.resourceAktif.keys()),
+      this.resourceAktif
+    );
+
+    // 2. Terapkan paket baru
+    const daftarDiaktifkan: string[] = [];
+    for (const [jalur, konten] of berkasBaru.entries()) {
+      this.resourceAktif.set(jalur, konten);
+      daftarDiaktifkan.push(jalur);
+    }
+
+    // 3. Update versi
+    this.versiAktif = versiBaru;
+
+    return {
+      sukses: true,
+      versiAktif: versiBaru,
+      versiSebelumnya: versiLama,
+      resourceDiaktifkan: daftarDiaktifkan,
+      pesan: `Berhasil mengaktifkan ${daftarDiaktifkan.length} resource OTA baru (versi ${versiBaru}).`,
+      stempelWaktu: new Date().toISOString(),
+    };
+  }
+}

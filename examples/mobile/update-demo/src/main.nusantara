@@ -1,0 +1,48 @@
+// Demonstrasi Pembaruan Aplikasi Mobile & Over-the-Air (OTA)
+// Target Versi: NUSANTARA v0.42.0
+
+gunakan "std:mobile" sebagai seluler
+
+program DemoPembaruanAplikasi
+mulai
+    tampilkan("==================================================")
+    tampilkan("  NUSANTARA MOBILE - DEMONSTRASI UPDATE & OTA   ")
+    tampilkan("==================================================")
+
+    // 1. Dapatkan status pembaruan aplikasi saat ini
+    infoStatus : peta = seluler.dapatkanStatusPembaruanMobile()
+    tampilkan("Status Sistem Saat Ini :", infoStatus["status"])
+    tampilkan("Versi Terpasang        :", infoStatus["versiAplikasi"])
+    tampilkan("Saluran Distribusi     :", infoStatus["saluran"])
+
+    // 2. Periksa ketersediaan pembaruan di server
+    tampilkan("\n[1] Memeriksa pembaruan ke server...")
+    hasilCek : peta = seluler.periksaPembaruanMobile("org.nusantara.update.demo", "0.41.0", "android")
+    tampilkan("Ada Pembaruan Tersedia :", hasilCek["adaPembaruan"])
+    tampilkan("Versi Terbaru di Server:", hasilCek["versiTerbaru"])
+    tampilkan("Kebijakan Pembaruan    :", hasilCek["kebijakan"])
+    tampilkan("Pesan Server           :", hasilCek["pesan"])
+
+    // 3. Jika pembaruan berupa resource OTA, unduh dan aktifkan
+    jika hasilCek["adaPembaruan"] == benar maka
+        tampilkan("\n[2] Mengunduh resource OTA yang diizinkan...")
+        hasilUnduh : peta = seluler.unduhPembaruanResourceMobile()
+        tampilkan("Status Unduhan :", hasilUnduh["pesan"])
+
+        tampilkan("\n[3] Mengaktifkan paket resource secara atomik...")
+        hasilAktif : peta = seluler.aktifkanPembaruanResourceMobile()
+        tampilkan("Status Aktivasi:", hasilAktif["pesan"])
+    lainnya
+        tampilkan("\nAplikasi sudah menggunakan versi terkini.")
+    akhir
+
+    // 4. Demonstrasi fasilitas Rollback jika terjadi anomali
+    tampilkan("\n[4] Menguji pemulihan cadangan (Rollback Safety)...")
+    hasilRollback : peta = seluler.rollbackPembaruanResourceMobile("android")
+    tampilkan("Hasil Rollback Sukses?", hasilRollback["sukses"])
+    tampilkan("Keterangan Pemulihan :", hasilRollback["pesan"])
+
+    tampilkan("\n==================================================")
+    tampilkan("  DEMONSTRASI PEMBARUAN SELESAI DENGAN SUKSES   ")
+    tampilkan("==================================================")
+selesai

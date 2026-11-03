@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "org.nusantara.update.demo",
+  "platform": "keduanya",
+  "channel": "stable",
+  "releaseVersion": "0.42.0",
+  "minimumSupportedVersion": "0.40.0",
+  "updateType": "ota_resource",
+  "policy": "disarankan",
+  "releaseDate": "2026-11-03T10:00:00.000Z",
+  "revision": 1,
+  "storeUrl": {
+    "googlePlay": "https://play.google.com/store/apps/details?id=org.nusantara.update.demo",
+    "appStore": "https://apps.apple.com/app/id1234567890"
+  },
+  "releaseNotes": {
+    "id": "Pembaruan tema visual Garuda Dark dan lokalisasi Bahasa Indonesia",
+    "en": "Updated Garuda Dark visual theme and Indonesian localization"
+  },
+  "resources": [
+    {
+      "id": "tema-garuda-dark",
+      "tipe": "theme",
+      "jalurRelatif": "resources/themes/garuda-dark.json",
+      "sha256": "3a4366db0c31e697a54f01e57d806ce7686d1d6635b15ed808a2a0d954e4e1f8",
+      "ukuranByte: ": 512,
+      "ukuranByte": 512
+    },
+    {
+      "id": "lokalisasi-id",
+      "tipe": "localization",
+      "jalurRelatif": "resources/locales/id.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ukuranByte": 256
+    }
+  ],
+  "tandaTangan": {
+    "algoritma": "Ed25519",
+    "keyId": "nusantara-root-release-2026",
+    "nilaiTandaTangan": "7e14cb7061d4f40f2f3e8f85f54316cf4c935471d2b7d41e75d400490b8fbe43",
+    "stempelWaktu": "2026-11-03T10:00:00.000Z"
+  }
+}

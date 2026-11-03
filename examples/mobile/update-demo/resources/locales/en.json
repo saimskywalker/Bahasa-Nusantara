@@ -1,0 +1,7 @@
+{
+  "app_name": "Nusantara Mobile Update Demo",
+  "welcome_title": "Welcome to Nusantara Mobile",
+  "update_available": "A new version update is available!",
+  "update_button": "Update Now",
+  "rollback_success": "Resources successfully restored to stable version."
+}

@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "Mobile App Store Integration & Automated Release (Google Play Console API, App Store Connect, TestFlight, Track Management, Release Approval Gate, Store Compliance Validator, Automated 11-Stage Pipeline, Multi-locale Metadata & Asset Manager), Mobile Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.41.0.",
+  "description": "Mobile App Update System & Over-the-Air Updates (OTA) (Semantic Version Checker, Signed Update Manifest, Secure HTTPS Download Manager, SHA-256 Integrity & Digital Signature, Resource Rollback, Google Play In-App Updates & App Store Linking, Update Channels, Notification Manager), Store Integration, Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.42.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

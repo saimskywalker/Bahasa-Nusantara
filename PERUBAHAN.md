@@ -4,6 +4,67 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.42.0] — 2026-11-03
+### Phase 42: Mobile App Update System & Over-the-Air Updates (OTA)
+
+Fase ini menghadirkan sistem pembaruan aplikasi mobile yang aman, modular, dan mematuhi batas arsitektur ketat (*Strict Boundary Architecture*) antara pembaruan biner native (Google Play In-App Updates & Apple App Store Connect) dan pembaruan resource OTA non-eksekutabel (tema, font, paket bahasa, konfigurasi) dengan verifikasi tanda tangan digital Ed25519 dan pemulihan otomatis (*Safe Mode Rollback*).
+
+#### Ditambahkan:
+- **Arsitektur Dua Jalur & Keamanan Jalur (`src/mobile/updates/security/`):**
+  - `UpdateSecurityPolicy`: Penegakan HTTPS (TLS 1.3), batas ukuran berkas tunggal (50 MB) dan paket bundle (100 MB), proteksi Zip-Slip, dan pencegahan absolut terhadap ekstensi biner terlarang (`.apk`, `.dex`, `.so`, `.dylib`, `.exe`, dll.).
+  - `HashValidator`: Implementasi murni algoritma FIPS 180-4 SHA-256 tanpa dependensi platform untuk validasi integritas berkas di browser maupun runtime Node.js.
+  - `TrustManager`: Registri kunci publik tepercaya (*Pinned Public Keys*) dengan dukungan rotasi kunci dan pencabutan kunci kedaluwarsa.
+  - `SignatureVerifier`: Penandatanganan kanonikal manifest dan verifikasi tanda tangan digital kurva eliptik Ed25519 dengan deteksi pemalsuan (*anti-tamper*).
+- **Pemeriksa Versi & Evaluasi Kebijakan (`src/mobile/updates/core/`):**
+  - `VersionChecker`: Parser SemVer 2.0.0, perbandingan versi tingkat mayor/minor/patch, evaluasi batas versi minimum, dan deteksi tipe perbedaan versi.
+  - `UpdatePolicyManager`: Evaluasi kebijakan pembaruan lima tingkat (`opsional`, `disarankan`, `wajib`, `keamanan`, `resource_saja`) beserta frekuensi interval pengingat.
+  - `UpdateChannelManager`: Pengelolaan 5 saluran distribusi rilis (`development`, `alpha`, `beta`, `testing`, `stable`).
+  - `CompatibilityManager`: Validasi kompatibilitas OS host, target Android SDK 24–34+, target minimum iOS 15.0+, dan ketersediaan ruang penyimpanan.
+  - `UpdateManager`: Fasad sentral terpadu orkestrasi pembaruan mobile.
+- **Skema Manifest Pembaruan (`src/mobile/updates/manifest/`):**
+  - `ManifestValidator`: Validasi skema ketat JSON manifest pembaruan, format reverse-DNS applicationId, integritas resource array, dan tanggal kedaluwarsa rilis.
+  - `ManifestParser`: Parser aman dan formatter JSON manifest kanonikal.
+- **Pembaruan Resource & Konten OTA (`src/mobile/updates/ota/`):**
+  - `DownloadManager`: Pengunduh aman berbasis HTTPS dengan pelacak progres unduhan persentase, mekanisme retry, dan dukungan pembatalan (`AbortController`).
+  - `IntegrityValidator`: Verifikator SHA-256 dan ukuran byte berkas per-resource dan total bundle.
+  - `ActivationManager`: Mekanisme aktivasi atomik (*atomic swap*) dari folder staging ke direktori aktif dengan pencadangan snapshot instan.
+  - `OTAResourceManager`: Koordinator alur lengkap unduhan dan aktivasi OTA.
+  - `OTAContentManager`: Pengakses dinamis konten tema UI, file bahasa lokalisasi, dan konfigurasi runtime.
+- **Penyimpanan, Status & Pemulihan Cadangan (`src/mobile/updates/storage/`):**
+  - `UpdateStateManager`: Mesin status pembaruan 11-status (*State Machine*) dengan pemulihan crash.
+  - `UpdateHistoryManager`: Audit log permanen riwayat pembaruan yang tersimpan aman.
+  - `RollbackManager`: Pemulihan snapshot cadangan resource secara instan jika terjadi kegagalan rendering atau crash runtime (maks. 3 kegagalan).
+  - `UpdateCache`: Pengelola direktori isolasi staging, active, dan backup.
+- **Jembatan Toko Aplikasi Resmi (`src/mobile/updates/store/`):**
+  - `GooglePlayInAppUpdate`: Integrasi Android Google Play Core AppUpdateManager untuk alur *Flexible* (background) dan *Immediate* (blocking modal).
+  - `AppleAppStoreUpdate`: Integrasi StoreKit dan deep-linking resmi ke Apple App Store sesuai kebijakan Apple Guideline 2.5.2.
+- **Notifikasi & Backend API (`src/mobile/updates/notification/`, `backend/`, `analytics/`, `reporting/`):**
+  - `UpdateNotificationManager` & `UpdateReminder`: Pengiriman notifikasi pembaruan dengan pembatasan frekuensi pengingat.
+  - `UpdateRegistry` & `UpdateAPI`: Endpoint tiruan server pembaruan `/check`, `/manifest`, dan `/report`.
+  - `UpdateAnalytics`: Metrik performa distribusi pembaruan berorientasi privasi tanpa pelacakan PII pengguna.
+  - `UpdateReportGenerator`: Pembuat laporan audit pembaruan format Markdown dan JSON.
+- **Integrasi CLI Baris Perintah (`nusantara mobile update`):**
+  - `nusantara mobile update periksa`: Periksa ketersediaan pembaruan di server.
+  - `nusantara mobile update versi`: Tampilkan perbandingan SemVer lokal vs server.
+  - `nusantara mobile update channel <nama>`: Beralih saluran rilis.
+  - `nusantara mobile update manifest <berkas>`: Validasi berkas manifest dan tanda tangan.
+  - `nusantara mobile update resource unduh`: Unduh paket resource OTA yang diizinkan.
+  - `nusantara mobile update store`: Status ketersediaan di Google Play & App Store.
+  - `nusantara mobile update history`: Tampilkan riwayat audit pembaruan.
+  - `nusantara mobile update laporan`: Cetak laporan status pembaruan Markdown resmi.
+- **Integrasi Standard Library `std:mobile`:**
+  - `periksaPembaruanMobile(appId?, versi?, platform?)`: Memeriksa ketersediaan rilis baru.
+  - `unduhPembaruanResourceMobile(idResource?)`: Mengunduh berkas resource OTA.
+  - `aktifkanPembaruanResourceMobile()`: Mengaktifkan resource yang telah diunduh.
+  - `rollbackPembaruanResourceMobile(platform?)`: Mengembalikan resource ke cadangan stabil terakhir.
+  - `dapatkanStatusPembaruanMobile()`: Mengambil status sistem pembaruan saat ini.
+- **Antarmuka Grafis GUI Dashboard (`src/komponen/StudioPembaruanMobile.tsx`):**
+  - Studio Pembaruan Mobile dengan 8 tab interaktif: Ringkasan & Status, Pemeriksa SemVer & Kebijakan, Saluran Rilis & Peluncuran, Manifest & Tanda Tangan, Pembaruan Resource OTA, Toko Aplikasi (Play/Apple), Rollback & Pemulihan, Laporan Audit & CLI.
+- **Contoh Proyek & Suite Pengujian:**
+  - `examples/mobile/update-demo/`: Proyek demonstrasi pembaruan mobile lengkap dengan `nusantara.mobile.json`, `update-manifest.json`, `main.nusantara`, dan aset OTA (tema, bahasa, konfigurasi).
+  - `pengujian/mobile/uji_pembaruan_fase42.ts`: Suite 21 pengujian otomatis yang mencakup 9 kelompok pengujian dengan tingkat kelulusan 100%.
+  - `docs/mobile/updates/`: 18 berkas dokumentasi teknis komprehensif.
+
 ## [v0.41.0] — 2026-11-03
 ### Phase 41: Mobile App Store Integration & Automated Release
 

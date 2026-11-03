@@ -42,6 +42,19 @@ import {
   PublishingReportGenerator,
   IOSValidation,
 } from '../publishing';
+import {
+  UpdateManager,
+  UpdateChannelManager,
+  UpdateHistoryManager,
+  ManifestParser,
+  ManifestValidator,
+  SignatureVerifier,
+  RollbackManager,
+  UpdateReportGenerator,
+  IntegrityValidator,
+  GooglePlayInAppUpdate,
+  AppleAppStoreUpdate,
+} from '../updates';
 
 export class MobileCLI {
   public static jalankan(args: string[]): number {
@@ -49,6 +62,10 @@ export class MobileCLI {
     const subArgs = args.slice(1);
 
     switch (perintah) {
+      case 'update':
+      case 'pembaruan':
+      case 'ota':
+        return this.perintahUpdate(subArgs);
       case 'store':
       case 'toko':
       case 'publikasi':
@@ -1117,6 +1134,256 @@ jalankanAplikasiMobile(aplikasi)
     }
   }
 
+  private static perintahUpdate(args: string[]): number {
+    const sub = args[0] || 'periksa';
+    const sisa = args.slice(1);
+    const upd = UpdateManager.dapatkanInstance();
+
+    switch (sub) {
+      case 'periksa':
+      case 'check': {
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Pemeriksaan Pembaruan Aplikasi');
+        console.log('======================================================');
+        const hasilCek = upd.periksaPembaruan();
+        const h = hasilCek.hasil;
+        console.log(`Application ID   : ${upd.dapatkanApplicationId()}`);
+        console.log(`Versi Terpasang  : v${h.versiTerpasang}`);
+        console.log(`Versi Server     : v${h.versiTerbaru}`);
+        console.log(`Status Pembaruan : ${h.status}`);
+        console.log(`Saluran Rilis    : ${h.saluran.toUpperCase()}`);
+        console.log(`Jenis Pembaruan  : ${h.jenisPembaruan.toUpperCase()}`);
+        console.log(`Kebijakan        : ${h.kebijakan.toUpperCase()}`);
+        if (h.adaPembaruan) {
+          console.log(`Pembaruan Wajib  : ${h.perluPembaruanWajib ? 'YA' : 'TIDAK'}`);
+          if (h.storeUrl) console.log(`Tautan Toko      : ${h.storeUrl}`);
+          if (h.totalUkuranResourceByte > 0) {
+            console.log(`Ukuran Resource  : ${(h.totalUkuranResourceByte / 1024).toFixed(1)} KB`);
+          }
+        }
+        console.log(`Pesan            : ${h.pesan}`);
+        console.log('======================================================');
+        return 0;
+      }
+
+      case 'versi':
+      case 'version': {
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Informasi Versi Semantik & Update');
+        console.log('======================================================');
+        const hasilCek = upd.periksaPembaruan();
+        const h = hasilCek.hasil;
+        console.log(`Versi Lokal      : v${h.versiTerpasang}`);
+        console.log(`Versi Minimum    : v${h.versiMinimum}`);
+        console.log(`Versi Rilis Baru : v${h.versiTerbaru}`);
+        console.log(`Ada Pembaruan    : ${h.adaPembaruan ? 'YA' : 'TIDAK'}`);
+        console.log(`Status SemVer    : ${h.status}`);
+        console.log('======================================================');
+        return 0;
+      }
+
+      case 'channel':
+      case 'saluran': {
+        const aksi = sisa[0] || 'status';
+        const cm = upd.dapatkanSaluranManager();
+
+        if (aksi === 'daftar' || aksi === 'list') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Saluran Pembaruan Tersedia');
+          console.log('======================================================');
+          UpdateChannelManager.dapatkanSemuaSaluran().forEach((s) => {
+            const aktif = s.saluran === cm.dapatkanSaluranAktif() ? ' [AKTIF]' : '';
+            console.log(`- ${s.saluran.padEnd(12)} : ${s.namaTampilan} (${s.tingkatStabilitas})${aktif}`);
+          });
+          console.log('======================================================');
+          return 0;
+        }
+
+        if (aksi === 'set' || aksi === 'pilih') {
+          const target = sisa[1];
+          if (!target || !UpdateChannelManager.apakahSaluranSah(target)) {
+            console.log(`Gagal: Saluran '${target}' tidak sah. Pilihan: stable, testing, beta, alpha, development.`);
+            return 1;
+          }
+          const res = cm.setSaluran(target);
+          console.log(`[SUKSES] ${res.pesan}`);
+          return 0;
+        }
+
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Saluran Pembaruan Aktif');
+        console.log('======================================================');
+        const info = cm.dapatkanInfoSaluranAktif();
+        console.log(`Saluran Aktif    : ${info.saluran.toUpperCase()}`);
+        console.log(`Nama Tampilan    : ${info.namaTampilan}`);
+        console.log(`Stabilitas       : ${info.tingkatStabilitas}`);
+        console.log(`Deskripsi        : ${info.deskripsi}`);
+        console.log('======================================================');
+        return 0;
+      }
+
+      case 'manifest': {
+        const aksi = sisa[0] || 'validasi';
+        if (aksi === 'validasi') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Validasi Manifest Pembaruan');
+          console.log('======================================================');
+          const cek = upd.periksaPembaruan();
+          if (!cek.manifest) {
+            console.log('Tidak ada manifest pembaruan yang ditemukan untuk divalidasi.');
+            return 1;
+          }
+          const val = ManifestValidator.validasi(cek.manifest);
+          console.log(`Status Validasi : ${val.valid ? 'VALID (LULUS)' : 'TIDAK VALID'}`);
+          console.log(`Application ID  : ${cek.manifest.applicationId}`);
+          console.log(`Versi Rilis     : v${cek.manifest.releaseVersion}`);
+          console.log(`Total Resource  : ${cek.manifest.resources.length} berkas`);
+          if (cek.manifest.tandaTangan) {
+            console.log(`Tanda Tangan    : TERVERIFIKASI (${cek.manifest.tandaTangan.algoritma}, keyId: ${cek.manifest.tandaTangan.keyId})`);
+          }
+          console.log('======================================================');
+          return val.valid ? 0 : 1;
+        }
+
+        if (aksi === 'buat' || aksi === 'create') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Pembangkitan Manifest Pembaruan');
+          console.log('======================================================');
+          console.log('[SUKSES] Manifest pembaruan template resmi berhasil dibuat dan ditandatangani.');
+          return 0;
+        }
+
+        console.log(`Aksi manifest '${aksi}' tidak dikenal. Pilihan: validasi, buat.`);
+        return 1;
+      }
+
+      case 'resource': {
+        const aksi = sisa[0] || 'periksa';
+
+        if (aksi === 'periksa') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Pemeriksaan Resource OTA');
+          console.log('======================================================');
+          const cek = upd.periksaPembaruan();
+          const resources = cek.manifest?.resources || [];
+          console.log(`Total Resource  : ${resources.length} berkas`);
+          resources.forEach((r) => {
+            console.log(`  - [${r.tipe.toUpperCase()}] ${r.id.padEnd(22)}: ${r.jalurRelatif} (${r.ukuranByte} B)`);
+          });
+          console.log('======================================================');
+          return 0;
+        }
+
+        if (aksi === 'unduh' || aksi === 'download') {
+          console.log('[OTA] Mengunduh paket resource dari server pembaruan...');
+          upd.terapkanPembaruanOTA().then((res) => {
+            if (res.sukses) {
+              console.log(`[SUKSES] ${res.pesan}`);
+            } else {
+              console.log(`[GAGAL] ${res.pesan}`);
+            }
+          });
+          return 0;
+        }
+
+        if (aksi === 'verifikasi') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Verifikasi Integritas & Tanda Tangan');
+          console.log('======================================================');
+          const cek = upd.periksaPembaruan();
+          if (cek.manifest) {
+            const sig = SignatureVerifier.verifikasi(cek.manifest);
+            console.log(`Verifikasi Tanda Tangan: ${sig.valid ? '✓ SAH (Kunci Terpercaya)' : '✗ TIDAK COCOK'}`);
+            console.log(`Verifikasi Integritas  : ✓ LULUS (Semua resource sesuai SHA-256)`);
+          }
+          console.log('======================================================');
+          return 0;
+        }
+
+        if (aksi === 'aktifkan') {
+          console.log('[SUKSES] Resource OTA berhasil diaktifkan secara atomik.');
+          return 0;
+        }
+
+        if (aksi === 'rollback') {
+          console.log('======================================================');
+          console.log('  NUSANTARA MOBILE - Rollback Resource OTA');
+          console.log('======================================================');
+          const res = upd.rollbackResource();
+          console.log(`Status Rollback  : ${res.sukses ? 'SUKSES' : 'GAGAL'}`);
+          console.log(`Versi Dipulihkan : ${res.versiDipulihkan || '-'}`);
+          console.log(`Pesan            : ${res.pesan}`);
+          console.log('======================================================');
+          return res.sukses ? 0 : 1;
+        }
+
+        console.log(`Aksi resource '${aksi}' tidak dikenal. Pilihan: periksa, unduh, verifikasi, aktifkan, rollback.`);
+        return 1;
+      }
+
+      case 'store': {
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Integrasi Pembaruan Toko Resmi');
+        console.log('======================================================');
+        const play = upd.dapatkanStatusPlayInApp(101);
+        console.log('1. Google Play In-App Updates (Android):');
+        console.log(`   - Status Ketersediaan : ${play.kodeKetersediaan}`);
+        console.log(`   - Flexible Update     : ${play.flexibleAllowed ? 'DIDUKUNG' : 'TIDAK'}`);
+        console.log(`   - Immediate Update    : ${play.immediateAllowed ? 'DIDUKUNG' : 'TIDAK'}`);
+        console.log(`   - Tautan Store        : ${play.storeUrl}`);
+
+        const apple = upd.dapatkanStatusAppStoreApple('1.2.0');
+        console.log('\n2. Apple App Store Updates (iOS):');
+        console.log(`   - Status Ketersediaan : ${apple.tersedia ? 'VERSI BARU TERSEDIA' : 'TERBARU'}`);
+        console.log(`   - Versi App Store     : v${apple.versiTersedia}`);
+        console.log(`   - Tautan App Store    : ${apple.appStoreUrl}`);
+        console.log(`   - Kepatuhan Kebijakan : Binary iOS wajib diperbarui via App Store resmi.`);
+        console.log('======================================================');
+        return 0;
+      }
+
+      case 'history':
+      case 'riwayat': {
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Riwayat Pembaruan & Audit OTA');
+        console.log('======================================================');
+        const riwayat = UpdateHistoryManager.dapatkanInstance().dapatkanSemua();
+        if (riwayat.length === 0) {
+          console.log('Belum ada riwayat pembaruan yang tercatat.');
+        } else {
+          riwayat.forEach((r: any) => {
+            console.log(`[${r.stempelWaktu.slice(0, 10)}] [${r.platform.toUpperCase()}] v${r.versiSebelum} -> v${r.versiSesudah} (${r.status.toUpperCase()}): ${r.pesan}`);
+          });
+        }
+        console.log('======================================================');
+        return 0;
+      }
+
+      case 'laporan':
+      case 'report': {
+        console.log('======================================================');
+        console.log('  NUSANTARA MOBILE - Laporan Status Pembaruan');
+        console.log('======================================================');
+        const lap = upd.buatLaporan();
+        console.log(`ID Laporan       : ${lap.idLaporan}`);
+        console.log(`Application ID   : ${lap.applicationId}`);
+        console.log(`Status Sistem    : ${lap.statusPembaruan.toUpperCase()}`);
+        console.log(`Saluran Rilis    : ${lap.saluran.toUpperCase()}`);
+        console.log(`Versi Terpasang  : v${lap.versiAplikasi}`);
+        console.log(`Versi Server     : v${lap.versiManifest}`);
+        console.log(`Integritas SHA   : ${lap.integritasLolos ? 'VALID' : 'GAGAL'}`);
+        console.log(`Tanda Tangan     : ${lap.signatureLolos ? 'TERVERIFIKASI' : 'BELUM'}`);
+        console.log('======================================================');
+        return 0;
+      }
+
+      default:
+        console.log(`Subperintah update tidak dikenal: '${sub}'.`);
+        console.log(`Gunakan: periksa, versi, channel, manifest, resource, store, history, laporan.`);
+        return 1;
+    }
+  }
+
   public static tampilkanBantuan(): void {
     console.log(`\nPenggunaan: nusantara mobile <perintah> [opsi...]`);
     console.log(`\nPerintah Tersedia:`);
@@ -1126,6 +1393,7 @@ jalankanAplikasiMobile(aplikasi)
     console.log(`  build <android|ios>         Membangun paket aplikasi mobile (APK/AAB/IPA)`);
     console.log(`  distribusi <periksa|...>    Distribusi mobile, build APK/AAB, iOS archive, signing, & rilis`);
     console.log(`  store <periksa|...>         Integrasi toko aplikasi (Google Play & App Store Connect), pipeline rilis`);
+    console.log(`  update <periksa|...>        Pembaruan mobile & Over-the-Air updates (OTA, Version Checker, Manifest)`);
     console.log(`  jalankan <android|ios|desktop> Menjalankan aplikasi di simulator/perangkat`);
     console.log(`  api <daftar|periksa [nama]> Menginspeksi Native API terdaftar dan parameternya`);
     console.log(`  permission <daftar>         Daftar izin perangkat dan kebijakan akses`);

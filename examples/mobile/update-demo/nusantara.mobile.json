@@ -1,0 +1,33 @@
+{
+  "nama": "Aplikasi Demo Pembaruan & OTA Nusantara",
+  "id": "org.nusantara.update.demo",
+  "versi": "0.42.0",
+  "nomorBuild": 42,
+  "saluran": "stable",
+  "platform": {
+    "android": {
+      "minSdkVersion": 24,
+      "targetSdkVersion": 34,
+      "inAppUpdates": {
+        "enabled": true,
+        "defaultMode": "flexible"
+      }
+    },
+    "ios": {
+      "minIosVersion": "15.0",
+      "appStoreId": "1234567890",
+      "storeKitDirectLink": true
+    }
+  },
+  "ota": {
+    "enabled": true,
+    "manifestUrl": "https://cdn.nusantara-lang.org/updates/org.nusantara.update.demo/manifest.json",
+    "signatureVerification": true,
+    "trustedKeys": [
+      "nusantara-root-release-2026",
+      "nusantara-ota-root-2026"
+    ],
+    "autoRollbackOnCrash": true,
+    "maxCrashThreshold": 3
+  }
+}

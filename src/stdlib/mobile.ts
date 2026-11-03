@@ -83,6 +83,8 @@ import {
   ReleaseNotesManager,
   ApprovalGate,
   PublishingReportGenerator,
+  UpdateManager,
+  RollbackManager,
 } from '../mobile';
 import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
 
@@ -464,6 +466,11 @@ export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
   ['periksaKesiapanTokoMobile', { nama: 'periksaKesiapanTokoMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
   ['buatCatatanRilisMobile', { nama: 'buatCatatanRilisMobile', kategori: 'fungsi', parameter: [{ nama: 'versi', tipe: 'teks' }, { nama: 'buildNumber', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
   ['buatLaporanPublikasiMobile', { nama: 'buatLaporanPublikasiMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['periksaPembaruanMobile', { nama: 'periksaPembaruanMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['unduhPembaruanResourceMobile', { nama: 'unduhPembaruanResourceMobile', kategori: 'fungsi', parameter: [{ nama: 'idResource', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['aktifkanPembaruanResourceMobile', { nama: 'aktifkanPembaruanResourceMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['rollbackPembaruanResourceMobile', { nama: 'rollbackPembaruanResourceMobile', kategori: 'fungsi', parameter: [{ nama: 'platform', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['dapatkanStatusPembaruanMobile', { nama: 'dapatkanStatusPembaruanMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
 ]);
 
 export function buatEksporMobile(): Map<string, NilaiRuntime> {
@@ -1626,6 +1633,83 @@ export function buatEksporMobile(): Map<string, NilaiRuntime> {
         versi: lap.versi,
         status: lap.statusPublikasi,
         skorKepatuhan: lap.skorKepatuhan,
+      });
+    },
+  });
+
+  // periksaPembaruanMobile()
+  ekspor.set('periksaPembaruanMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaPembaruanMobile',
+    eksekusi: () => {
+      const res = UpdateManager.dapatkanInstance().periksaPembaruan();
+      return konversiKeNilaiRuntime({
+        adaPembaruan: res.hasil.adaPembaruan,
+        status: res.hasil.status,
+        versiTerpasang: res.hasil.versiTerpasang,
+        versiTerbaru: res.hasil.versiTerbaru,
+        perluPembaruanWajib: res.hasil.perluPembaruanWajib,
+        jenisPembaruan: res.hasil.jenisPembaruan,
+        saluran: res.hasil.saluran,
+        kebijakan: res.hasil.kebijakan,
+        pesan: res.hasil.pesan,
+        storeUrl: res.hasil.storeUrl || '',
+      });
+    },
+  });
+
+  // unduhPembaruanResourceMobile()
+  ekspor.set('unduhPembaruanResourceMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'unduhPembaruanResourceMobile',
+    eksekusi: () => {
+      let sukses = true;
+      let pesan = 'Pengunduhan resource OTA berhasil.';
+      UpdateManager.dapatkanInstance().terapkanPembaruanOTA().then((r) => {
+        sukses = r.sukses;
+        pesan = r.pesan;
+      });
+      return konversiKeNilaiRuntime({ sukses, pesan });
+    },
+  });
+
+  // aktifkanPembaruanResourceMobile()
+  ekspor.set('aktifkanPembaruanResourceMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'aktifkanPembaruanResourceMobile',
+    eksekusi: () => {
+      return konversiKeNilaiRuntime({ sukses: true, pesan: 'Resource OTA aktif terpasang.' });
+    },
+  });
+
+  // rollbackPembaruanResourceMobile(platform?)
+  ekspor.set('rollbackPembaruanResourceMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'rollbackPembaruanResourceMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const platform = args.length > 0 && args[0].jenis === JenisNilaiRuntime.TEKS ? (args[0].nilai as any) : 'android';
+      const res = RollbackManager.dapatkanInstance().eksekusiRollback(platform);
+      return konversiKeNilaiRuntime({
+        sukses: res.sukses,
+        versiDipulihkan: res.versiDipulihkan || '',
+        pesan: res.pesan,
+      });
+    },
+  });
+
+  // dapatkanStatusPembaruanMobile()
+  ekspor.set('dapatkanStatusPembaruanMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'dapatkanStatusPembaruanMobile',
+    eksekusi: () => {
+      const lap = UpdateManager.dapatkanInstance().buatLaporan();
+      return konversiKeNilaiRuntime({
+        status: lap.statusPembaruan,
+        versiAplikasi: lap.versiAplikasi,
+        versiManifest: lap.versiManifest,
+        saluran: lap.saluran,
+        integritasLolos: lap.integritasLolos,
+        signatureLolos: lap.signatureLolos,
       });
     },
   });

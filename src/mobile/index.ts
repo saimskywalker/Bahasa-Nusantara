@@ -6,6 +6,7 @@
  * Pintu Masuk Utama Nusantara Mobile Application Framework
  */
 
+export type { PlatformMobile } from './types';
 export * from './types';
 export * from './core/lifecycle';
 export * from './core/config';
@@ -26,3 +27,4 @@ export * from './native';
 export * from './networking';
 export * from './distribution';
 export * from './publishing';
+export * from './updates';

@@ -25,3 +25,4 @@ export * from './cli';
 export * from './native';
 export * from './networking';
 export * from './distribution';
+export * from './publishing';

@@ -77,6 +77,12 @@ import {
   ReleaseManager,
   AssetValidator,
   VersionManager,
+  PublishingManager,
+  StoreValidator,
+  ComplianceValidator,
+  ReleaseNotesManager,
+  ApprovalGate,
+  PublishingReportGenerator,
 } from '../mobile';
 import { konversiKeNilaiRuntime, konversiDariNilaiRuntime } from './basisdata';
 
@@ -455,6 +461,9 @@ export const simbolEksporMobile: Map<string, InfoSimbolModul> = new Map([
   ['kelolaVersiMobile', { nama: 'kelolaVersiMobile', kategori: 'fungsi', parameter: [{ nama: 'aksi', tipe: 'teks' }, { nama: 'tipe', tipe: 'teks' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
   ['periksaAsetMobile', { nama: 'periksaAsetMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
   ['buatLaporanDistribusi', { nama: 'buatLaporanDistribusi', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['periksaKesiapanTokoMobile', { nama: 'periksaKesiapanTokoMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
+  ['buatCatatanRilisMobile', { nama: 'buatCatatanRilisMobile', kategori: 'fungsi', parameter: [{ nama: 'versi', tipe: 'teks' }, { nama: 'buildNumber', tipe: 'bilangan' }], tipeKembalian: 'peta', minParameter: 0, variadik: true }],
+  ['buatLaporanPublikasiMobile', { nama: 'buatLaporanPublikasiMobile', kategori: 'fungsi', parameter: [], tipeKembalian: 'peta', minParameter: 0 }],
 ]);
 
 export function buatEksporMobile(): Map<string, NilaiRuntime> {
@@ -1566,6 +1575,57 @@ export function buatEksporMobile(): Map<string, NilaiRuntime> {
         totalArtefak: res.artefak.length,
         jalurLaporan: res.jalurLaporanMarkdown,
         siapRilis: res.validasi.siapRilis,
+      });
+    },
+  });
+
+  // periksaKesiapanTokoMobile()
+  ekspor.set('periksaKesiapanTokoMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'periksaKesiapanTokoMobile',
+    eksekusi: () => {
+      const res = PublishingManager.dapatkanInstance().validasiKesiapanPublikasi();
+      return konversiKeNilaiRuntime({
+        valid: res.valid,
+        skorKesiapan: res.kesiapan.skorKesiapan,
+        statusAndroid: res.kesiapan.statusPlatform.android,
+        statusIOS: res.kesiapan.statusPlatform.ios,
+        isuPemblokir: res.kesiapan.isuPemblokir,
+        ringkasan: res.ringkasan,
+      });
+    },
+  });
+
+  // buatCatatanRilisMobile(versi, buildNumber)
+  ekspor.set('buatCatatanRilisMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatCatatanRilisMobile',
+    eksekusi: (args: NilaiRuntime[]) => {
+      const versi = args[0]?.jenis === JenisNilaiRuntime.TEKS ? (args[0] as any).nilai : '1.0.0';
+      const build = args[1]?.jenis === JenisNilaiRuntime.BILANGAN ? (args[1] as any).nilai : 1;
+      const res = ReleaseNotesManager.buatDraftCatatanRilis(versi, build, 'manual');
+      return konversiKeNilaiRuntime({
+        versi: res.versi,
+        buildNumber: res.buildNumber,
+        catatanID: res.kontenPerLocale.id,
+        catatanEN: res.kontenPerLocale.en,
+        karakterID: res.karakterPerLocale.id,
+      });
+    },
+  });
+
+  // buatLaporanPublikasiMobile()
+  ekspor.set('buatLaporanPublikasiMobile', {
+    jenis: JenisNilaiRuntime.FUNGSI_BAWAAN,
+    nama: 'buatLaporanPublikasiMobile',
+    eksekusi: () => {
+      const lap = PublishingManager.dapatkanInstance().buatLaporanPublikasi();
+      return konversiKeNilaiRuntime({
+        idLaporan: lap.idLaporan,
+        applicationId: lap.applicationId,
+        versi: lap.versi,
+        status: lap.statusPublikasi,
+        skorKepatuhan: lap.skorKepatuhan,
       });
     },
   });

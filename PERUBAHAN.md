@@ -4,6 +4,64 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.41.0] — 2026-11-03
+### Phase 41: Mobile App Store Integration & Automated Release
+
+Fase ini menghadirkan sistem integrasi toko aplikasi (Google Play Console & Apple App Store Connect / TestFlight) dan otomatisasi proses rilis mobile profesional, aman, berorientasi kepatuhan, serta dilengkapi gerbang persetujuan manusia (*human approval gate*) pada bahasa pemrograman NUSANTARA.
+
+#### Ditambahkan:
+- **Arsitektur Inti Publikasi (`src/mobile/publishing/core/`):**
+  - `PublishingManager`: Fasad tunggal terpadu orkestrasi integrasi toko dan rilis otomatis.
+  - `StoreRegistry`: Registri konfigurasi target toko, credentials, tracks, dan pengaturan rollout.
+- **Pengelolaan Kredensial & Keamanan (`src/mobile/publishing/credentials/`):**
+  - `SecretProvider`: Pembaca aman variabel lingkungan dengan penyensoran token dan masking rahasia.
+  - `CredentialValidator`: Validasi berkas Service Account JSON Google Play, App Store Connect `.p8` Key, Key ID, dan Issuer ID.
+  - `CredentialManager`: Pengelola resolusi kredensial otomatis dengan Sandbox Mode terisolasi saat environment resmi belum dikonfigurasi.
+  - Pemindai anti-hardcoded secret scanner yang memblokir commit atau rilis jika terdeteksi kunci privat.
+- **Metadata Toko, Lokalisasi & Aset Grafis (`src/mobile/publishing/metadata/`):**
+  - `Localization`: Dukungan lokalisasi 7 bahasa resmi (`id`, `en`, `ms`, `ar`, `ja`, `zh`, `es`) dengan deteksi RTL dan validasi kelengkapan terjemahan.
+  - `AppMetadata`: Validasi batas karakter toko (Nama aplikasi maks 30 kar, deskripsi singkat 80 kar, deskripsi lengkap 4000 kar, keywords 100 kar).
+  - `StoreListing`: Penyimpanan dan sinkronisasi berkas cantuman toko ke direktori `store-metadata/`.
+  - `ScreenshotManager`: Validator spesifikasi pixel, aspek rasio, dan dimensi grafis untuk Google Play (Ikon 512x512, Feature Graphic 1024x500) dan iOS (Layar 6.7", 6.5", iPad 12.9").
+  - `ReleaseNotes`: Pembangkit catatan rilis otomatis berbasis Git commit history dan CHANGELOG dengan batas 500 karakter dan penyaring pesan internal.
+- **Integrasi Google Play Developer API (`src/mobile/publishing/android/`):**
+  - `GooglePlayClient`: Klien resmi Google Play Developer API v3 dengan Sandbox Mode aman.
+  - `PlayTrackManager`: Pengelolaan 4 track rilis (`internal`, `closed`, `open`, `production`), peluncuran bertahap (*staged rollout*), dan promosi build.
+  - `PlayValidation`: Validasi wajib Target SDK 34+ (Android 14) dan validasi urutan `versionCode`.
+  - `PlayListingManager`: Pengunggahan dan pembaruan cantuman toko multibahasa.
+  - `PlayReleaseManager`: Koordinator end-to-end publikasi Android App Bundle (`.aab`).
+- **Integrasi Apple App Store Connect & TestFlight (`src/mobile/publishing/ios/`):**
+  - `AppStoreConnectClient`: Otentikasi JWT ES256 Apple dengan masa berlaku 20 menit (1200 detik).
+  - `TestFlightManager`: Distribusi beta TestFlight grup internal dan eksternal, catatan pengujian, dan pelacak kedaluwarsa 90 hari.
+  - `IOSValidation`: Validasi format Reverse-DNS bundle ID, deployment target iOS 15.0+, dan kepatuhan ekspor kriptografi (`ITSAppUsesNonExemptEncryption`).
+  - `AppStoreReleaseManager`: Koordinator pengunggahan `.xcarchive` / `.ipa` dan pengajuan tinjauan App Store.
+- **Otomatisasi Release Pipeline & Gerbang Persetujuan (`src/mobile/publishing/automation/`):**
+  - `ReleasePipeline`: Eksekusi 11 tahapan rilis berurutan (validasi, pengujian, kompilasi, integritas, signing, metadata, kesiapan, approval gate, upload, status processing, dan laporan).
+  - `ApprovalGate`: Gerbang persetujuan manusia tunggal yang mewajibkan konfirmasi eksplisit (`--setujui`) sebelum publikasi ke track produksi.
+  - `RollbackPlanner`: Prosedur pemulihan dan hotfix yang jujur terhadap batasan teknis toko aplikasi (toko tidak mendukung downgrade langsung).
+- **Audit Kepatuhan & Riwayat Rilis (`src/mobile/publishing/reports/`, `validation/`):**
+  - `ComplianceValidator`: Evaluasi otomatis terhadap Google Play Developer Policy dan Apple App Store Review Guidelines.
+  - `ReleaseReadiness`: Penilaian skor kesiapan rilis (0–100%) dan deteksi isu pemblokir (*blockers*).
+  - `PublishingHistory`: Jejak audit permanen (*audit trail*) yang mencatat setiap aksi rilis.
+  - `PublishingReport`: Pembuat laporan publikasi format JSON dan Markdown.
+- **Antarmuka Grafis GUI Dashboard (`src/komponen/StudioPublikasiMobile.tsx`):**
+  - Dasbor *NUSANTARA Mobile App Store Studio* dengan 9 sub-tab interaktif (Kesiapan, Kredensial, Metadata, Aset Grafis, Release Notes, Google Play, App Store & TestFlight, Pipeline Rilis, Riwayat).
+- **Perintah CLI Terpadu:**
+  - `nusantara mobile store periksa`
+  - `nusantara mobile store koneksi <android|ios>`
+  - `nusantara mobile store android <metadata|validasi|track|release>`
+  - `nusantara mobile store ios <metadata|validasi|testflight|upload>`
+  - `nusantara mobile store aset`
+  - `nusantara mobile store release-notes`
+  - `nusantara mobile store pipeline <periksa|jalankan>`
+  - `nusantara mobile store history`
+  - `nusantara mobile store laporan`
+- **Integrasi Standard Library `std:mobile`:**
+  - `periksaKesiapanTokoMobile()`, `buatCatatanRilisMobile()`, `buatLaporanPublikasiMobile()`.
+- **Proyek Percontohan & Dokumentasi:**
+  - Proyek demo di `examples/mobile/app-publishing-demo/`.
+  - 6 panduan komprehensif di `docs/mobile/publishing/`.
+
 ## [v0.40.0] — 2026-11-02
 ### Phase 40: Mobile App Distribution & Publishing
 

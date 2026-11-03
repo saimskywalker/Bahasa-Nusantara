@@ -6,10 +6,10 @@
  * Target Milestone: Phase 25 (v0.25.0)
  */
 
-export const VERSI_NUSANTARA = '0.40.0';
-export const LABEL_VERSI_NUSANTARA = 'v0.40.0';
-export const FASE_TERAKHIR = 40;
-export const NAMA_FASE_TERAKHIR = 'Mobile App Distribution & Publishing';
+export const VERSI_NUSANTARA = '0.41.0';
+export const LABEL_VERSI_NUSANTARA = 'v0.41.0';
+export const FASE_TERAKHIR = 41;
+export const NAMA_FASE_TERAKHIR = 'Mobile App Store Integration & Automated Release';
 
 export interface InfoRilisNUSANTARA {
   versi: string;
@@ -28,7 +28,7 @@ export const METADATA_RILIS_NUSANTARA: InfoRilisNUSANTARA = {
   label: LABEL_VERSI_NUSANTARA,
   fase: FASE_TERAKHIR,
   namaFase: NAMA_FASE_TERAKHIR,
-  tanggalRilis: '2026-10-29',
+  tanggalRilis: '2026-11-02',
   lisensi: 'Apache-2.0',
   situsWeb: 'https://nusantara-lang.org',
   repositori: 'https://github.com/nusantara-lang/nusantara',

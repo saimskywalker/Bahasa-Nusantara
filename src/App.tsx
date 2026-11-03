@@ -36,6 +36,7 @@ import {
   Compass,
   HardDrive,
   Smartphone,
+  Store,
 } from 'lucide-react';
 import {
   BERKAS_REPOSITORI,
@@ -100,12 +101,13 @@ import {
 import StudioEkosistemPaket from './komponen/StudioEkosistemPaket';
 import StudioDistribusiBuild from './komponen/StudioDistribusiBuild';
 import StudioDistribusiMobile from './komponen/StudioDistribusiMobile';
+import StudioPublikasiMobile from './komponen/StudioPublikasiMobile';
 import { StudioCicdWorkflow } from './komponen/StudioCicdWorkflow';
 import { StudioDebugger } from './komponen/StudioDebugger';
 import StudioIDE from './komponen/ide/StudioIDE';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'ide' | 'distribusi-mobile' | 'debugger' | 'cicd' | 'distribusi' | 'ekosistem' | 'testing' | 'lsp' | 'toolchain' | 'diagnostik' | 'stdlib' | 'paket' | 'struktur-data' | 'fungsi' | 'perulangan' | 'percabangan' | 'operator' | 'tipe' | 'ast' | 'token' | 'panduan' | 'berkas' | 'roadmap' | 'git'>('ide');
+  const [activeTab, setActiveTab] = useState<'ide' | 'publikasi-mobile' | 'distribusi-mobile' | 'debugger' | 'cicd' | 'distribusi' | 'ekosistem' | 'testing' | 'lsp' | 'toolchain' | 'diagnostik' | 'stdlib' | 'paket' | 'struktur-data' | 'fungsi' | 'perulangan' | 'percabangan' | 'operator' | 'tipe' | 'ast' | 'token' | 'panduan' | 'berkas' | 'roadmap' | 'git'>('ide');
   const [selectedFile, setSelectedFile] = useState<BerkasRepo>(BERKAS_REPOSITORI[0]);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [playgroundCode, setPlaygroundCode] = useState<string>(
@@ -1264,6 +1266,15 @@ pastikan_sama(aktual, target, "Nilai aktual tidak memenuhi target ekspektasi")`,
             <span>CI/CD &amp; Release (Phase 24)</span>
           </button>
           <button
+            onClick={() => setActiveTab('publikasi-mobile')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2 ${
+              activeTab === 'publikasi-mobile' ? 'bg-emerald-950 text-emerald-200 border border-emerald-700/60 font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-900'
+            }`}
+          >
+            <Store className="w-4 h-4 text-emerald-400" />
+            <span>Store Publishing (Phase 41)</span>
+          </button>
+          <button
             onClick={() => setActiveTab('distribusi-mobile')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2 ${
               activeTab === 'distribusi-mobile' ? 'bg-emerald-950 text-emerald-200 border border-emerald-700/60 font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-900'
@@ -1453,6 +1464,9 @@ pastikan_sama(aktual, target, "Nilai aktual tidak memenuhi target ekspektasi")`,
 
         {/* TAB 00000: CI/CD & AUTOMATED RELEASE (PHASE 24) */}
         {activeTab === 'cicd' && <StudioCicdWorkflow />}
+
+        {/* TAB: MOBILE APP STORE INTEGRATION & AUTOMATED RELEASE (PHASE 41) */}
+        {activeTab === 'publikasi-mobile' && <StudioPublikasiMobile />}
 
         {/* TAB: MOBILE DISTRIBUTION & PUBLISHING (PHASE 40) */}
         {activeTab === 'distribusi-mobile' && <StudioDistribusiMobile />}

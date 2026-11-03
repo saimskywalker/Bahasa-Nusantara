@@ -1,0 +1,9 @@
+{
+  "locale": "id",
+  "namaAplikasi": "Aplikasi Toko Nusantara",
+  "deskripsiSingkat": "Aplikasi percontohan publikasi toko aplikasi otomatis berbasis NUSANTARA.",
+  "deskripsiLengkap": "Aplikasi Toko Nusantara adalah percontohan resmi implementasi Phase 41 bahasa pemrograman NUSANTARA untuk orkestrasi penerbitan aplikasi ke Google Play Console dan Apple App Store Connect secara aman, terverifikasi, dan otomatis.",
+  "catatanRilis": "Rilis perdana aplikasi percontohan integrasi toko mobile NUSANTARA.",
+  "kebijakanPrivasi": "https://nusantara.dev/privasi",
+  "emailDukungan": "support@nusantara.dev"
+}

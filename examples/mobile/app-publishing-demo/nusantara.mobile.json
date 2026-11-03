@@ -1,0 +1,29 @@
+{
+  "namaAplikasi": "Aplikasi Toko Nusantara",
+  "paketId": "id.nusantara.publishingdemo",
+  "versi": "1.0.0",
+  "kodeVersiAndroid": 100,
+  "nomorBuildIOS": 1,
+  "platform": ["android", "ios"],
+  "android": {
+    "minSdk": 24,
+    "targetSdk": 34,
+    "compileSdk": 34,
+    "formatBinary": "aab"
+  },
+  "ios": {
+    "deploymentTarget": "15.0",
+    "bundleId": "id.nusantara.publishingdemo",
+    "exportCompliance": false
+  },
+  "toko": {
+    "googlePlay": {
+      "trackAwal": "internal",
+      "stagedRolloutRatio": 1.0
+    },
+    "appStore": {
+      "distribusiTestFlight": true,
+      "grupPenguji": ["Internal QA", "Komunitas Pengembang Nusantara"]
+    }
+  }
+}

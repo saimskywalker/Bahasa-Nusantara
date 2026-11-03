@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "Mobile App Distribution & Publishing (Android APK & AAB Builder, Android Keystore Signing, Apple iOS Archive & Code Signing, TestFlight & App Store Preparation, Version Management, Asset Manager, Release Validator, Build Reports), Mobile Networking & Cloud Services, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.40.0.",
+  "description": "Mobile App Store Integration & Automated Release (Google Play Console API, App Store Connect, TestFlight, Track Management, Release Approval Gate, Store Compliance Validator, Automated 11-Stage Pipeline, Multi-locale Metadata & Asset Manager), Mobile Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.41.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

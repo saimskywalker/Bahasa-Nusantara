@@ -1,0 +1,9 @@
+{
+  "locale": "en",
+  "namaAplikasi": "Nusantara Store Demo",
+  "deskripsiSingkat": "Automated app store publishing demonstration powered by NUSANTARA.",
+  "deskripsiLengkap": "Nusantara Store Demo is the official Phase 41 demonstration for automated release and store integration with Google Play Console and Apple App Store Connect, featuring end-to-end verification and human approval gates.",
+  "catatanRilis": "Initial release of the NUSANTARA mobile store publishing demonstration app.",
+  "kebijakanPrivasi": "https://nusantara.dev/privacy",
+  "emailDukungan": "support@nusantara.dev"
+}

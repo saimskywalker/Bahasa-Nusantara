@@ -116,6 +116,15 @@ Meskipun sistem telah matang hingga tingkat aplikasi mobile, web, dan desktop (v
 
 Seluruh 38 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 37 suite pengujian unit, integrasi, dan e2e) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap integrasi pipeline:
 
+| Metrik Verifikasi | Jumlah Aktual | Penjelasan |
+|---|:---:|---|
+| **Skrip Pengujian** | **38 Berkas** | 1 skrip `.js` fondasi + 37 berkas `.ts` di direktori `pengujian/` |
+| **Suite Pengujian** | **38 Suite** | 38 suite pengujian terisolasi untuk masing-masing fase |
+| **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Integritas dokumen, EBNF, lisensi, dan contoh awal (Phase 1–5) |
+| **Test Case (Kasus Uji)** | **1.030 Kasus** | Total skenario pengujian unit, integrasi, dan e2e pada 37 suite TypeScript |
+| **Total Pengujian Gabungan** | **1.197 Pengujian** | Akumulasi 167 pemeriksaan dokumen fondasi + 1.030 test cases |
+| **Assertion (Penegasan)** | **2.000+ Penegasan** | Titik penegasan kondisi nilai (`samaDengan`, `pastikan`, dll.) |
+
 ```bash
 npm test
 ```

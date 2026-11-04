@@ -9,16 +9,15 @@ Direktori `pengujian/` menampung seluruh kerangka pengujian mutu komprehensif ba
 
 ## 1. Definisi & Rekapitulasi Metrik Pengujian
 
-Sesuai audit teknis resmi dan transparan, berikut pemisahan lima metrik pengujian repositori:
+Sesuai audit teknis resmi dan transparan, berikut rincian metrik pengujian repositori:
 
 | Metrik | Jumlah Aktual | Penjelasan Operasional |
 |---|:---:|---|
 | **Skrip Pengujian** | **38 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 37 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
-| **Suite Pengujian** | **38 Suite** | Masing-masing file pengujian bertindak sebagai test suite terisolasi untuk menguji satu modul atau fase tertentu. |
+| **Suite Pengujian** | **38 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Pemeriksaan keberadaan, kelengkapan isi, format lisensi, dan tata kelola pada Phase 1–5 oleh `skrip/periksa_fondasi.js`. |
-| **Test Case (Kasus Uji)** | **1.030 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 37 suite TypeScript (9 s/d 90 uji per file). |
-| **Total Pengujian Gabungan** | **1.197 Pengujian** | Akumulasi 167 pemeriksaan dokumen fondasi + 1.030 test cases pada seluruh suite TypeScript. |
-| **Assertion (Penegasan Nilai)** | **2.000+ Penegasan** | Titik penegasan kondisi nilai (`samaDengan`, `pastikan`, `assert`, dll.) yang dievaluasi di dalam seluruh test case. |
+| **Kasus Pengujian TypeScript (Test Cases)** | **1.030 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 37 suite TypeScript (9 s/d 90 uji per file). |
+| **Total Pemeriksaan Gabungan** | **1.197 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.030 kasus uji TypeScript = 1.197 pemeriksaan (Lulus 100%).** |
 
 ---
 

@@ -7,7 +7,7 @@
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-37_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-38_suites_lulus_100%25-green.svg)](pengujian/README.md)
 [![Mobile OTA](https://img.shields.io/badge/mobile_ota-in--app_&_cloud_updates-blue.svg)](docs/mobile/updates/index.md)
 [![Mobile CI/CD](https://img.shields.io/badge/mobile_cicd-fastlane_&_github_actions-purple.svg)](docs/mobile/cicd/index.md)
 [![Distribusi](https://img.shields.io/badge/distribusi-android_apk_aab_&_ios-blue.svg)](docs/mobile/distribution/index.md)
@@ -41,7 +41,7 @@ NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa a
 - **Total Fase Diaudit:** 48 Fase (Phase 1 s/d Phase 48).
   - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 42):** 42 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
   - 🔵 **Dalam Perencanaan (Phase 43 s/d Phase 48):** 6 fase riset lanjutan (Bytecode Engine, LLVM AOT Compiler, Optimasi Lanjut, Native Linker, 2D/3D Engine, dan Kernel NusantaraOS).
-- **Rangkaian Pengujian:** 37 test suite otomatis lulus 100% (mencakup 167 modul fondasi inti, CLI, parser, interpreter, database, web, desktop, native API, dan OTA updates).
+- **Rangkaian Pengujian:** 38 test suite otomatis lulus 100% (mencakup 167 modul fondasi inti, CLI, parser, interpreter, database, web, desktop, native API, dan OTA updates).
 - **Audit Terakhir:** 3 November 2026.
 - **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 48.
 
@@ -96,36 +96,37 @@ selesai
 
 ### 4.2 Fungsi dan Percabangan Logika
 ```nusantara
+fungsi hitung_faktorial(n : bilangan) : bilangan
+mulai
+    jika n <= 1 maka
+        kembalikan 1
+    selain
+        kembalikan n * hitung_faktorial(n - 1)
+    akhir
+selesai
+
 program HitungFaktorial
 mulai
-    fungsi hitung_faktorial(n : bilangan) -> bilangan
-    mulai
-        jika (n <= 1)
-        mulai
-            kembali 1
-        selesai
-        kembali n * hitung_faktorial(n - 1)
-    selesai
-
     bil : bilangan = 5
     hasil : bilangan = hitung_faktorial(bil)
     tampilkan("Faktorial dari 5 adalah:", hasil)
 selesai
 ```
 
-### 4.3 Struktur Data Komposit
+### 4.3 Struktur Data Komposit (Daftar & Peta)
 ```nusantara
 program DataPengguna
 mulai
-    struktur Pengguna
-        nama : teks
-        usia : bilangan
-        aktif : logika
-    selesai
+    pengguna : peta = {
+        nama: "Budi Santoso",
+        usia: 28,
+        aktif: benar
+    }
+    daftar_keahlian : daftar = ["TypeScript", "Nusantara", "Mobile"]
 
-    pengguna_baru : Pengguna = Pengguna(nama = "Budi Santoso", usia = 28, aktif = benar)
-    tampilkan("Nama:", pengguna_baru.nama)
-    tampilkan("Usia:", pengguna_baru.usia)
+    tampilkan("Nama Pengguna:", pengguna["nama"])
+    tampilkan("Usia:", pengguna["usia"])
+    tampilkan("Jumlah Keahlian:", panjang(daftar_keahlian))
 selesai
 ```
 
@@ -169,8 +170,8 @@ Kebutuhan lingkungan:
 
 ```bash
 # 1. Klon repositori proyek
-git clone https://github.com/nusantara-lang/nusantara.git
-cd nusantara
+git clone https://github.com/sarjanabahasaarab/Bahasa-Nusantara.git
+cd Bahasa-Nusantara
 
 # 2. Pasang dependensi
 npm install
@@ -195,11 +196,13 @@ Dokumentasi resmi tersusun secara terstruktur di dalam direktori `docs/` dan `do
 - **Jaringan & Sinkronisasi Seluler (Fase 39):** [docs/mobile/networking/01_arsitektur_networking_mobile.md](docs/mobile/networking/01_arsitektur_networking_mobile.md) (13 panduan)
 - **API Perangkat Keras Seluler Asli (Fase 38):** [docs/mobile/native-api/pengenalan-native-api.md](docs/mobile/native-api/pengenalan-native-api.md) (25 panduan)
 - **Kerangka Kerja Seluler (Fase 37):** [docs/mobile/01_pendahuluan.md](docs/mobile/01_pendahuluan.md)
-- **Antarmuka Desktop GUI (Fase 35):** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
-- **WebSocket & Pekerja Latar Belakang (Fase 33):** [docs/referensi/realtime.md](docs/referensi/realtime.md)
-- **Autentikasi & Keamanan (Fase 32):** [docs/referensi/authentication.md](docs/referensi/authentication.md)
-- **Framework Web (Fase 31):** [docs/referensi/web-framework.md](docs/referensi/web-framework.md)
-- **Basis Data & ORM (Fase 30):** [docs/referensi/database.md](docs/referensi/database.md)
+- **Antarmuka Desktop GUI (Fase 36):** [docs/desktop/pengenalan-gui.md](docs/desktop/pengenalan-gui.md)
+- **Klien HTTP & Integrasi API Eksternal (Fase 35):** [docs/referensi/http-client.md](docs/referensi/http-client.md)
+- **WebSocket & Pekerja Latar Belakang (Fase 34):** [docs/referensi/realtime.md](docs/referensi/realtime.md)
+- **Object-Relational Mapping / ORM (Fase 32):** [docs/referensi/orm.md](docs/referensi/orm.md)
+- **Autentikasi, Sesi & Keamanan RBAC (Fase 31):** [docs/referensi/authentication.md](docs/referensi/authentication.md)
+- **Framework Web & Server HTTP (Fase 30):** [docs/referensi/web-framework.md](docs/referensi/web-framework.md)
+- **Basis Data API & SQLite Native (Fase 29):** [docs/referensi/database.md](docs/referensi/database.md)
 
 ---
 

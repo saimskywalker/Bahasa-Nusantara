@@ -114,7 +114,7 @@ Meskipun sistem telah matang hingga tingkat aplikasi mobile, web, dan desktop (v
 
 ## 5. Rangkaian Pengujian Otomatis yang Dijalankan (Verification Suite)
 
-Seluruh 37 skrip pengujian berikut diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap integrasi pipeline:
+Seluruh 38 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 37 suite pengujian unit, integrasi, dan e2e) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap integrasi pipeline:
 
 ```bash
 npm test

@@ -4,6 +4,42 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.44.0] — 2026-11-05
+### Phase 44: LLVM Backend & AOT Native Compilation
+
+Fase ini mengimplementasikan backend kompilasi *Ahead-of-Time* (AOT) berbasis LLVM Toolchain untuk menerjemahkan representasi perantara NIR (*Nusantara Intermediate Representation*) menjadi berkas LLVM IR tekstual (.ll), berkas objek biner (.o / .obj), dan biner mesin native yang dapat dieksekusi langsung tanpa ketergantungan interpreter JavaScript/Node.js.
+
+#### Ditambahkan:
+- **LLVM Toolchain Manager (`src/compiler/llvm/toolchain-manager.ts`):**
+  - Deteksi aman keberadaan toolchain LLVM (`clang`, `llc`, `opt`, `llvm-as`, `llvm-dis`, `llvm-objdump`, `lld`) tanpa injeksi shell menggunakan argumen array `execFileSync`.
+  - Dukungan kustomisasi jalur direktori toolchain melalui metode `setCustomPath(dir)`.
+  - Pelaporan status kesiapan instalasi, petunjuk langkah instalasi (Ubuntu/Debian, macOS Homebrew, Windows winget), dan transparansi lingkungan tanpa membuat klaim palsu jika toolchain belum terpasang.
+- **Target Triple & Data Layout Cross-Platform (`src/compiler/llvm/target-triple.ts`):**
+  - Resolusi arsitektur dan sistem operasi host (`x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`, `arm64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`).
+  - Pemetaan otomatis spesifikasi *Data Layout* resmi LLVM dan penetapan format berkas objek (`ELF`, `Mach-O`, `COFF`).
+- **LLVM Type Mapper (`src/compiler/llvm/llvm-type-mapper.ts`):**
+  - Pemetaan tipe data NIR ke representasi tipe LLVM IR: tipe primitif (`void`, `i1`, `i32`, `i64`, `double`), pointer opaque (`ptr`) sesuai standar LLVM 15+, array bertipe (`[N x T]`), struct terdefinisi (`{ T1, T2 }`), dan signature fungsi.
+- **LLVM Instruction Emitter (`src/compiler/llvm/llvm-instruction-emitter.ts`):**
+  - Pembangkit instruksi LLVM SSA: `alloca`, `load`, `store`, `getelementptr` (gep), aritmetika (`add`, `sub`, `mul`, `sdiv`, `fdiv`, `srem`, `frem`), perbandingan terpadu (`icmp`, `fcmp`), simpul percabangan `phi`, pemanggilan fungsi `call`, konversi tipe `cast`, dan instruksi terminator kendali (`br`, `cond_br`, `ret`, `unreachable`).
+- **LLVM IR Generator (`src/compiler/llvm/llvm-ir-generator.ts`):**
+  - Emisi modul LLVM IR tekstual lengkap dengan metadata target triple, data layout, string literal globals yang ter-escape rapi, variabel global beralamat unik, dan deklarasi pustaka C libc standar (`printf`, `malloc`, `free`, `exit`) serta stub Nusantara (`nusantara_cetak_bilangan`, `nusantara_cetak_teks`).
+- **LLVM Validator & Optimizer (`src/compiler/llvm/llvm-validator.ts`, `src/compiler/llvm/llvm-optimizer.ts`):**
+  - Validasi integritas sintaksis LLVM IR lokal (pengecekan penyeimbang kurung kurawal, keberadaan terminator pada basic block, label valid) serta verifikasi semantik melalui `llvm-as` jika terpasang.
+  - Integrasi pass manager optimasi LLVM `opt` dengan preset `-O0`, `-O1`, `-O2`, `-O3`, dan `-Os`, dilengkapi penanganan fallback anggun (*graceful fallback*) ketika binary `opt` tidak tersedia di sistem.
+- **Object Generator & Native Linker (`src/compiler/llvm/object-generator.ts`, `src/compiler/llvm/linker.ts`):**
+  - Penerjemahan LLVM IR ke berkas objek biner (.o/.obj) via `llc` atau `clang -c`.
+  - Penghubungan (*linking*) berkas objek dengan runtime C stub Nusantara via `clang` untuk menghasilkan biner mesin yang dapat dieksekusi secara mandiri.
+- **Pustaka C Runtime Nusantara (`src/compiler/runtime/native-runtime.ts`):**
+  - Penghubung entry point native `main` bahasa C dengan fungsi `@utama` Nusantara.
+  - Pustaka runtime mandiri mencakup pencetakan bilangan 64-bit berformat, manipulasi teks, dan manajemen memori terisolasi.
+- **AOT Compiler Pipeline (`src/compiler/aot/aot-compiler.ts`):**
+  - Pipeline orkestrasi satu pintu dari berkas sumber `.nusantara` -> Parser AST -> AST Lowering ke NIR -> Validasi NIR -> Optimasi NIR (O2) -> LLVM IR Gen -> Validasi LLVM -> Optimasi LLVM -> Emisi Berkas Objek -> Linking Biner Native.
+- **Integrasi Antarmuka CLI (`src/paket/cli.ts`):**
+  - Perintah `nusantara toolchain`: Menampilkan diagnostik deteksi LLVM dan panduan instalasi.
+  - Perintah `nusantara aot` / `nusantara kompilasi`: Menerima opsi `--emit-llvm`, `--emit-object`, `--opt=O0|O1|O2|O3|Os`, `--target=<triple>`, dan `-o <output>`.
+- **Rangkaian Pengujian Otomatis (`pengujian/llvm/uji_llvm_fase44.ts`):**
+  - 15 pengujian komprehensif mencakup deteksi toolchain, target triple host/cross, type mapper, instruction emitter, generator LLVM IR, validator, optimizer, C runtime stub, dan pipeline AOT (14 pengujian lulus 100%, 1 pengujian biner dieksekusi ditandai *SKIPPED* secara transparan karena lingkungan pengujian container tidak memiliki compiler clang/llc sistem).
+
 ## [v0.43.0] — 2026-11-04
 ### Phase 43: Nusantara Intermediate Representation (NIR) & SSA Form
 

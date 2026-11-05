@@ -1,9 +1,9 @@
 # Kerangka Kerja & Sistem Pengujian Otomatis NUSANTARA
 
 > **Dokumentasi Resmi Rangkaian Pengujian Mutu (Quality Gate) Bahasa Pemrograman NUSANTARA**  
-> **Versi Rilis:** `v0.43.0` | **Status:** 39 Suite Pengujian Lulus 100%
+> **Versi Rilis:** `v0.44.0` | **Status:** 40 Suite Pengujian Lulus 100%
 
-Direktori `pengujian/` menampung seluruh kerangka pengujian mutu komprehensif bahasa pemrograman NUSANTARA, mulai dari verifikasi dokumen fondasi, analisis leksikal, parsing AST, evaluasi semantik & tipe, interpreter runtime, toolchain, framework web & desktop, ekosistem mobile, hingga intermediate representation (NIR) (Phase 1 s/d Phase 43).
+Direktori `pengujian/` menampung seluruh kerangka pengujian mutu komprehensif bahasa pemrograman NUSANTARA, mulai dari verifikasi dokumen fondasi, analisis leksikal, parsing AST, evaluasi semantik & tipe, interpreter runtime, toolchain, framework web & desktop, ekosistem mobile, intermediate representation (NIR), hingga LLVM backend & kompilasi AOT native (Phase 1 s/d Phase 44).
 
 ---
 
@@ -13,11 +13,11 @@ Sesuai audit teknis resmi dan transparan, berikut rincian metrik pengujian repos
 
 | Metrik | Jumlah Aktual | Penjelasan Operasional |
 |---|:---:|---|
-| **Skrip Pengujian** | **39 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 38 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
-| **Suite Pengujian** | **39 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
+| **Skrip Pengujian** | **40 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 39 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
+| **Suite Pengujian** | **40 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Pemeriksaan keberadaan, kelengkapan isi, format lisensi, dan tata kelola pada Phase 1–5 oleh `skrip/periksa_fondasi.js`. |
-| **Kasus Pengujian TypeScript (Test Cases)** | **1.059 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 38 suite TypeScript (9 s/d 90 uji per file). |
-| **Total Pemeriksaan Gabungan** | **1.226 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.059 kasus uji TypeScript = 1.226 pemeriksaan (Lulus 100%).** |
+| **Kasus Pengujian TypeScript (Test Cases)** | **1.074 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 39 suite TypeScript (1.073 LULUS, 1 SKIPPED transparan karena toolchain LLVM host). |
+| **Total Pemeriksaan Gabungan** | **1.241 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.074 kasus uji TypeScript = 1.241 pemeriksaan.** |
 
 ---
 
@@ -35,7 +35,7 @@ Setiap fitur dan subsistem diklasifikasikan secara jujur dan transparan berdasar
 
 ---
 
-## 3. Matriks Hasil Pengujian Komprehensif (39 Suite)
+## 3. Matriks Hasil Pengujian Komprehensif (40 Suite)
 
 | No | Target Fase | Modul & Nama Pengujian | Perintah Eksekusi | Kasus Uji | Status | Klasifikasi Validasi |
 |:---:|:---:|---|---|:---:|:---:|---|
@@ -78,13 +78,14 @@ Setiap fitur dan subsistem diklasifikasikan secara jujur dan transparan berdasar
 | 37 | Phase 41 | Mobile Store Automation & Approval Gate | `npx tsx pengujian/mobile/uji_publikasi_fase41.ts` | 90 uji | LULUS | SIMULATOR TEST PASSED |
 | 38 | Phase 42 | Mobile OTA Update Engine, Ed25519 & Rollback | `npx tsx pengujian/mobile/uji_pembaruan_fase42.ts` | 21 uji | LULUS | INTEGRATION TEST PASSED |
 | 39 | Phase 43 | Nusantara Intermediate Representation (NIR) | `npx tsx pengujian/nir/uji_nir_fase43.ts` | 29 uji | LULUS | INTEGRATION TEST PASSED |
+| 40 | Phase 44 | LLVM Backend & AOT Native Compilation | `npx tsx pengujian/llvm/uji_llvm_fase44.ts` | 15 uji | LULUS | INTEGRATION TEST PASSED |
 
 ---
 
 ## 4. Cara Menjalankan Pengujian
 
 ### 4.1 Menjalankan Seluruh Rangkaian Pengujian
-Jalankan perintah standar npm untuk mengeksekusi ke-38 suite secara berurutan:
+Jalankan perintah standar npm untuk mengeksekusi ke-40 suite secara berurutan:
 
 ```bash
 npm test
@@ -96,6 +97,10 @@ Setiap fase memiliki target skrip mandiri pada `package.json`:
 ```bash
 # Pengujian Fondasi (Phase 1–5)
 node skrip/periksa_fondasi.js
+
+# Pengujian Kompiler & IR (Phase 43–44)
+npm run test:nir-v43
+npm run test:llvm-v44
 
 # Pengujian Kompiler Inti (Phase 6–10)
 npm run test:lexer
@@ -121,3 +126,4 @@ npm run test:pembaruan-v42
 2. **Pengujian Distribusi (Phase 40):** Pembuat berkas APK/AAB dan arsip iOS divalidasi integritas struktur file ZIP, penandatanganan kriptografi SHA-256, dan kelayakan berkas XML manifes secara murni di lingkungan Node.js. Pembuatan bytecode native Dalvik (.dex) komersial tetap memerlukan Android SDK (`gradlew assembleRelease`), dan berkas biner Mach-O iOS memerlukan lingkungan perangkat keras macOS dengan `xcodebuild`.
 3. **Pengujian Store & Publikasi (Phase 41):** Klien Google Play API dan App Store Connect diuji dalam mode Sandbox / Mock Token untuk mencegah publikasi otomatis ke akun toko publik komersial selama pengujian CI/CD rutin.
 4. **Pengujian OTA Update (Phase 42):** Seluruh proses verifikasi tanda tangan digital Ed25519, hashing SHA-256 berkas manifest, atomic swap direktori aset, dan logika pemulihan otomatis Safe Mode Rollback diuji menggunakan modul kriptografi asli Node.js (`crypto`).
+5. **Pengujian LLVM Backend & AOT (Phase 44):** Pipeline emisi LLVM IR, pemetaan tipe data SSA, validasi sintaksis/semantik, integrasi optimasi, dan stub runtime C diuji dan divalidasi 100%. Pada lingkungan container tanpa instalasi biner compiler sistem (`clang`/`llc`), pengujian eksekusi biner mesin native ditandai *SKIPPED* secara transparan tanpa membuat klaim sukses palsu.

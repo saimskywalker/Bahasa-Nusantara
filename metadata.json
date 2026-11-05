@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "Mobile App Update System & Over-the-Air Updates (OTA) (Semantic Version Checker, Signed Update Manifest, Secure HTTPS Download Manager, SHA-256 Integrity & Digital Signature, Resource Rollback, Google Play In-App Updates & App Store Linking, Update Channels, Notification Manager), Store Integration, Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.42.0.",
+  "description": "LLVM Backend & AOT Native Compilation, NIR (Nusantara Intermediate Representation), Mobile App Framework & OTA Updates, Store Integration, Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.44.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -43,6 +43,8 @@ import {
   SSAConverter,
   NIRFormatter,
 } from '../compiler/nir';
+import { AOTCompiler } from '../compiler/aot';
+import { LLVMToolchainManager } from '../compiler/llvm';
 
 export interface OpsiCLI {
   pengelola?: PengelolaPaket;
@@ -239,6 +241,9 @@ export class NusantaraCLI {
             'seluler',
             'nir',
             'ir',
+            'toolchain',
+            'aot',
+            'kompilasi',
           ].includes(perintah) &&
             this.pembaca.apakahAda(perintah)))
       ) {
@@ -346,6 +351,21 @@ export class NusantaraCLI {
         case 'nir':
         case 'ir': {
           return this.prosesPerintahNIR(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'toolchain': {
+          return this.prosesPerintahToolchain(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'aot':
+        case 'kompilasi': {
+          return this.prosesPerintahAOT(args.slice(1), {
             json: opsiJSON,
             warna: opsiWarna,
           });
@@ -875,6 +895,128 @@ export class NusantaraCLI {
       });
       return 1;
     }
+  }
+
+  /**
+   * Menangani perintah 'nusantara toolchain' untuk memeriksa status toolchain LLVM (Phase 44).
+   */
+  private prosesPerintahToolchain(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    const mgr = new LLVMToolchainManager();
+    const status = mgr.detect();
+
+    if (opsi.json || args.includes('--json')) {
+      this.log(JSON.stringify(status, null, 2));
+      return status.available ? 0 : 1;
+    }
+
+    this.log('======================================================');
+    this.log('        STATUS TOOLCHAIN NATIVE LLVM NUSANTARA        ');
+    this.log('======================================================');
+    this.log(`Status Ketersediaan : ${status.available ? 'TERSEDIA' : 'TIDAK TERPASANG'}`);
+    this.log(`Versi LLVM          : ${status.version || 'N/A'}`);
+    this.log(`Opaque Pointers     : ${status.useOpaquePointers ? 'AKTIF (LLVM 15+)' : 'NONAKTIF'}`);
+    this.log('\nDaftar Perangkat Biner:');
+    for (const [key, bin] of Object.entries(status.binaries)) {
+      const icon = bin.found ? '[✓]' : '[✗]';
+      const detail = bin.found ? `${bin.command} (${bin.version || 'tersedia'})` : 'tidak ditemukan';
+      this.log(`  ${icon} ${key.padEnd(12)} : ${detail}`);
+    }
+
+    this.log('\nCatatan Diagnostik:');
+    for (const d of status.diagnostics) {
+      this.log(`  ${d}`);
+    }
+    this.log('======================================================');
+
+    return status.available ? 0 : 0;
+  }
+
+  /**
+   * Menangani perintah 'nusantara aot' / 'nusantara kompilasi' untuk AOT Native Compilation (Phase 44).
+   */
+  private prosesPerintahAOT(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    let emitLLVM = false;
+    let emitObject = false;
+    let optLevel: any = 'O2';
+    let targetTriple: string | undefined;
+    let berkasTarget = '';
+    let outputPath: string | undefined;
+
+    for (let i = 0; i < args.length; i++) {
+      const a = args[i];
+      if (a === '--emit-llvm') {
+        emitLLVM = true;
+      } else if (a === '--emit-object') {
+        emitObject = true;
+      } else if (a.startsWith('--opt=')) {
+        optLevel = a.slice(6);
+      } else if (a.startsWith('--target=')) {
+        targetTriple = a.slice(9);
+      } else if (a === '-o' && i + 1 < args.length) {
+        outputPath = args[++i];
+      } else if (!a.startsWith('-') && !berkasTarget) {
+        berkasTarget = a;
+      }
+    }
+
+    if (!berkasTarget) {
+      this.error(
+        "Perintah 'nusantara aot' memerlukan berkas target (.nusantara).\nPenggunaan: nusantara aot <berkas.nusantara> [--emit-llvm] [--emit-object] [--opt=O2] [--target=triple] [-o output]"
+      );
+      return 2;
+    }
+
+    if (!this.pembaca.apakahAda(berkasTarget)) {
+      this.error(`Berkas target '${berkasTarget}' tidak ditemukan.`);
+      return 1;
+    }
+
+    const kode = this.pembaca.baca(berkasTarget);
+    const compiler = new AOTCompiler();
+    const res = compiler.compileSource(kode, {
+      emitLLVM,
+      emitObject,
+      optLevel,
+      targetTriple,
+      outputPath,
+    });
+
+    if (opsi.json || args.includes('--json')) {
+      this.log(
+        JSON.stringify(
+          {
+            success: res.success,
+            diagnostics: res.diagnostics,
+            toolchainAvailable: res.toolchain.available,
+            executablePath: res.executablePath,
+            objectPath: res.objectPath,
+          },
+          null,
+          2
+        )
+      );
+      return res.success ? 0 : 1;
+    }
+
+    this.log('======================================================');
+    this.log('      HASIL AOT NATIVE COMPILATION NUSANTARA          ');
+    this.log('======================================================');
+    for (const d of res.diagnostics) {
+      this.log(d);
+    }
+
+    if (emitLLVM && res.llvmIR) {
+      this.log('\n--- LLVM IR GENERATED ---');
+      this.log(res.llvmIR);
+    }
+
+    return res.success ? 0 : 1;
   }
 
   /**
@@ -2286,6 +2428,20 @@ Kode Status Keluar (Exit Codes):
   1                      Terdapat kesalahan sintaks, tipe, linter, runtime, atau kegagalan penegasan test
   2                      Kesalahan sintaksis argumen atau perintah CLI tidak valid
 `);
+  }
+}
+
+// Eksekusi langsung jika dipanggil dari terminal via tsx/node
+if (
+  typeof process !== 'undefined' &&
+  process.argv &&
+  process.argv[1] &&
+  (process.argv[1].endsWith('cli.ts') || process.argv[1].endsWith('cli.js'))
+) {
+  const cli = new NusantaraCLI();
+  const kodeKeluar = cli.jalankan(process.argv.slice(2));
+  if (kodeKeluar !== 0) {
+    process.exit(kodeKeluar);
   }
 }
 

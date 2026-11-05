@@ -2,13 +2,14 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_43:_nusantara_intermediate_representation_(nir)-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.43.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_44:_llvm_backend_&_aot-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.44.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-39_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-40_suites_lulus_100%25-green.svg)](pengujian/README.md)
 [![NIR & SSA](https://img.shields.io/badge/compiler-nir_ssa_&_cfg-blue.svg)](docs/compiler/nir.md)
+[![LLVM AOT](https://img.shields.io/badge/backend-llvm_ir_&_aot_native-blue.svg)](docs/compiler/llvm-backend.md)
 [![Mobile OTA](https://img.shields.io/badge/mobile_ota-in--app_&_cloud_updates-blue.svg)](docs/mobile/updates/index.md)
 [![Mobile CI/CD](https://img.shields.io/badge/mobile_cicd-fastlane_&_github_actions-purple.svg)](docs/mobile/cicd/index.md)
 [![Distribusi](https://img.shields.io/badge/distribusi-android_apk_aab_&_ios-blue.svg)](docs/mobile/distribution/index.md)
@@ -26,7 +27,7 @@
 
 **NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) tingkat tinggi yang dirancang dan dikembangkan dari nol menggunakan 100% tata bahasa, kata kunci teknis, dan leksikon Bahasa Indonesia.
 
-NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, hingga *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG untuk Kompilasi Native*.
+NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG*, hingga *LLVM Backend & Kompilasi Native Ahead-of-Time (AOT)*.
 
 ### Visi & Misi Proyek
 - **Kedaulatan Teknologi & Bahasa:** Memberikan kemandirian dalam ekosistem perangkat lunak nasional melalui bahasa pemrograman formal berstandar internasional (ISO/IEC 14977 EBNF).
@@ -38,12 +39,12 @@ NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa a
 
 ## 2. Status Perkembangan Proyek & Roadmap
 
-- **Status Saat Ini:** **🟢 Phase 43: Nusantara Intermediate Representation (NIR) & SSA Form (Milestone v0.43.0)**.
+- **Status Saat Ini:** **🟢 Phase 44: LLVM Backend & AOT Native Compilation (Milestone v0.44.0)**.
 - **Total Fase Diaudit:** 48 Fase (Phase 1 s/d Phase 48).
-  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 43):** 43 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
-  - 🔵 **Dalam Perencanaan (Phase 44 s/d Phase 48):** 5 fase riset lanjutan (LLVM AOT Compiler, Optimasi Lanjut LTO, Standalone Static Linker, Game Engine 2D/3D, dan Kernel NusantaraOS).
-- **Rangkaian Pengujian:** 39 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.059 test cases pada 38 suite TypeScript = total 1.226 pemeriksaan gabungan terverifikasi).
-- **Audit Terakhir:** 4 November 2026.
+  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 44):** 44 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
+  - 🔵 **Dalam Perencanaan (Phase 45 s/d Phase 48):** 4 fase riset lanjutan (Optimasi Lanjut LTO, Standalone Static Linker, Game Engine 2D/3D, dan Kernel NusantaraOS).
+- **Rangkaian Pengujian:** 40 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.074 test cases pada 39 suite TypeScript = total 1.241 pemeriksaan gabungan terverifikasi).
+- **Audit Terakhir:** 5 November 2026.
 - **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 48.
 
 ---
@@ -82,6 +83,14 @@ Seluruh fitur di bawah ini telah diverifikasi melalui audit kode sumber (`src/`)
 - **SSA Mem2Reg Engine:** Algoritma promosi variabel tumpukan (`alloca`/`load`/`store`) ke bentuk SSA murni dengan simpul `phi` berkinerja tinggi.
 - **Optimizer Pipeline:** Pipeline pengoptimalan modular (`NIRPassManager`) mencakup *Constant Folding*, *Algebraic Simplification*, dan *Dead Code Elimination (DCE)*.
 - **NIR Verifier & CLI Tool:** Verifikasi integritas semantik IR dan utilitas baris perintah `nusantara nir` (`--verify`, `--dump`, `--json`, `--optimize`, `--ssa`).
+
+### E. LLVM Backend & AOT Native Compilation (Phase 44)
+- **Deteksi Toolchain LLVM Aman:** `LLVMToolchainManager` mendeteksi `clang`, `llc`, `opt`, `llvm-as`, `llvm-dis`, `llvm-objdump`, dan `lld` secara aman tanpa shell injection serta mendukung kustomisasi jalur dan diagnostik pemasangan.
+- **Target Triple & Data Layout Cross-Platform:** Resolusi target host otomatis dan target kompilasi silang (`x86_64-linux`, `aarch64-linux`, `arm64-macos`, `x86_64-macos`, `x86_64-windows`) dengan format objek ELF, Mach-O, dan COFF.
+- **Pemetaan Tipe & Emisi Instruksi LLVM IR:** Pemetaan lengkap tipe NIR ke LLVM IR (`i1`, `i32`, `i64`, `double`, opaque pointer `ptr`, array, struct, signature fungsi) dan emisi instruksi SSA (`alloca`, `load`, `store`, `gep`, `add`, `sub`, `mul`, `sdiv`, `icmp`, `phi`, `call`, `br`, `cond_br`, `ret`).
+- **Validasi & Optimasi LLVM IR:** Validasi sintaks LLVM IR lokal terpadu + validasi via `llvm-as` jika terpasang, serta integrasi pass manager `opt` (`-O0`, `-O1`, `-O2`, `-O3`, `-Os`).
+- **Runtime C & Native Linker:** Runtime stub `nusantara-native-runtime.c` yang mendelegasikan `main` native ke `@utama` Nusantara dan menyediakan pustaka C runtime terisolasi (`nusantara_cetak_bilangan`, `nusantara_cetak_teks`, `malloc`, `free`, `printf`).
+- **AOT Pipeline & CLI:** Pipeline utuh dari berkas `.nusantara` -> LLVM IR -> Object File -> Biner Mesin Native via perintah `nusantara aot` / `nusantara kompilasi` dan `nusantara toolchain`.
 
 ---
 
@@ -146,16 +155,16 @@ selesai
 ### 5.1 Menggunakan Paket Biner Rilis Resmi
 Unduh paket distribusi untuk sistem operasi Anda dari direktori `dist/` atau halaman rilis resmi:
 
-- **Windows (x64)**: `nusantara-v0.42.0-windows-x64.zip`
-- **Linux (x64)**: `nusantara-v0.42.0-linux-x64.tar.gz` atau `.zip`
-- **macOS (Intel x64)**: `nusantara-v0.42.0-macos-x64.tar.gz`
-- **macOS (Apple Silicon ARM64)**: `nusantara-v0.42.0-macos-arm64.tar.gz`
+- **Windows (x64)**: `nusantara-v0.44.0-windows-x64.zip`
+- **Linux (x64)**: `nusantara-v0.44.0-linux-x64.tar.gz` atau `.zip`
+- **macOS (Intel x64)**: `nusantara-v0.44.0-macos-x64.tar.gz`
+- **macOS (Apple Silicon ARM64)**: `nusantara-v0.44.0-macos-arm64.tar.gz`
 
 #### Langkah Pemasangan Cepat (Linux / macOS):
 ```bash
 # 1. Ekstrak arsip rilis
-tar -xzf nusantara-v0.42.0-linux-x64.tar.gz
-cd nusantara-v0.42.0-linux-x64
+tar -xzf nusantara-v0.44.0-linux-x64.tar.gz
+cd nusantara-v0.44.0-linux-x64
 
 # 2. Jalankan skrip instalasi otomatis ke PATH pengguna
 ./install.sh
@@ -165,7 +174,7 @@ nusantara --versi
 ```
 
 Pada Windows:
-1. Ekstrak berkas `nusantara-v0.42.0-windows-x64.zip`.
+1. Ekstrak berkas `nusantara-v0.44.0-windows-x64.zip`.
 2. Klik ganda berkas `install.bat` atau tambahkan direktori `bin` ke variabel lingkungan `PATH`.
 3. Buka PowerShell / Command Prompt dan jalankan:
    ```powershell

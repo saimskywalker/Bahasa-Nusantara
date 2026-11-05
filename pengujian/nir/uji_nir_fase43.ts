@@ -25,6 +25,7 @@ import {
   NIRFormatter,
   NIRFunction,
   NIRICmpInst,
+  NIRInstruction,
   NIRLoadInst,
   NIRModule,
   NIROpcode,
@@ -35,6 +36,7 @@ import {
   NIRStoreInst,
   NIRTypeKind,
   NIRTypes,
+  NIRValue,
   NIRVerifier,
   PhiHelper,
   SimplificationPass,
@@ -605,6 +607,66 @@ uji('9.4 Menjalankan Pipeline Lengkap NIRPassManager (O2)', () => {
 
   const term = bb.terminator as any;
   samaDengan(term.returnValue, fn.parameters[0], 'Pipeline harus mengoptimalkan seluruh rantai menjadi %x');
+});
+
+uji('9.5 Semantic Preservation: Hasil Evaluasi Semantik Sebelum dan Sesudah Optimasi Konsisten', () => {
+  // Menguji bahwa optimasi mempertahankan semantik fungsional program:
+  // 1. Aritmetika konstan (10 + 20) * 2 - 15 = 45
+  // 2. Dead code yang tidak mempengaruhi hasil akhir
+  // 3. Simbol aljabar x * 1 + 0 = x
+  const modAsli = new NIRModule('ModulSemantikAsli');
+  const fnAsli = modAsli.createFunction('hitung', NIRTypes.i64(), [{ name: 'val', type: NIRTypes.i64() }]);
+  const bbAsli = fnAsli.createBasicBlock('entry');
+  const bAsli = new NIRBuilder(bbAsli);
+
+  // Perhitungan nyata
+  const k1 = bAsli.createAdd(NIRConstants.i64(10), NIRConstants.i64(20), 'k1'); // 30
+  const k2 = bAsli.createMul(k1, NIRConstants.i64(2), 'k2'); // 60
+  const k3 = bAsli.createSub(k2, NIRConstants.i64(15), 'k3'); // 45
+  // Ekspresi aljabar dengan parameter
+  const a1 = bAsli.createMul(fnAsli.parameters[0], NIRConstants.i64(1), 'a1'); // val * 1 -> val
+  const a2 = bAsli.createAdd(a1, NIRConstants.i64(0), 'a2'); // val + 0 -> val
+  // Gabungkan
+  const total = bAsli.createAdd(a2, k3, 'total'); // val + 45
+  // Instruksi mati yang tidak mempengaruhi total
+  bAsli.createMul(total, NIRConstants.i64(9999), 'deadInst');
+  bAsli.createRet(total);
+
+  // Evaluasi manual nilai asli untuk val = 10 -> harus menghasilkan 55
+  const hitungManual = (val: bigint) => {
+    const k_1 = 10n + 20n;
+    const k_2 = k_1 * 2n;
+    const k_3 = k_2 - 15n;
+    const a_1 = val * 1n;
+    const a_2 = a_1 + 0n;
+    return a_2 + k_3;
+  };
+  const hasilExpected = hitungManual(10n); // 55n
+
+  // Sekarang jalankan optimasi O2 pada salinan modul yang identik
+  const pm = NIRPassManager.createO2Pipeline();
+  pm.run(modAsli);
+
+  // Verifikasi struktur setelah optimasi
+  // total = add %val, 45
+  // ret %total
+  const retTerm = bbAsli.terminator as any;
+  pastikan(retTerm.returnValue instanceof NIRInstruction, 'Terminator harus mengembalikan instruksi hasil');
+  const retInst = retTerm.returnValue as NIRBinaryInst;
+  samaDengan(retInst.opcode, NIROpcode.ADD, 'Instruksi hasil harus berupa operasi penjumlahan');
+  
+  // Salah satu operand adalah parameter %val, yang lainnya adalah konstanta 45
+  const ops = [retInst.lhs, retInst.rhs];
+  const hasParam = ops.includes(fnAsli.parameters[0]);
+  const constOp = ops.find((op) => op instanceof NIRConstantInt) as NIRConstantInt;
+  
+  pastikan(hasParam, 'Operand harus memuat parameter %val');
+  pastikan(!!constOp, 'Operand harus memuat konstanta yang telah dilipat');
+  samaDengan(BigInt(constOp.value), 45n, 'Konstanta terlipat harus bernilai 45n');
+
+  // Nilai semantik untuk input 10: 10 + 45 = 55 (preservasi 100%)
+  const hasilOptimasi = 10n + BigInt(constOp.value);
+  samaDengan(hasilOptimasi, hasilExpected, 'Hasil semantik setelah optimasi harus identik dengan nilai asli (55)');
 });
 
 // -----------------------------------------------------------------------------

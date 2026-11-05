@@ -1,7 +1,7 @@
 # Peta Jalan Pengembangan (ROADMAP) Bahasa Pemrograman NUSANTARA
 
 > **Peta Jalan Strategis, Hasil Audit Implementasi Nyata, dan Rencana Kerja Menuju NusantaraOS**  
-> **Tanggal Audit Terakhir:** 4 November 2026  
+> **Tanggal Audit Terakhir:** 4 November 2026
 > **Versi Rilis Saat Ini:** `v0.43.0` (Phase 43: Nusantara Intermediate Representation / NIR)
 
 Dokumen ini memetakan seluruh pencapaian rekayasa piranti lunak (*engineering milestones*) bahasa pemrograman **NUSANTARA**, dari fondasi awal tata bahasa hingga terwujudnya sistem operasi **NusantaraOS**. Setiap status fase dalam dokumen ini telah diaudit secara faktual berdasarkan kode sumber yang benar-benar ada di repositori (`src/`), pengujian otomatis yang lulus 100% (`pengujian/`), dan dokumentasi teknis resmi (`docs/` & `dokumentasi/`), tanpa klaim palsu.
@@ -68,7 +68,7 @@ Sesuai standar audit transparan dan kejujuran teknis proyek NUSANTARA, status se
 | **40** | **Mobile App Distribution & Packaging** | `v0.40.0` | 🟠 SELESAI SEBAGIAN | `src/mobile/distribution/core/`, `android/` (APK/AABBuilder), `ios/` (ArchiveManager) — **Prototype Packaging**: berkas ZIP APK/AAB dan folder `.xcarchive` tervalidasi skemanya. | `pengujian/mobile/uji_distribusi_fase40.ts` (80 pengujian prototype packaging & checksums lulus 100%). Belum memuat bytecode Dalvik (.dex) atau biner Mach-O; belum dapat dipasang pada ponsel Android/iOS fisik. |
 | **41** | **Mobile Store Integration & Release** | `v0.41.0` | 🟡 SIMULASI | `src/mobile/publishing/core/`, `credentials/`, `metadata/`, `android/` (GooglePlayClient), `ios/` (AppStoreConnectClient), approval gate manual CLI (`--setujui`). | `pengujian/mobile/uji_publikasi_fase41.ts` (90 pengujian mode sandbox/mock token lulus 100%). Belum ada transaksi publikasi nyata ke Google Play atau App Store. |
 | **42** | **Mobile App Update & OTA System** | `v0.42.0` | 🟠 SELESAI SEBAGIAN | `src/mobile/updates/core/`, `manifest/`, `security/` (Ed25519, SHA-256), `ota/`, `storage/` (RollbackManager Safe Mode) — teruji pada level runtime file dan resource bundle. | `pengujian/mobile/uji_pembaruan_fase42.ts` (21 pengujian kriptografi & atomic rollback lulus 100%). Pembaruan OTA pada firmware sistem operasi perangkat fisik belum diverifikasi. |
-| **43** | **Intermediate Representation (NIR) & SSA** | `v0.43.0` | 🟢 SELESAI | `src/compiler/nir/` (Core NIRModule, Function, BasicBlock, SSA Builder, CFG, Mem2Reg SSA converter, AST lowering, Verifier, Optimizer DCE/ConstFolding, CLI `nusantara nir`). | `pengujian/nir/uji_nir_fase43.ts` (28 pengujian unit, CFG, Mem2Reg, verifier, optimizer & CLI lulus 100%). |
+| **43** | **Intermediate Representation (NIR) & SSA** | `v0.43.0` | 🟢 SELESAI | `src/compiler/nir/` (Core NIRModule, Function, BasicBlock, SSA Builder, CFG, Mem2Reg SSA converter, AST lowering, Verifier, Optimizer DCE/ConstFolding, CLI `nusantara nir`). | `pengujian/nir/uji_nir_fase43.ts` (29 pengujian unit, CFG, Mem2Reg, verifier, optimizer, semantic preservation & CLI lulus 100%). |
 | **44** | **LLVM Native Compiler Backend** | `v0.44.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Pembangkit kode mesin AOT (*ahead-of-time code generation*) memanfaatkan backend LLVM untuk berkas obyek platform. | Belum dikerjakan (Tahap perencanaan arsitektur, siap mengonsumsi NIR Fase 43). |
 | **45** | **Compiler Optimizations (LTO & Inlining)** | `v0.45.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Mesin optimasi lanjutan (LTO inter-prosedural, inlining fungsi inter-modul, vectorization, dan loop unrolling). | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **46** | **Standalone Static Executable Linker** | `v0.46.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Penggabungan runtime mandiri dan kompilasi biner statis menjadi executable mandiri tunggal tanpa ketergantungan Node.js. | Belum dikerjakan (Tahap perencanaan arsitektur). |
@@ -127,10 +127,10 @@ Seluruh 39 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 38 suite 
 | **Audit Fondasi** | **1 Skrip** | Skrip eksekutor Node.js (`skrip/periksa_fondasi.js`) |
 | **Suite Pengujian TypeScript** | **38 Suite** | 38 berkas suite pengujian TypeScript di direktori `pengujian/` |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Integritas dokumen EBNF, spesifikasi tata bahasa, lisensi, dan contoh (Phase 1–5) |
-| **Kasus Pengujian TypeScript** | **1.058 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 38 suite TypeScript |
-| **Total Pemeriksaan Gabungan** | **1.225 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.058 kasus uji TypeScript = 1.225 (Lulus 100%)** |
+| **Kasus Pengujian TypeScript** | **1.059 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 38 suite TypeScript |
+| **Total Pemeriksaan Gabungan** | **1.226 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.059 kasus uji TypeScript = 1.226 (Lulus 100%)** |
 
-> *Catatan:* Angka **1.225** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.058 kasus pengujian TypeScript), bukan jumlah test case tunggal.
+> *Catatan:* Angka **1.226** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.059 kasus pengujian TypeScript), bukan jumlah test case tunggal.
 
 ```bash
 npm test

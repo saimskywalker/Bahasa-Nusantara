@@ -16,8 +16,8 @@ Sesuai audit teknis resmi dan transparan, berikut rincian metrik pengujian repos
 | **Skrip Pengujian** | **39 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 38 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
 | **Suite Pengujian** | **39 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Pemeriksaan keberadaan, kelengkapan isi, format lisensi, dan tata kelola pada Phase 1–5 oleh `skrip/periksa_fondasi.js`. |
-| **Kasus Pengujian TypeScript (Test Cases)** | **1.058 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 38 suite TypeScript (9 s/d 90 uji per file). |
-| **Total Pemeriksaan Gabungan** | **1.225 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.058 kasus uji TypeScript = 1.225 pemeriksaan (Lulus 100%).** |
+| **Kasus Pengujian TypeScript (Test Cases)** | **1.059 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 38 suite TypeScript (9 s/d 90 uji per file). |
+| **Total Pemeriksaan Gabungan** | **1.226 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.059 kasus uji TypeScript = 1.226 pemeriksaan (Lulus 100%).** |
 
 ---
 
@@ -77,7 +77,7 @@ Setiap fitur dan subsistem diklasifikasikan secara jujur dan transparan berdasar
 | 36 | Phase 40 | Mobile App Packaging & Keystore Signing | `npx tsx pengujian/mobile/uji_distribusi_fase40.ts` | 80 uji | LULUS | INTEGRATION TEST PASSED |
 | 37 | Phase 41 | Mobile Store Automation & Approval Gate | `npx tsx pengujian/mobile/uji_publikasi_fase41.ts` | 90 uji | LULUS | SIMULATOR TEST PASSED |
 | 38 | Phase 42 | Mobile OTA Update Engine, Ed25519 & Rollback | `npx tsx pengujian/mobile/uji_pembaruan_fase42.ts` | 21 uji | LULUS | INTEGRATION TEST PASSED |
-| 39 | Phase 43 | Nusantara Intermediate Representation (NIR) | `npx tsx pengujian/nir/uji_nir_fase43.ts` | 28 uji | LULUS | INTEGRATION TEST PASSED |
+| 39 | Phase 43 | Nusantara Intermediate Representation (NIR) | `npx tsx pengujian/nir/uji_nir_fase43.ts` | 29 uji | LULUS | INTEGRATION TEST PASSED |
 
 ---
 

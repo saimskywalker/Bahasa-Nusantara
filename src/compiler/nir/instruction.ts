@@ -389,6 +389,13 @@ export class NIRPhiInst extends NIRInstruction {
     this.addOperand(value);
   }
 
+  public override setOperand(index: number, val: NIRValue): void {
+    super.setOperand(index, val);
+    if (index >= 0 && index < this.incoming.length) {
+      this.incoming[index].value = val;
+    }
+  }
+
   public getIncomingValueForBlock(block: any): NIRValue | undefined {
     const found = this.incoming.find((inc) => inc.block === block || inc.block.id === block.id);
     return found ? found.value : undefined;

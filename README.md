@@ -2,12 +2,13 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_42:_mobile_app_update_system_&_ota-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.42.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_43:_nusantara_intermediate_representation_(nir)-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.43.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-38_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-39_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![NIR & SSA](https://img.shields.io/badge/compiler-nir_ssa_&_cfg-blue.svg)](docs/compiler/nir.md)
 [![Mobile OTA](https://img.shields.io/badge/mobile_ota-in--app_&_cloud_updates-blue.svg)](docs/mobile/updates/index.md)
 [![Mobile CI/CD](https://img.shields.io/badge/mobile_cicd-fastlane_&_github_actions-purple.svg)](docs/mobile/cicd/index.md)
 [![Distribusi](https://img.shields.io/badge/distribusi-android_apk_aab_&_ios-blue.svg)](docs/mobile/distribution/index.md)
@@ -25,24 +26,24 @@
 
 **NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) tingkat tinggi yang dirancang dan dikembangkan dari nol menggunakan 100% tata bahasa, kata kunci teknis, dan leksikon Bahasa Indonesia.
 
-NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, hingga *Platform Mobile Lintas-Platform (Android & iOS) dengan Sistem Pembaruan OTA Mandiri*.
+NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, hingga *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG untuk Kompilasi Native*.
 
 ### Visi & Misi Proyek
 - **Kedaulatan Teknologi & Bahasa:** Memberikan kemandirian dalam ekosistem perangkat lunak nasional melalui bahasa pemrograman formal berstandar internasional (ISO/IEC 14977 EBNF).
 - **Akselerasi Edukasi Komputasi:** Menghilangkan batasan bahasa asing bagi pelajar dan pengembang di seluruh Nusantara dalam memahami konsep algoritma, struktur data, dan rekayasa perangkat lunak.
-- **Produksi Industri & Multiplatform:** Mampu digunakan untuk membangun utilitas terminal, layanan API web, aplikasi desktop GUI, hingga aplikasi seluler produksi lengkap dengan pipeline distribusi dan pembaruan berkala.
+- **Produksi Industri & Multiplatform:** Mampu digunakan untuk membangun utilitas terminal, layanan API web, aplikasi desktop GUI, aplikasi seluler produksi, hingga biner kompilasi native yang dioptimalkan.
 - **Evolusi Menuju Sistem Operasi:** Menjadi fondasi runtime dan bahasa pemrograman utama bagi proyek jangka panjang **NusantaraOS**.
 
 ---
 
 ## 2. Status Perkembangan Proyek & Roadmap
 
-- **Status Saat Ini:** **🟢 Phase 42: Mobile App Update System & Over-the-Air (OTA) Updates (Milestone v0.42.0)**.
+- **Status Saat Ini:** **🟢 Phase 43: Nusantara Intermediate Representation (NIR) & SSA Form (Milestone v0.43.0)**.
 - **Total Fase Diaudit:** 48 Fase (Phase 1 s/d Phase 48).
-  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 42):** 42 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
-  - 🔵 **Dalam Perencanaan (Phase 43 s/d Phase 48):** 6 fase riset lanjutan (Bytecode Engine, LLVM AOT Compiler, Optimasi Lanjut, Native Linker, 2D/3D Engine, dan Kernel NusantaraOS).
-- **Rangkaian Pengujian:** 38 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.030 test cases pada 37 suite TypeScript = total 1.197 pemeriksaan gabungan terverifikasi).
-- **Audit Terakhir:** 3 November 2026.
+  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 43):** 43 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
+  - 🔵 **Dalam Perencanaan (Phase 44 s/d Phase 48):** 5 fase riset lanjutan (LLVM AOT Compiler, Optimasi Lanjut LTO, Standalone Static Linker, Game Engine 2D/3D, dan Kernel NusantaraOS).
+- **Rangkaian Pengujian:** 39 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.058 test cases pada 38 suite TypeScript = total 1.225 pemeriksaan gabungan terverifikasi).
+- **Audit Terakhir:** 4 November 2026.
 - **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 48.
 
 ---
@@ -73,6 +74,14 @@ Seluruh fitur di bawah ini telah diverifikasi melalui audit kode sumber (`src/`)
 - **Mobile Distribution & Publishing:** Pembuat paket Android APK & AAB, penandatanganan Keystore, Apple iOS Archive & Code Signing, validator kelayakan rilis Play Store/App Store, dan pelapor build.
 - **Mobile CI/CD & Store Automation:** Integrasi GitHub Actions & Fastlane, generator alur kerja otomatis, manajemen rahasia/sertifikat, dan otomatisasi rilis TestFlight/Play Store Internal.
 - **Mobile App Update & OTA Engine (Phase 42):** Pemeriksa pembaruan dalam aplikasi (*in-app update*), pengunduh aman berverifikasi SHA-256, delta patcher, hot-reload bundle OTA JavaScript/Nusantara, pemulihan rollback otomatis jika instalasi gagal, dan banner notifikasi pembaruan ramah pengguna.
+
+### D. Nusantara Intermediate Representation (NIR) & SSA Form (Phase 43)
+- **Representasi Tingkat Rendah NIR:** Arsitektur berbasis register tak terbatas dengan pelacakan rantai *def-use*, penataan *Basic Blocks*, dan instruksi *terminator* (`ret`, `br`, `cond_br`, `unreachable`).
+- **AST-to-NIR Lowering:** Penurunan menyeluruh struktur AST bahasa Nusantara ke representasi perantara memori (`NIRModule`).
+- **Control Flow Graph (CFG) & Dominator Tree:** Pembangkit graf aliran kontrol lengkap dengan kalkulasi *Dominance Frontier* untuk penempatan simpul Phi SSA.
+- **SSA Mem2Reg Engine:** Algoritma promosi variabel tumpukan (`alloca`/`load`/`store`) ke bentuk SSA murni dengan simpul `phi` berkinerja tinggi.
+- **Optimizer Pipeline:** Pipeline pengoptimalan modular (`NIRPassManager`) mencakup *Constant Folding*, *Algebraic Simplification*, dan *Dead Code Elimination (DCE)*.
+- **NIR Verifier & CLI Tool:** Verifikasi integritas semantik IR dan utilitas baris perintah `nusantara nir` (`--verify`, `--dump`, `--json`, `--optimize`, `--ssa`).
 
 ---
 

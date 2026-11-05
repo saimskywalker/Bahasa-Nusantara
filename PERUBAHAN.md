@@ -4,6 +4,44 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.43.0] — 2026-11-04
+### Phase 43: Nusantara Intermediate Representation (NIR) & SSA Form
+
+Fase ini menghadirkan representasi perantara tingkat rendah (**NIR**) berbasis *Static Single Assignment* (SSA) dan *Control Flow Graph* (CFG) yang menghubungkan AST tingkat tinggi bahasa Nusantara dengan backend kompilasi masa depan (khususnya backend native LLVM pada Fase 44).
+
+#### Ditambahkan:
+- **Arsitektur Inti NIR (`src/compiler/nir/`):**
+  - `NIRModule`: Kontainer tingkat atas penyimpan fungsi, variabel global, target triple, data layout, dan metadata.
+  - `NIRFunction`: Representasi fungsi terisolasi dengan parameter bertipe, tipe kembalian, dan kumpulan blok kontrol.
+  - `NIRBasicBlock`: Blok dasar aliran kendali linier dengan relasi pendahulu (*predecessors*) dan penerus (*successors*).
+  - `NIRInstruction` & `NIRTerminator`: Kumpulan instruksi bertipe (`alloca`, `load`, `store`, `gep`, `add`, `sub`, `mul`, `sdiv`, `icmp`, `fcmp`, `call`, `phi`, `cast`) dan instruksi terminator (`ret`, `br`, `cond_br`, `unreachable`).
+  - `NIRValue` & `NIRConstant`: Model nilai SSA dengan pelacakan rantai penggunaan (*def-use chain*) dan metode `replaceAllUsesWith()`.
+  - `NIRBuilder`: API ergonomis untuk membangun instruksi dan blok secara terstruktur.
+- **Analisis CFG & Dominator Tree (`src/compiler/nir/cfg/`):**
+  - `NIRControlFlowGraph`: Analisis ketercapaian blok, konstruksi graf kendali, dan validasi topologi CFG.
+  - `NIRDominatorTree`: Algoritma perhitungan relasi dominasi, pembentukan pohon dominator, dan kalkulasi batas dominasi (*Dominance Frontier*).
+- **Transformasi Bentuk SSA & Mem2Reg (`src/compiler/nir/ssa/`):**
+  - `SSAConverter`: Promosi variabel tumpukan lokal (`alloca`/`load`/`store`) ke register SSA murni berbasis *Iterated Dominance Frontier* (IDF) dan penamaan ulang variabel (*variable renaming walk*).
+  - `NIRPhiInst`: Pembentukan simpul Phi SSA dan penyederhanaan otomatis phi redundan.
+  - `SSAVerifier`: Audit statis kepatuhan aturan SSA tunggal.
+- **AST to NIR Lowering (`src/compiler/nir/lowering/`):**
+  - `ASTToNIRLowering`: Transformasi seluruh konstruksi AST bahasa Nusantara (deklarasi variabel, konstanta, penugasan, aritmetika, perbandingan, logika, percabangan `jika-maka-selain`, perulangan `selama` dan `untuk`, fungsi dan pemanggilan fungsi) menjadi modul NIR in-memory.
+- **NIR Verifier & Skema JSON (`src/compiler/nir/verifier.ts`, `serializer.ts`, `deserializer.ts`):**
+  - `NIRVerifier`: Validasi integritas semantik modul, kelayakan tipe operand pada instruksi biner, dan keberadaan terminator pada setiap Basic Block.
+  - `NIRSerializer` & `NIRDeserializer`: Ekspor dan impor lengkap skema modul NIR dalam format JSON murni.
+- **Pipa Optimasi NIR (`src/compiler/nir/optimizer/`):**
+  - `ConstantFoldingPass`: Evaluasi dan pelipatan operasi aritmetika dan perbandingan bernilai konstan saat waktu kompilasi.
+  - `AlgebraicSimplificationPass`: Penyederhanaan identitas aljabar ($x + 0 \rightarrow x$, $x \times 1 \rightarrow x$, dll).
+  - `DeadCodeEliminationPass` (DCE): Penghapusan instruksi tanpa pengguna sampingan (*unused pure instructions*).
+  - `CFGCleanupPass`: Penggabungan blok redundan dan eliminasi blok mati.
+  - `NIRPassManager`: Orkestrator pipeline optimasi tingkat O1 dan O2.
+- **Perkakas Baris Perintah & Visualisasi (`src/compiler/nir/inspector/`, `src/paket/cli.ts`):**
+  - `NIRFormatter`: Generator representasi tekstual NIR bergaya LLVM IR dan ekspor graf kontrol berformat Graphviz DOT.
+  - Perintah CLI `nusantara nir`: Opsi `--verify`, `--dump`, `--json`, `--optimize`, dan `--ssa`.
+- **Rangkaian Pengujian & Dokumentasi:**
+  - `pengujian/nir/uji_nir_fase43.ts`: 28 skenario pengujian komprehensif pada 10 kelompok uji (Lulus 100%).
+  - Dokumentasi teknis: `docs/compiler/nir.md`, `docs/compiler/nir-instruction-set.md`, `docs/compiler/nir-ssa.md`, dan `docs/compiler/nir-architecture.md`.
+
 ## [v0.42.0] — 2026-11-03
 ### Phase 42: Mobile App Update System & Over-the-Air Updates (OTA)
 

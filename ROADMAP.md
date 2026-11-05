@@ -1,8 +1,8 @@
 # Peta Jalan Pengembangan (ROADMAP) Bahasa Pemrograman NUSANTARA
 
 > **Peta Jalan Strategis, Hasil Audit Implementasi Nyata, dan Rencana Kerja Menuju NusantaraOS**  
-> **Tanggal Audit Terakhir:** 3 November 2026  
-> **Versi Rilis Saat Ini:** `v0.42.0` (Phase 42: Mobile App Update System & Over-the-Air Updates)
+> **Tanggal Audit Terakhir:** 4 November 2026  
+> **Versi Rilis Saat Ini:** `v0.43.0` (Phase 43: Nusantara Intermediate Representation / NIR)
 
 Dokumen ini memetakan seluruh pencapaian rekayasa piranti lunak (*engineering milestones*) bahasa pemrograman **NUSANTARA**, dari fondasi awal tata bahasa hingga terwujudnya sistem operasi **NusantaraOS**. Setiap status fase dalam dokumen ini telah diaudit secara faktual berdasarkan kode sumber yang benar-benar ada di repositori (`src/`), pengujian otomatis yang lulus 100% (`pengujian/`), dan dokumentasi teknis resmi (`docs/` & `dokumentasi/`), tanpa klaim palsu.
 
@@ -13,7 +13,7 @@ Dokumen ini memetakan seluruh pencapaian rekayasa piranti lunak (*engineering mi
 Sesuai standar audit transparan dan kejujuran teknis proyek NUSANTARA, status setiap fase diklasifikasikan sebagai berikut:
 
 | Simbol | Status | Definisi Operasional |
-|:---:|---|---|
+|---|---|---|
 | 🟢 | **SELESAI** | Seluruh kriteria penerimaan fase sudah diimplementasikan penuh dalam source code dan diverifikasi oleh pengujian otomatis yang relevan. |
 | 🟠 | **SELESAI SEBAGIAN** | Implementasi inti tersedia dan teruji, namun sebagian kemampuan (misal: bytecode DEX, biner Mach-O, atau layanan cloud produksi) belum terpenuhi. |
 | 🟡 | **SIMULASI** | Implementasi arsitektur dan kontrak API tersedia, namun eksekusi dan pengujian baru berjalan melalui simulator, mock, atau in-memory message bus. |
@@ -68,9 +68,9 @@ Sesuai standar audit transparan dan kejujuran teknis proyek NUSANTARA, status se
 | **40** | **Mobile App Distribution & Packaging** | `v0.40.0` | 🟠 SELESAI SEBAGIAN | `src/mobile/distribution/core/`, `android/` (APK/AABBuilder), `ios/` (ArchiveManager) — **Prototype Packaging**: berkas ZIP APK/AAB dan folder `.xcarchive` tervalidasi skemanya. | `pengujian/mobile/uji_distribusi_fase40.ts` (80 pengujian prototype packaging & checksums lulus 100%). Belum memuat bytecode Dalvik (.dex) atau biner Mach-O; belum dapat dipasang pada ponsel Android/iOS fisik. |
 | **41** | **Mobile Store Integration & Release** | `v0.41.0` | 🟡 SIMULASI | `src/mobile/publishing/core/`, `credentials/`, `metadata/`, `android/` (GooglePlayClient), `ios/` (AppStoreConnectClient), approval gate manual CLI (`--setujui`). | `pengujian/mobile/uji_publikasi_fase41.ts` (90 pengujian mode sandbox/mock token lulus 100%). Belum ada transaksi publikasi nyata ke Google Play atau App Store. |
 | **42** | **Mobile App Update & OTA System** | `v0.42.0` | 🟠 SELESAI SEBAGIAN | `src/mobile/updates/core/`, `manifest/`, `security/` (Ed25519, SHA-256), `ota/`, `storage/` (RollbackManager Safe Mode) — teruji pada level runtime file dan resource bundle. | `pengujian/mobile/uji_pembaruan_fase42.ts` (21 pengujian kriptografi & atomic rollback lulus 100%). Pembaruan OTA pada firmware sistem operasi perangkat fisik belum diverifikasi. |
-| **43** | **Intermediate Representation (IR) & Bytecode** | `v0.43.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Desain format IR berbasis stack/register mandiri untuk mengoptimalkan kinerja eksekusi sebelum generasi kode biner. | Belum dikerjakan (Tahap perencanaan arsitektur). |
-| **44** | **LLVM Native Compiler Backend** | `v0.44.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Pembangkit kode mesin AOT (*ahead-of-time code generation*) memanfaatkan backend LLVM untuk berkas obyek platform. | Belum dikerjakan (Tahap perencanaan arsitektur). |
-| **45** | **Compiler Optimizations (DCE & Inlining)** | `v0.45.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Mesin optimasi eliminasi kode mati (*dead code elimination*), inlining fungsi, penyusutan memori, dan unrolling loop. | Belum dikerjakan (Tahap perencanaan arsitektur). |
+| **43** | **Intermediate Representation (NIR) & SSA** | `v0.43.0` | 🟢 SELESAI | `src/compiler/nir/` (Core NIRModule, Function, BasicBlock, SSA Builder, CFG, Mem2Reg SSA converter, AST lowering, Verifier, Optimizer DCE/ConstFolding, CLI `nusantara nir`). | `pengujian/nir/uji_nir_fase43.ts` (28 pengujian unit, CFG, Mem2Reg, verifier, optimizer & CLI lulus 100%). |
+| **44** | **LLVM Native Compiler Backend** | `v0.44.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Pembangkit kode mesin AOT (*ahead-of-time code generation*) memanfaatkan backend LLVM untuk berkas obyek platform. | Belum dikerjakan (Tahap perencanaan arsitektur, siap mengonsumsi NIR Fase 43). |
+| **45** | **Compiler Optimizations (LTO & Inlining)** | `v0.45.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Mesin optimasi lanjutan (LTO inter-prosedural, inlining fungsi inter-modul, vectorization, dan loop unrolling). | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **46** | **Standalone Static Executable Linker** | `v0.46.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Penggabungan runtime mandiri dan kompilasi biner statis menjadi executable mandiri tunggal tanpa ketergantungan Node.js. | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **47** | **Game Engine & Multimedia Toolkit** | `v0.47.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Pustaka rendering grafis 2D/3D (WebGL/Metal/Vulkan), audio spasial, dan fisika game dengan API berbahasa Indonesia. | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **48** | **NusantaraOS Kernel & System Architecture** | `v1.0.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Visi puncak kedaulatan teknologi: Sistem Operasi mandiri dengan microkernel, manajemen memori, dan antarmuka nasional. | Visi jangka panjang proyek. |
@@ -91,12 +91,14 @@ Berdasarkan audit source code di `src/`, berikut kluster kapabilitas yang benar-
    - Pustaka standar ekspansi (Kripto, Kompresi, Validasi, Fetch), modul basis data relasional SQLite dengan prepared statement dan transaksi ACID, web framework HTTP dengan router parameter `:id` dan template Anti-XSS, sistem autentikasi Scrypt KDF dan RBAC wildcard, ORM dengan skema migrasi otomatis, generator perancah proyek (`nusantara baru`), peladen WebSocket real-time dengan antrean tugas latar belakang, klien HTTP mandiri, dan kerangka kerja GUI desktop.
 5. **Mobile Framework, Distribusi, Toko Aplikasi & OTA (Phase 37–42):**
    - Kerangka kerja aplikasi seluler Android & iOS dengan siklus hidup lengkap dan tata letak responsif, 35 kontrak Native Device API terdaftar dengan implementasi simulator, konektivitas mobile networking offline-first dengan antrean SQLite persisten dan sinkronisasi Delta LWW, generator prototype packaging APK/AAB dan iOS Archive tervalidasi skemanya (belum memuat bytecode Dalvik DEX atau biner Mach-O), integrasi Google Play API v3 & App Store Connect teruji pada mode Sandbox dengan gerbang persetujuan manusia (`--setujui`), serta sistem pembaruan aplikasi mobile Over-the-Air (OTA) dengan verifikasi tanda tangan digital Ed25519 dan pemulihan otomatis Safe Mode Rollback di level runtime.
+6. **Intermediate Representation (NIR), SSA & Optimizer (Phase 43):**
+   - Nusantara Intermediate Representation (NIR) berbasis Static Single Assignment (SSA) dan Control Flow Graph (CFG) lengkap dengan sistem tipe data kuat (`i1`, `i32`, `i64`, `f64`, `string`, `ptr`, `struct`, dll), abstraksi `NIRBuilder`, penurun AST ke NIR (`ast-to-nir`), analisis dominator tree & dominance frontier, konversi `Mem2Reg` (promosi alokasi stack alloca/load/store ke register SSA murni), NIR Verifier semantik, serialisasi/deserialisasi JSON round-trip, optimizer pass manager (Constant Folding, Algebraic Simplification, Dead Code Elimination), visualizer teks IR, dan antarmuka CLI `nusantara nir`.
 
 ---
 
 ## 4. Fitur yang Belum Selesai & Batasan Implementasi Saat Ini
 
-Berdasarkan audit kejujuran teknis repositori v0.42.0:
+Berdasarkan audit kejujuran teknis repositori v0.43.0:
 
 1. **Jembatan Native Biner (Phase 37):**
    - Jembatan `JembatanMobileNative` saat ini beroperasi di atas *memory message bus simulator*. Binding langsung ke biner native Kotlin (JNI/Android) dan Swift (WebKit message handlers/iOS) belum diimplementasikan.
@@ -111,24 +113,24 @@ Berdasarkan audit kejujuran teknis repositori v0.42.0:
    - Klien API dan verifikasi token JWT ES256 teruji aman dalam mode Sandbox Simulator. Belum ada transaksi publikasi nyata ke Google Play Store atau Apple App Store.
 6. **Pembaruan OTA pada Firmware Sistem Operasi Fisik (Phase 42):**
    - Algoritma kriptografi Ed25519, hashing SHA-256, dan atomic rollback teruji pada level file/resource runtime. Pembaruan OTA pada tingkat firmware/OS perangkat fisik berstatus **BELUM DIVERIFIKASI**.
-7. **Riset Tingkat Rendah Menuju NusantaraOS (Phase 43–48):**
-   - Intermediate Representation (IR/Bytecode), LLVM Compiler Backend, Standalone Static Linker, Game Engine Asli, dan Kernel NusantaraOS (status: **BELUM DIIMPLEMENTASIKAN**).
+7. **Riset Tingkat Rendah Menuju NusantaraOS (Phase 44–48):**
+   - LLVM Compiler Backend, Standalone Static Linker, Game Engine Asli, dan Kernel NusantaraOS (status: **BELUM DIIMPLEMENTASIKAN**).
 
 ---
 
 ## 5. Rangkaian Pengujian Otomatis yang Dijalankan (Verification Suite)
 
-Seluruh 38 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 37 suite pengujian TypeScript) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap pipeline:
+Seluruh 39 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 38 suite pengujian TypeScript) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap pipeline:
 
 | Metrik Verifikasi | Nilai Faktual | Keterangan Operasional |
 |---|:---:|---|
 | **Audit Fondasi** | **1 Skrip** | Skrip eksekutor Node.js (`skrip/periksa_fondasi.js`) |
-| **Suite Pengujian TypeScript** | **37 Suite** | 37 berkas suite pengujian TypeScript di direktori `pengujian/` |
+| **Suite Pengujian TypeScript** | **38 Suite** | 38 berkas suite pengujian TypeScript di direktori `pengujian/` |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Integritas dokumen EBNF, spesifikasi tata bahasa, lisensi, dan contoh (Phase 1–5) |
-| **Kasus Pengujian TypeScript** | **1.030 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 37 suite TypeScript |
-| **Total Pemeriksaan Gabungan** | **1.197 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.030 kasus uji TypeScript = 1.197 (Lulus 100%)** |
+| **Kasus Pengujian TypeScript** | **1.058 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 38 suite TypeScript |
+| **Total Pemeriksaan Gabungan** | **1.225 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.058 kasus uji TypeScript = 1.225 (Lulus 100%)** |
 
-> *Catatan:* Angka **1.197** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.030 kasus pengujian TypeScript), bukan jumlah test case tunggal.
+> *Catatan:* Angka **1.225** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.058 kasus pengujian TypeScript), bukan jumlah test case tunggal.
 
 ```bash
 npm test
@@ -173,17 +175,19 @@ Daftar suite pengujian terverifikasi:
 - `test:distribusi-v40` — Suite uji builder APK/AAB, keystore signing & iOS archive (Phase 40).
 - `test:publikasi-v41` — Suite uji Google Play API, App Store Connect & approval gate (Phase 41).
 - `test:pembaruan-v42` — Suite uji SemVer, signed manifest, Ed25519 & OTA rollback (Phase 42).
+- `test:nir-v43` — Suite uji Nusantara Intermediate Representation (NIR), CFG, Mem2Reg SSA & Optimizer (Phase 43).
 
 ---
 
 ## 6. Jadwal & Prioritas Rilis Mendatang
 
-- **Target Berikutnya:**
-  - **Phase 43 (v0.43.0)**: Intermediate Representation (IR) Compiler & Bytecode Virtual Machine Engine.
-  - **Phase 44 (v0.44.0)**: LLVM Native Compiler Backend (AOT Code Generation).
-  - **Phase 45 (v0.45.0)**: Advanced Compiler Optimizations (DCE, Inlining, Loop Unrolling).
-  - **Phase 46 (v0.46.0)**: Standalone Static Executable Linker (.exe / ELF / Mach-O).
-  - **Phase 47 (v0.47.0)**: 2D/3D Game Engine & Multimedia Toolkit.
+- **Fase Selesai Terbaru:**
+  - **Phase 43 (v0.43.0)**: Nusantara Intermediate Representation (NIR), SSA Form (Mem2Reg), CFG Dominator Tree, Optimizer Pass & CLI `nusantara nir` (🟢 Selesai).
+- **Target Rilis Mendatang:**
+  - **Phase 44 (v0.44.0)**: LLVM Native Compiler Backend (AOT Code Generation untuk ELF/Mach-O/PE).
+  - **Phase 45 (v0.45.0)**: Advanced Compiler Optimizations (LTO, Function Inlining, Loop Unrolling, Vectorization).
+  - **Phase 46 (v0.46.0)**: Standalone Static Executable Linker (Biner Statis Mandiri Tanpa Node.js).
+  - **Phase 47 (v0.47.0)**: 2D/3D Game Engine & Multimedia Toolkit Asli Nusantara.
   - **Phase 48 (v1.0.0)**: NusantaraOS Kernel & Sovereign Computing Architecture.
 
 *Dokumen ROADMAP ini dirilis secara berkala dan disinkronkan secara ketat dengan hasil pengujian aktual repositori NUSANTARA.*

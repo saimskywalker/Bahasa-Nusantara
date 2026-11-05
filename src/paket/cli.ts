@@ -35,6 +35,14 @@ import { PelariSeeder } from '../seeder/seederRunner';
 import { ProjectGenerator, ValidatorProyek } from '../generator';
 import { AntreanTugasMemori, PekerjaLatarBelakang } from '../realtime';
 import { MobileCLI } from '../mobile/cli/mobile_cli';
+import {
+  ASTToNIRLowering,
+  NIRVerifier,
+  NIRSerializer,
+  NIRPassManager,
+  SSAConverter,
+  NIRFormatter,
+} from '../compiler/nir';
 
 export interface OpsiCLI {
   pengelola?: PengelolaPaket;
@@ -229,6 +237,8 @@ export class NusantaraCLI {
             'profiler',
             'mobile',
             'seluler',
+            'nir',
+            'ir',
           ].includes(perintah) &&
             this.pembaca.apakahAda(perintah)))
       ) {
@@ -328,6 +338,14 @@ export class NusantaraCLI {
           }
           return this.jalankanBerkasProgram(berkasTarget, argumenTambahan.slice(1), {
             debug: opsiDebug,
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'nir':
+        case 'ir': {
+          return this.prosesPerintahNIR(args.slice(1), {
             json: opsiJSON,
             warna: opsiWarna,
           });
@@ -731,6 +749,127 @@ export class NusantaraCLI {
         kodeSumber,
         namaBerkas: jalurBerkas,
         debug: opsi.debug,
+        json: opsi.json,
+        warna: opsi.warna,
+      });
+      return 1;
+    }
+  }
+
+  /**
+   * Menangani perintah 'nusantara nir' untuk inspeksi, verifikasi, dan optimasi NIR (Phase 43).
+   */
+  private prosesPerintahNIR(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    let modeVerifikasi = false;
+    let modeDump = false;
+    let modeJSON = opsi.json || false;
+    let modeOptimasi = false;
+    let modeSSA = false;
+    let berkasTarget = '';
+
+    for (const arg of args) {
+      if (arg === '--verify' || arg === '--verifikasi' || arg === '-v') {
+        modeVerifikasi = true;
+      } else if (arg === '--dump' || arg === '-d') {
+        modeDump = true;
+      } else if (arg === '--json') {
+        modeJSON = true;
+      } else if (arg === '--optimize' || arg === '--optimasi' || arg === '-O') {
+        modeOptimasi = true;
+      } else if (arg === '--ssa') {
+        modeSSA = true;
+      } else if (!arg.startsWith('-') && !berkasTarget) {
+        berkasTarget = arg;
+      }
+    }
+
+    if (!berkasTarget) {
+      this.error(
+        "Perintah 'nusantara nir' memerlukan berkas target (.nusantara).\nPenggunaan: nusantara nir [--verify] [--dump] [--json] [--optimize] [--ssa] <berkas.nusantara>"
+      );
+      return 2;
+    }
+
+    let kodeSumber = '';
+    try {
+      if (!this.pembaca.apakahAda(berkasTarget)) {
+        throw new Error(`Berkas '${berkasTarget}' tidak ditemukan.`);
+      }
+      kodeSumber = this.pembaca.baca(berkasTarget);
+
+      // 1. Parsing
+      const parser = new Parser(kodeSumber);
+      const ast = parser.parse();
+      const galatParser = parser.dapatkanDaftarGalat();
+      if (galatParser.length > 0) {
+        throw galatParser[0];
+      }
+
+      // 2. Modul & Resolusi
+      const direktoriBerkas = this.pembaca.direktoriDari(berkasTarget) || '.';
+      const resolver = new ResolverModul(this.pembaca, { direktoriAkarProyek: direktoriBerkas });
+      const pemuat = new PemuatModul(resolver, this.pembaca, {});
+
+      // 3. Type Checking
+      const pemeriksaTipe = new PemeriksaTipe(pemuat);
+      const galatTipe = pemeriksaTipe.periksa(ast, direktoriBerkas);
+      if (galatTipe.length > 0) {
+        throw galatTipe[0];
+      }
+
+      // 4. AST to NIR Lowering
+      const namaModul = berkasTarget.replace(/\\.[^/.]+$/, '').replace(/^[./\\\\]+/, '');
+      const lowering = new ASTToNIRLowering(namaModul);
+      const nirMod = lowering.lower(ast);
+
+      // 5. SSA Conversion (jika diminta atau optimasi aktif)
+      if (modeSSA || modeOptimasi) {
+        for (const fn of nirMod.functions.values()) {
+          if (!fn.isDeclaration) {
+            const ssa = new SSAConverter(fn);
+            ssa.run();
+          }
+        }
+      }
+
+      // 6. Optimasi (jika diminta)
+      if (modeOptimasi) {
+        const pm = NIRPassManager.createDefaultPipeline();
+        pm.run(nirMod);
+      }
+
+      // 7. Verifikasi
+      if (modeVerifikasi) {
+        const verifRes = NIRVerifier.verifyModule(nirMod);
+        if (!verifRes.valid) {
+          this.error(`Verifikasi NIR Gagal (${verifRes.errors.length} galat):`);
+          for (const err of verifRes.errors) {
+            this.error(`  - ${err}`);
+          }
+          return 1;
+        }
+        this.log(`[SUKSES] Verifikasi NIR untuk modul '${nirMod.name}' LULUS 100%.`);
+      }
+
+      // 8. Output
+      if (modeJSON) {
+        this.log(NIRSerializer.toJSONString(nirMod, true));
+      } else if (modeDump) {
+        this.log(NIRFormatter.formatSummary(nirMod));
+        this.log('\n--- KODE NIR TEKSTUAL ---');
+        this.log(NIRFormatter.formatText(nirMod));
+      } else {
+        this.log(NIRFormatter.formatText(nirMod));
+      }
+
+      return 0;
+    } catch (err: any) {
+      this.laporkanGalatCLI(err, {
+        kodeSumber,
+        namaBerkas: berkasTarget,
         json: opsi.json,
         warna: opsi.warna,
       });
@@ -2090,6 +2229,7 @@ Perintah Eksekusi, Toolchain, Testing & Developer Tools:
   uji-semua, quality-gate Menjalankan seluruh Quality Gate & Verifikasi Kualitas NUSANTARA
   format [<berkas>|.]    Format kode sumber NUSANTARA sesuai standar resmi
   cek [<berkas>|.]       Pemeriksaan sintaksis, sistem tipe, dan linter tanpa eksekusi
+  nir <berkas>           Hasilkan dan periksa Nusantara Intermediate Representation (Phase 43)
   bahasa-server, lsp     Menjalankan Language Server Protocol (LSP) via stdio untuk IDE/Editor
 
 Perintah Ekosistem Paket & Dependency Management (Phase 16, 22 & 27):

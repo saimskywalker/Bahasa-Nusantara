@@ -2,7 +2,7 @@
 
 > **Peta Jalan Strategis, Hasil Audit Implementasi Nyata, dan Rencana Kerja Menuju NusantaraOS**  
 > **Tanggal Audit Terakhir:** 5 November 2026
-> **Versi Rilis Saat Ini:** `v0.44.0` (Phase 44: LLVM Native Compiler Backend & AOT)
+> **Versi Rilis Saat Ini:** `v0.45.0` (Phase 45: Nusantara Linker & Standalone Executable)
 
 Dokumen ini memetakan seluruh pencapaian rekayasa piranti lunak (*engineering milestones*) bahasa pemrograman **NUSANTARA**, dari fondasi awal tata bahasa hingga terwujudnya sistem operasi **NusantaraOS**. Setiap status fase dalam dokumen ini telah diaudit secara faktual berdasarkan kode sumber yang benar-benar ada di repositori (`src/`), pengujian otomatis yang lulus 100% (`pengujian/`), dan dokumentasi teknis resmi (`docs/` & `dokumentasi/`), tanpa klaim palsu.
 
@@ -70,8 +70,8 @@ Sesuai standar audit transparan dan kejujuran teknis proyek NUSANTARA, status se
 | **42** | **Mobile App Update & OTA System** | `v0.42.0` | 🟠 SELESAI SEBAGIAN | `src/mobile/updates/core/`, `manifest/`, `security/` (Ed25519, SHA-256), `ota/`, `storage/` (RollbackManager Safe Mode) — teruji pada level runtime file dan resource bundle. | `pengujian/mobile/uji_pembaruan_fase42.ts` (21 pengujian kriptografi & atomic rollback lulus 100%). Pembaruan OTA pada firmware sistem operasi perangkat fisik belum diverifikasi. |
 | **43** | **Intermediate Representation (NIR) & SSA** | `v0.43.0` | 🟢 SELESAI | `src/compiler/nir/` (Core NIRModule, Function, BasicBlock, SSA Builder, CFG, Mem2Reg SSA converter, AST lowering, Verifier, Optimizer DCE/ConstFolding, CLI `nusantara nir`). | `pengujian/nir/uji_nir_fase43.ts` (29 pengujian unit, CFG, Mem2Reg, verifier, optimizer, semantic preservation & CLI lulus 100%). |
 | **44** | **LLVM Native Compiler Backend & AOT** | `v0.44.0` | 🟢 SELESAI | `src/compiler/llvm/`, `src/compiler/aot/`, `src/compiler/runtime/` (LLVM IR generator, type mapper, target triple, LLVM validator, optimizer, object generator, native linker, C runtime, CLI `nusantara toolchain` & `nusantara aot`). | `pengujian/llvm/uji_llvm_fase44.ts` (15 pengujian unit toolchain, target triple, type mapping, IR generation, validation, optimization, runtime & AOT lulus/terverifikasi). |
-| **45** | **Compiler Optimizations (LTO & Inlining)** | `v0.45.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Mesin optimasi lanjutan (LTO inter-prosedural, inlining fungsi inter-modul, vectorization, dan loop unrolling). | Belum dikerjakan (Tahap perencanaan arsitektur). |
-| **46** | **Standalone Static Executable Linker** | `v0.46.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Penggabungan runtime mandiri dan kompilasi biner statis menjadi executable mandiri tunggal tanpa ketergantungan Node.js. | Belum dikerjakan (Tahap perencanaan arsitektur). |
+| **45** | **Linker & Standalone Executable** | `v0.45.0` | 🟢 SELESAI | `src/compiler/linker/`, `src/compiler/executable/`, `src/compiler/runtime/` (Tabel Simbol, Name Mangling `_N_*`, Resolusi Simbol Kuat/Lemah, Relocation Engine ELF/PE/Mach-O, Library Manager statis/dinamis, Dependency Inspector, Binary Inspector, Runtime Packager Profil Bundled/Minimal/Shared, Standalone Packager, CLI `nusantara link`, `nusantara inspect`, `nusantara package`). | `pengujian/linker/uji_linker_fase45.ts` (21 skenario uji tabel simbol, resolusi, relokasi, pustaka, dependensi, format biner, runtime & pengemasan terverifikasi). |
+| **46** | **Compiler Optimizations (LTO & Inlining)** | `v0.46.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Mesin optimasi lanjutan (LTO inter-prosedural, inlining fungsi inter-modul, vectorization, dan loop unrolling). | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **47** | **Game Engine & Multimedia Toolkit** | `v0.47.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Pustaka rendering grafis 2D/3D (WebGL/Metal/Vulkan), audio spasial, dan fisika game dengan API berbahasa Indonesia. | Belum dikerjakan (Tahap perencanaan arsitektur). |
 | **48** | **NusantaraOS Kernel & System Architecture** | `v1.0.0` | 🔵 BELUM DIIMPLEMENTASIKAN | Visi puncak kedaulatan teknologi: Sistem Operasi mandiri dengan microkernel, manajemen memori, dan antarmuka nasional. | Visi jangka panjang proyek. |
 
@@ -95,12 +95,14 @@ Berdasarkan audit source code di `src/`, berikut kluster kapabilitas yang benar-
    - Nusantara Intermediate Representation (NIR) berbasis Static Single Assignment (SSA) dan Control Flow Graph (CFG) lengkap dengan sistem tipe data kuat (`i1`, `i32`, `i64`, `f64`, `string`, `ptr`, `struct`, dll), abstraksi `NIRBuilder`, penurun AST ke NIR (`ast-to-nir`), analisis dominator tree & dominance frontier, konversi `Mem2Reg` (promosi alokasi stack alloca/load/store ke register SSA murni), NIR Verifier semantik, serialisasi/deserialisasi JSON round-trip, optimizer pass manager (Constant Folding, Algebraic Simplification, Dead Code Elimination), visualizer teks IR, dan antarmuka CLI `nusantara nir`.
 7. **LLVM Backend & AOT Native Compilation (Phase 44):**
    - Generator kode LLVM IR tekstual valid dari NIRModule, sistem deteksi aman `LLVMToolchainManager` (clang, llc, opt, llvm-as, lld), pemetaan tipe data native termasuk pointer opaque (LLVM 15+), validasi sintaksis/semantik LLVM IR, integrasi optimizer `opt`, generator berkas objek via `llc`/`clang`, linker executable biner native via `clang` yang ditautkan dengan C Runtime stub Nusantara (`main` entrypoint, helper I/O dan alokasi memori), serta CLI `nusantara toolchain` dan `nusantara aot`.
+8. **Linker & Standalone Executable (Phase 45):**
+   - Sistem linker komprehensif: Tabel simbol (`SymbolTable`) dengan skema name mangling terstruktur (`_N_*`), resolusi simbol kuat vs lemah (`SymbolResolver`) dengan deteksi galat duplikasi dan simbol tak terdefinisi, mesin relokasi multi-format (`RelocationManager` untuk ELF x86_64/AArch64, PE/COFF, Mach-O), manajer pustaka statis/dinamis (`LibraryManager`) dengan dukungan `[pustaka]` pada `nusantara.toml`, inspeksi dependensi runtime (`DependencyInspector`), inspektur format biner mesin bawaan (`BinaryInspector`), runtime packager dengan profil `BUNDLED`/`MINIMAL`/`SHARED`, pembangun executable mandiri (`ExecutableBuilder`), pengemas aplikasi distribusi portabel (`StandalonePackager`), serta antarmuka CLI `nusantara link`, `nusantara inspect`, dan `nusantara package`.
 
 ---
 
 ## 4. Fitur yang Belum Selesai & Batasan Implementasi Saat Ini
 
-Berdasarkan audit kejujuran teknis repositori v0.44.0:
+Berdasarkan audit kejujuran teknis repositori v0.45.0:
 
 1. **Jembatan Native Biner Mobile (Phase 37):**
    - Jembatan `JembatanMobileNative` saat ini beroperasi di atas *memory message bus simulator*. Binding langsung ke biner native Kotlin (JNI/Android) dan Swift (WebKit message handlers/iOS) belum diimplementasikan.
@@ -117,24 +119,24 @@ Berdasarkan audit kejujuran teknis repositori v0.44.0:
    - Algoritma kriptografi Ed25519, hashing SHA-256, dan atomic rollback teruji pada level file/resource runtime. Pembaruan OTA pada tingkat firmware/OS perangkat fisik berstatus **BELUM DIVERIFIKASI**.
 7. **Ketersediaan Biner LLVM pada Lingkungan Container Saat Ini (Phase 44):**
    - Seluruh pipeline generator LLVM IR, validator, optimizer, object generator, linker, dan C runtime stub telah lengkap dan teruji unit/integrasi. Pada container cloud yang belum memiliki paket biner `clang`/`llc` terpasang, tahap pembuatan berkas objek dan biner eksekutabel dilewati secara elegan (marked as transparently skipped test) tanpa pemalsuan output biner.
-8. **Riset Tingkat Rendah Menuju NusantaraOS (Phase 45–48):**
-   - Compiler Optimizations LTO, Standalone Static Linker, Game Engine Asli, dan Kernel NusantaraOS (status: **BELUM DIIMPLEMENTASIKAN**).
+8. **Riset Tingkat Rendah Menuju NusantaraOS (Phase 46–48):**
+   - Compiler Optimizations LTO, Game Engine Asli, dan Kernel NusantaraOS (status: **BELUM DIIMPLEMENTASIKAN**).
 
 ---
 
 ## 5. Rangkaian Pengujian Otomatis yang Dijalankan (Verification Suite)
 
-Seluruh 40 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 39 suite pengujian TypeScript) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap pipeline:
+Seluruh 41 skrip pengujian berikut (1 skrip audit 167 berkas fondasi + 40 suite pengujian TypeScript) diintegrasikan ke dalam `npm test` dan dieksekusi secara otomatis pada setiap pipeline:
 
 | Metrik Verifikasi | Nilai Faktual | Keterangan Operasional |
 |---|:---:|---|
 | **Audit Fondasi** | **1 Skrip** | Skrip eksekutor Node.js (`skrip/periksa_fondasi.js`) |
-| **Suite Pengujian TypeScript** | **39 Suite** | 39 berkas suite pengujian TypeScript di direktori `pengujian/` |
+| **Suite Pengujian TypeScript** | **40 Suite** | 40 berkas suite pengujian TypeScript di direktori `pengujian/` |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Integritas dokumen EBNF, spesifikasi tata bahasa, lisensi, dan contoh (Phase 1–5) |
-| **Kasus Pengujian TypeScript** | **1.074 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 39 suite TypeScript (1.073 Lulus, 1 Skipped transparan) |
-| **Total Pemeriksaan Gabungan** | **1.241 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.074 kasus uji TypeScript = 1.241 pemeriksaan** |
+| **Kasus Pengujian TypeScript** | **1.095 Kasus** | Total skenario uji (`uji(...)` / `test(...)`) yang dieksekusi oleh 40 suite TypeScript (1.093 Lulus, 2 Skipped transparan) |
+| **Total Pemeriksaan Gabungan** | **1.262 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.095 kasus uji TypeScript = 1.262 pemeriksaan** |
 
-> *Catatan:* Angka **1.241** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.074 kasus pengujian TypeScript), bukan jumlah test case tunggal.
+> *Catatan:* Angka **1.262** adalah total pemeriksaan gabungan (167 pemeriksaan berkas fondasi ditambah 1.095 kasus pengujian TypeScript), bukan jumlah test case tunggal.
 
 ```bash
 npm test
@@ -181,6 +183,7 @@ Daftar suite pengujian terverifikasi:
 - `test:pembaruan-v42` — Suite uji SemVer, signed manifest, Ed25519 & OTA rollback (Phase 42).
 - `test:nir-v43` — Suite uji Nusantara Intermediate Representation (NIR), CFG, Mem2Reg SSA & Optimizer (Phase 43).
 - `test:llvm-v44` — Suite uji LLVM Toolchain, Target Triple, Type Mapper, LLVM IR Generator, Validator, Optimizer, Runtime C Stub & AOT Pipeline (Phase 44).
+- `test:linker-v45` — Suite uji Linker, Symbol Table, Relocation Engine, Library Manager, Runtime Packager, Binary Inspector & Standalone Packaging (Phase 45).
 
 ---
 
@@ -189,9 +192,9 @@ Daftar suite pengujian terverifikasi:
 - **Fase Selesai Terbaru:**
   - **Phase 43 (v0.43.0)**: Nusantara Intermediate Representation (NIR), SSA Form (Mem2Reg), CFG Dominator Tree, Optimizer Pass & CLI `nusantara nir` (🟢 Selesai).
   - **Phase 44 (v0.44.0)**: LLVM Native Compiler Backend, Toolchain Manager, Target Triple & Data Layout, Type Mapping, LLVM IR Gen, IR Validator & Optimizer, Object Generator, Linker, Runtime C Stubs, AOT Pipeline & CLI `nusantara toolchain` / `nusantara aot` (🟢 Selesai).
+  - **Phase 45 (v0.45.0)**: Nusantara Linker, Symbol Table System (`_N_*`), Strong/Weak Symbol Resolution, Relocation Engine ELF/PE/Mach-O, Static & Dynamic Linking, Library Manager, Dependency Inspector, Binary Inspector, Runtime Packager Profil Bundled/Minimal/Shared, Standalone Application Packager & CLI `nusantara link` / `inspect` / `package` (🟢 Selesai).
 - **Target Rilis Mendatang:**
-  - **Phase 45 (v0.45.0)**: Advanced Compiler Optimizations (LTO, Function Inlining, Loop Unrolling, Vectorization).
-  - **Phase 46 (v0.46.0)**: Standalone Static Executable Linker (Biner Statis Mandiri Tanpa Node.js).
+  - **Phase 46 (v0.46.0)**: Advanced Compiler Optimizations (LTO, Function Inlining, Loop Unrolling, Vectorization).
   - **Phase 47 (v0.47.0)**: 2D/3D Game Engine & Multimedia Toolkit Asli Nusantara.
   - **Phase 48 (v1.0.0)**: NusantaraOS Kernel & Sovereign Computing Architecture.
 

@@ -4,6 +4,42 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.45.0] — 2026-11-05
+### Phase 45: Nusantara Linker & Standalone Executable
+
+Fase ini mengimplementasikan sistem *linker* tingkat lanjut dan pembuat berkas *standalone executable* mandiri untuk menghubungkan berkas objek (.o), pustaka statis (.a/.lib), pustaka dinamis (.so/.dylib/.dll), serta mengemas runtime dan aplikasi menjadi bundel distribusi portabel yang dapat dijalankan langsung.
+
+#### Ditambahkan:
+- **Sistem Tabel Simbol & Name Mangling (`src/compiler/linker/symbol-table.ts`):**
+  - Penyimpanan simbol komprehensif (`SymbolTable`) yang mendukung binding `GLOBAL`, `LOCAL`, dan `WEAK`, serta visibilitas `DEFAULT`, `HIDDEN`, dan `PROTECTED`.
+  - Skema penamaan terstruktur `SymbolNameMangler`: prefix `_N_F_` untuk fungsi, `_N_V_` untuk variabel global, `_N_C_` untuk konstanta, dan identifikasi entry point `_N_F_utama_utama`.
+- **Mesin Resolusi Simbol (`src/compiler/linker/symbol-resolver.ts`):**
+  - Resolusi simbol internal, eksternal, dan antar-objek lintas berkas.
+  - Penimpaan simbol lemah (*weak symbol*) oleh simbol kuat (*strong symbol*) secara deterministik.
+  - Deteksi dan pelaporan galat terstruktur untuk konflik simbol ganda (`LN4001`) dan simbol belum terdefinisi (`LN4002`) dalam Bahasa Indonesia.
+- **Mesin Relokasi Multi-Format (`src/compiler/linker/relocation-manager.ts`):**
+  - Pemodelan dan validasi relokasi arsitektur ELF (x86_64, AArch64), PE/COFF (AMD64), dan Mach-O.
+  - Validasi keberadaan simbol target, verifikasi batas offset seksi, dan kalkulasi addend PC32 dengan pencegahan overflow.
+- **Linker Statis & Dinamis (`src/compiler/linker/static-linker.ts`, `dynamic-linker.ts`):**
+  - Linking statis objek dan pustaka (`.a`, `.lib`) dengan opsi `--strip` dan `--no-default-libraries`.
+  - Linking dinamis pustaka bersama (`.so`, `.dylib`, `.dll`) dengan konfigurasi `RPATH` (`$ORIGIN`, `@executable_path`) dan `-fPIC`.
+- **Manajer Pustaka & Inspektur Dependensi (`src/compiler/linker/library-manager.ts`, `dependency-inspector.ts`):**
+  - Parsing konfigurasi `[pustaka]` / `[libraries]` pada `nusantara.toml` untuk jalur pencarian (`pencarian`), pustaka statis, dan pustaka dinamis.
+  - Analisis dependensi biner saat runtime di Linux (`ldd`), macOS (`otool`), dan Windows (`dumpbin`), memetakan pustaka yang ditemukan vs missing.
+- **Pengemasan Runtime & Dependensi (`src/compiler/runtime/runtime-packager.ts`, `runtime-dependencies.ts`):**
+  - Tiga mode distribusi runtime: `BUNDLED` (lengkap mandiri), `MINIMAL` (alokasi memori dasar dan libc), dan `SHARED` (pustaka bersama dinamis).
+- **Inspektur Format Biner Mesin (`src/compiler/executable/binary-inspector.ts`, `binary-metadata.ts`):**
+  - Inspeksi biner native bawaan tanpa alat eksternal untuk header ELF (`\x7fELF`), PE/COFF (`MZ`), dan Mach-O, memverifikasi arsitektur, OS ABI, bitness, dan tipe berkas.
+- **Pembangun Executable Mandiri & Standalone Packager (`src/compiler/executable/executable-builder.ts`, `standalone-packager.ts`):**
+  - Pembuatan biner executable dari kode sumber `.nusantara` atau berkas objek `.o`.
+  - Pembuatan struktur direktori distribusi mandiri (`bin/`, `lib/`, `config/`, `resources/`, `manifest.json`, `LISENSI.txt`, `BACA-SAYA.txt`) dengan hashing SHA-256 dan pembuatan arsip terkompresi.
+- **Integrasi Antarmuka CLI (`src/paket/cli.ts`):**
+  - `nusantara link <objek...>`: Menautkan objek menjadi biner mandiri.
+  - `nusantara inspect <biner>`: Analisis format biner dan dependensi runtime.
+  - `nusantara package -b <biner> -o <dist>`: Mengemas executable menjadi bundel distribusi portabel.
+- **Rangkaian Pengujian Otomatis (`pengujian/linker/uji_linker_fase45.ts`):**
+  - 21 pengujian unit dan integrasi mencakup tabel simbol, resolusi, relokasi, pustaka, dependensi, format biner, runtime packager, executable builder, dan standalone packager (20 pengujian lulus 100%, 1 pengujian biner native ditandai *SKIPPED* secara transparan karena ketiadaan linker sistem di host).
+
 ## [v0.44.0] — 2026-11-05
 ### Phase 44: LLVM Backend & AOT Native Compilation
 

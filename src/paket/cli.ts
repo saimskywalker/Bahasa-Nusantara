@@ -45,6 +45,8 @@ import {
 } from '../compiler/nir';
 import { AOTCompiler } from '../compiler/aot';
 import { LLVMToolchainManager } from '../compiler/llvm';
+import { LinkerManager, DependencyInspector } from '../compiler/linker';
+import { BinaryInspector, ExecutableBuilder, StandalonePackager } from '../compiler/executable';
 
 export interface OpsiCLI {
   pengelola?: PengelolaPaket;
@@ -366,6 +368,30 @@ export class NusantaraCLI {
         case 'aot':
         case 'kompilasi': {
           return this.prosesPerintahAOT(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'link':
+        case 'taut': {
+          return this.prosesPerintahLink(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'inspect':
+        case 'inspeksi': {
+          return this.prosesPerintahInspect(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'package':
+        case 'kemas': {
+          return this.prosesPerintahPackage(args.slice(1), {
             json: opsiJSON,
             warna: opsiWarna,
           });
@@ -1017,6 +1043,242 @@ export class NusantaraCLI {
     }
 
     return res.success ? 0 : 1;
+  }
+
+  /**
+   * Menangani perintah 'nusantara link' untuk menautkan berkas objek native (Phase 45).
+   */
+  private prosesPerintahLink(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    const objectFiles: string[] = [];
+    let outputExecutable = 'program';
+    let isStatic = false;
+    const libraryPaths: string[] = [];
+    const staticLibraries: string[] = [];
+    const sharedLibraries: string[] = [];
+    let debug = false;
+    let strip = false;
+    let targetTriple: string | undefined;
+
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if (arg === '-o' && i + 1 < args.length) {
+        outputExecutable = args[++i];
+      } else if (arg.startsWith('-o=')) {
+        outputExecutable = arg.slice(3);
+      } else if (arg === '--static') {
+        isStatic = true;
+      } else if (arg === '--shared') {
+        isStatic = false;
+      } else if (arg === '-L' && i + 1 < args.length) {
+        libraryPaths.push(args[++i]);
+      } else if (arg.startsWith('-L')) {
+        libraryPaths.push(arg.slice(2));
+      } else if (arg === '-l' && i + 1 < args.length) {
+        sharedLibraries.push(args[++i]);
+      } else if (arg.startsWith('-l')) {
+        sharedLibraries.push(arg.slice(2));
+      } else if (arg === '-g' || arg === '--debug') {
+        debug = true;
+      } else if (arg === '-s' || arg === '--strip') {
+        strip = true;
+      } else if (arg.startsWith('--target=')) {
+        targetTriple = arg.slice(9);
+      } else if (!arg.startsWith('-')) {
+        objectFiles.push(arg);
+      }
+    }
+
+    if (objectFiles.length === 0) {
+      this.error(
+        "Perintah 'nusantara link' memerlukan minimal satu berkas objek (.o / .obj).\nPenggunaan: nusantara link <obj1.o> [obj2.o] -o <output> [--static] [--shared] [-L <path>] [-l <lib>]"
+      );
+      return 2;
+    }
+
+    const linker = new LinkerManager({ targetTriple });
+    const res = linker.link({
+      objectFiles,
+      outputExecutable,
+      isStatic,
+      libraryPaths,
+      staticLibraries,
+      sharedLibraries,
+      debug,
+      strip,
+    });
+
+    if (opsi.json || args.includes('--json')) {
+      this.log(JSON.stringify(res, null, 2));
+      return res.success ? 0 : 1;
+    }
+
+    this.log('======================================================');
+    this.log('          HASIL LINKER NATIVE NUSANTARA               ');
+    this.log('======================================================');
+    for (const d of res.diagnostics) {
+      this.log(d);
+    }
+
+    return res.success ? 0 : 1;
+  }
+
+  /**
+   * Menangani perintah 'nusantara inspect' untuk memeriksa biner eksekutabel (Phase 45).
+   */
+  private prosesPerintahInspect(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    let targetBinary = '';
+    let showSymbols = false;
+    let showSections = false;
+    let showDependencies = false;
+
+    for (const arg of args) {
+      if (arg === '--symbols' || arg === '-s') {
+        showSymbols = true;
+      } else if (arg === '--sections' || arg === '-S') {
+        showSections = true;
+      } else if (arg === '--dependencies' || arg === '-d') {
+        showDependencies = true;
+      } else if (!arg.startsWith('-') && !targetBinary) {
+        targetBinary = arg;
+      }
+    }
+
+    if (!targetBinary) {
+      this.error(
+        "Perintah 'nusantara inspect' memerlukan berkas target biner.\nPenggunaan: nusantara inspect <biner> [--symbols] [--sections] [--dependencies]"
+      );
+      return 2;
+    }
+
+    const meta = BinaryInspector.inspect(targetBinary);
+    const depInspector = new DependencyInspector();
+    const depReport = depInspector.inspect(
+      targetBinary,
+      meta.operatingSystem === 'unknown' ? 'linux' : meta.operatingSystem
+    );
+
+    if (opsi.json || args.includes('--json')) {
+      this.log(JSON.stringify({ metadata: meta, dependencies: depReport }, null, 2));
+      return 0;
+    }
+
+    this.log('======================================================');
+    this.log('          INSPEKSI BINER NATIVE NUSANTARA             ');
+    this.log('======================================================');
+    this.log(`Berkas Target   : ${meta.filePath}`);
+    this.log(`Format Biner    : ${meta.format} (${meta.bits}-bit, ${meta.endianness})`);
+    this.log(`Arsitektur      : ${meta.architecture}`);
+    this.log(`Sistem Operasi  : ${meta.operatingSystem}`);
+    this.log(`Ukuran Berkas   : ${meta.fileSizeBytes} bytes`);
+    this.log(`Entry Point     : ${meta.entryPointAddress || 'N/A'}`);
+
+    if (showSections || (!showSymbols && !showDependencies)) {
+      this.log('\n--- Daftar Seksi (Section Headers) ---');
+      for (const sec of meta.sections) {
+        this.log(
+          `  [${sec.name.padEnd(16)}] Offset: 0x${sec.offset.toString(16).padStart(6, '0')} | Ukuran: ${sec.size} bytes`
+        );
+      }
+    }
+
+    if (showDependencies || (!showSymbols && !showSections)) {
+      this.log('\n--- Dependensi Dinamis Runtime ---');
+      for (const dep of depReport.dependencies) {
+        const status = dep.found ? 'TERPENUHI' : 'HILANG';
+        this.log(`  - ${dep.name.padEnd(20)} [${status}] (${dep.resolvedPath || 'tidak ditemukan'})`);
+      }
+    }
+
+    if (showSymbols) {
+      this.log('\n--- Simbol Impor / Ekspor ---');
+      this.log(`  Ekspor: ${meta.exportedSymbols.join(', ') || '(kosong)'}`);
+      this.log(`  Impor : ${meta.importedSymbols.join(', ') || '(kosong)'}`);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Menangani perintah 'nusantara package' untuk mengemas aplikasi standalone (Phase 45).
+   */
+  private prosesPerintahPackage(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    let sourceOrExe = '';
+    let outputDir = './dist';
+    let appName = 'aplikasi-nusantara';
+    let appVersion = '1.0.0';
+
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if ((arg === '--output' || arg === '-o') && i + 1 < args.length) {
+        outputDir = args[++i];
+      } else if (arg.startsWith('--output=')) {
+        outputDir = arg.slice(9);
+      } else if (arg === '--nama' && i + 1 < args.length) {
+        appName = args[++i];
+      } else if (arg === '--versi' && i + 1 < args.length) {
+        appVersion = args[++i];
+      } else if (!arg.startsWith('-') && !sourceOrExe) {
+        sourceOrExe = arg;
+      }
+    }
+
+    if (!sourceOrExe) {
+      this.error(
+        "Perintah 'nusantara package' memerlukan berkas sumber (.nusantara) atau executable.\nPenggunaan: nusantara package <berkas.nusantara> [--output <dist>] [--nama <app>] [--versi <ver>]"
+      );
+      return 2;
+    }
+
+    const cleanBaseName = sourceOrExe.split(/[/\\]/).pop()?.replace(/\.[^/.]+$/, '') || appName;
+    appName = cleanBaseName;
+
+    // Jika target adalah file .nusantara, bangun dulu executable via ExecutableBuilder
+    let exePath = sourceOrExe;
+    if (sourceOrExe.endsWith('.nusantara')) {
+      const builder = new ExecutableBuilder();
+      const bRes = builder.build({
+        sourceFilePath: sourceOrExe,
+        outputDirectory: outputDir,
+        outputFilename: appName,
+      });
+      if (bRes.executablePath) {
+        exePath = bRes.executablePath;
+      }
+    }
+
+    const pkgRes = StandalonePackager.package({
+      appName,
+      appVersion,
+      executablePath: exePath,
+      outputDirectory: outputDir,
+    });
+
+    if (opsi.json || args.includes('--json')) {
+      this.log(JSON.stringify(pkgRes, null, 2));
+      return pkgRes.success ? 0 : 1;
+    }
+
+    this.log('======================================================');
+    this.log('      PENGEMASAN APLIKASI STANDALONE NUSANTARA        ');
+    this.log('======================================================');
+    for (const d of pkgRes.diagnostics) {
+      this.log(d);
+    }
+    this.log(`\nDirektori Standalone : ${pkgRes.standaloneDirectory}`);
+    this.log(`Arsip Distribusi     : ${pkgRes.archivePath}`);
+    this.log(`Manifest File        : ${pkgRes.manifestPath}`);
+    this.log(`Total Berkas Dikemas : ${pkgRes.filesPackaged.length} berkas`);
+
+    return pkgRes.success ? 0 : 1;
   }
 
   /**
@@ -2414,6 +2676,11 @@ Opsi Perintah 'uji':
 Opsi Perintah 'format':
   --tulis, -w            Tulis hasil format langsung ke berkas (in-place) secara aman
   --cek                  Periksa apakah berkas sudah terformat tanpa melakukan modifikasi
+
+Perintah Linker & Executable (Phase 45):
+  nusantara link <obj1.o> [obj2.o] -o <output> [--static] [--shared] [-L <path>] [-l <lib>]
+  nusantara inspect <biner> [--symbols] [--sections] [--dependencies]
+  nusantara package <berkas.nusantara> [--output <dist>] [--nama <app>] [--versi <ver>]
 
 Opsi Global:
   --debug                Tampilkan jejak tumpukan lengkap dan info diagnostik rinci

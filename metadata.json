@@ -1,6 +1,6 @@
 {
   "name": "NUSANTARA - Bahasa Pemrograman Indonesia",
-  "description": "LLVM Backend & AOT Native Compilation, NIR (Nusantara Intermediate Representation), Mobile App Framework & OTA Updates, Store Integration, Distribution, Native API, GUI Framework, dan Toolchain bahasa pemrograman NUSANTARA v0.44.0.",
+  "description": "Nusantara Linker & Standalone Executable, LLVM Backend & AOT Native Compilation, NIR (Nusantara Intermediate Representation), Mobile App Framework, GUI, dan Toolchain bahasa pemrograman NUSANTARA v0.45.0.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

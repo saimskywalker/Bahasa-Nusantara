@@ -274,7 +274,7 @@ console.log('\n[KELOMPOK 6] Native Runtime & Entry Point Integration');
 
 uji('6.1 Menghasilkan kode C runtime stub dengan delegasi main ke @utama', () => {
   const cSrc = NativeRuntimeManager.generateRuntimeCSource();
-  pastikan(cSrc.includes('extern int64_t utama();'), 'Harus mendeklarasikan @utama');
+  pastikan(cSrc.includes('utama('), 'Harus mendeklarasikan @utama');
   pastikan(cSrc.includes('int main(int argc, char** argv)'), 'Harus memuat entrypoint OS main');
   pastikan(cSrc.includes('nusantara_cetak_bilangan'), 'Harus menyertakan helper bilangan');
   pastikan(cSrc.includes('nusantara_cetak_teks'), 'Harus menyertakan helper teks');

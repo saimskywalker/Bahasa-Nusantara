@@ -11,14 +11,25 @@ const isNode =
   typeof process !== 'undefined' &&
   Boolean(process?.versions?.node);
 
+declare const require: ((id: string) => any) | undefined;
+
 function getRuntimeNodeModule<T = any>(moduleName: string): T | null {
   if (!isNode) return null;
   try {
-    const dynamicRequire = new Function('m', 'return require(m)');
-    return dynamicRequire(moduleName);
+    if (typeof require === 'function') {
+      return require(moduleName);
+    }
+    const proc = (globalThis as any).process;
+    if (proc && typeof proc.getBuiltinModule === 'function') {
+      return proc.getBuiltinModule(moduleName);
+    }
+    if (proc && proc.mainModule && typeof proc.mainModule.require === 'function') {
+      return proc.mainModule.require(moduleName);
+    }
   } catch {
     return null;
   }
+  return null;
 }
 
 export const safeCP = {

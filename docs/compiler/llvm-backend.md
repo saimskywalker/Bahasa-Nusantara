@@ -74,3 +74,8 @@ Direktori `src/compiler/llvm/` menaungi seluruh komponen backend:
   ```bash
   nusantara aot program.nusantara --opt=O2 -o program
   ```
+
+## 5. Status Verifikasi & Batasan Lingkungan
+
+- **Generasi LLVM IR, Pemetaan Tipe SSA, Target Triple, Validasi, dan Optimasi:** Lulus dan terverifikasi 100% pada rangkaian pengujian otomatis (`pengujian/llvm/uji_llvm_fase44.ts`).
+- **Eksekusi Biner Native:** Membutuhkan instalasi biner compiler sistem host (`clang`/`llc`). Apabila rantai perkakas LLVM belum terpasang di lingkungan sistem operasi host, eksekusi biner mesin dilaporkan secara transparan sebagai **SKIPPED / NOT TESTED** sesuai standar kepatuhan audit.

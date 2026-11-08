@@ -1,0 +1,28 @@
+// ============================================
+// CONTOH 1: GAME PERTAMA (2D)
+// Bahasa Pemrograman Nusantara v0.47.0
+// ============================================
+
+program GamePertama
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== MEMULAI CONTOH GAME 2D PERTAMA ===")
+
+    // 1. Buat Aplikasi Game
+    app : peta = game.buatAplikasiGame("Game Pertama Nusantara", 800, 600)
+    tampilkan("Aplikasi game berhasil dibuat: ", app["judul"])
+
+    // 2. Operasi Geometri Vektor dan Warna
+    posisi : peta = game.vektor2(100, 200)
+    kecepatan : peta = game.vektor2(10, -5)
+    warnaPemain : peta = game.warna(0.2, 0.7, 1.0, 1.0)
+    batasPemain : peta = game.kotak(100, 200, 32, 32)
+
+    tampilkan("Posisi awal: (100, 200)")
+    tampilkan("Warna pemain (hex): ", warnaPemain["hex"])
+
+    // 3. Simulasi langkah frame
+    app.langkah(1 / 60)
+    tampilkan("Frame pertama berhasil disimulasikan pada target FPS: 60")
+    tampilkan("=== CONTOH GAME 2D PERTAMA SELESAI ===")
+selesai

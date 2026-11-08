@@ -4,6 +4,93 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.47.0] — 2026-11-08
+### Phase 47: Nusantara Game Development Kit (Game SDK)
+
+Fase ini mengimplementasikan Nusantara Game Development Kit (Game SDK) sebagai toolkit pengembangan game 2D dan 3D terpadu, modular, dan berperforma tinggi untuk bahasa pemrograman NUSANTARA. Implementasi ini mencakup siklus game loop deterministik dengan fixed timestep accumulator, abstraksi grafika multi-backend dengan software rasterizer command buffer virtual, kamera 2D dan 3D, generator primitif geometri mesh 3D, material, tekstur, shader, pencahayaan, arsitektur Entity Component System (ECS) dengan sparse indexing dan serialisasi penuh, sistem fisika 2D (integrasi kecepatan, deteksi tabrakan AABB & Lingkaran, pemisahan benturan impuls, dan raycasting), manajer input aksi keyboard dan mouse terpadu, manajer audio multi-kategori dan hierarki volume, animasi sprite timeline, sistem partikel 2D, antarmuka pengguna (Game UI) modular, proteksi aset anti path-traversal & format whitelist, jaringan multiplayer terserialisasi, sistem simpanan verifikasi checksum SHA-256 & migrasi versi, integrasi Actor Model (Phase 46) melalui ActorComponent, modul pustaka standar `std:game` (alias: `permainan`, `engine`), perkakas baris perintah `nusantara game` (`new`, `run`, `build`, `inspect`, `benchmark`, `assets`, `package`), serta profiler performa game.
+
+#### Ditambahkan:
+- **Core Engine & Deterministic GameLoop (`src/runtime/game/core/`):**
+  - **Siklus GameLoop (`game-loop.ts`):** Fixed timestep accumulator dengan simulasi deterministik (`update`, `render`, `fixedUpdate`), batas akumulator waktu (*spiral of death protection*), serta metode `step(dt)` manual untuk pengujian otomatis.
+  - **Manajemen Waktu (`time.ts`):** `Time` dengan `deltaTime`, `unscaledDeltaTime`, `timeScale`, `totalTime`, dan perhitungan FPS real-time.
+  - **Sistem Peristiwa (`event-system.ts`):** `GameEventBus` terisolasi dengan registrasi langganan `on` (mengembalikan fungsi pembatalan unsubscribe), sekali jalan `once`, `off`, dan `emit`.
+  - **Orkestrator GameApp (`game-app.ts`):** Penggabungan seluruh subsistem (renderer, scene, input, audio, assets, save, ui, physics) dalam satu wadah runtime aplikasi game.
+- **Geometri & Matematika Grafika (`src/runtime/game/types.ts`):**
+  - `Vector2`: Operasi penjumlahan, pengurangan, penskalaan, panjang, jarak, normalisasi, dot product, rotasi, pembatasan rentang, dan alias dwibahasa Indonesia/Inggris.
+  - `Vector3`: Operasi vektor 3 dimensi, panjang, normalisasi, dot product, cross product, dan interpolasi lerp.
+  - `Color`: Representasi kanal RGBA ternormalisasi (0..1), konversi format heksadesimal `#RRGGBB` / `#RRGGBBAA`, format CSS `rgba(...)`, dan warna dasar konstan (`putih`, `hitam`, `merah`, `hijau`, `biru`).
+  - `Rect`: Batas persegi 2D dengan titik posisi, ukuran, hit-test `contains`, pengujian tumpang tindih `intersects`, dan pelebaran `expand`.
+- **Grafika 2D & 3D (`src/runtime/game/graphics/`):**
+  - **Abstraksi Renderer Terpadu (`renderer.ts`, `canvas2d-renderer.ts`):** Antarmuka `IRenderer` dengan `Canvas2DRenderer` yang dapat merender ke HTML5 Canvas atau command buffer software rasterizer virtual (tanpa ketergantungan wajib pada GPU fisik headless).
+  - **Kamera 2D (`camera.ts`):** Transformasi koordinat `worldToScreen`, `screenToWorld`, pembesaran `zoom`, pembatasan batas pandang (*bounds clamp*), dan pembidikan target halus (*follow*).
+  - **Kamera 3D (`camera.ts`):** Proyeksi perspektif dengan sudut pandang `fov`, rasio aspek `aspectRatio`, vektor pengamatan `lookAt`, dan orientasi vektor maju `getForward`.
+  - **Pembangkit Mesh 3D (`mesh.ts`):** Pembuatan primitif kubus (`createCube`), bidang datar (`createPlane`), dan bola (`createSphere`) dengan data posisi vertex, normal, UV, dan indeks segitiga.
+  - **Material & Tekstur (`material.ts`, `texture.ts`):** `MaterialManager` pengelola shader/warna dan `TextureManager` pembuat tekstur warna pekat serta pemuat berkas gambar.
+  - **Shader & Pencahayaan (`lighting.ts`):** `ShaderManager` pembuat shader mock terkompilasi, serta objek cahaya `Light` tipe directional, point, dan spotlight.
+- **Entity Component System & Scene Manager (`src/runtime/game/ecs/`):**
+  - **Komponen Inti (`component.ts`):** Komponen siap pakai `Transform2D`, `Transform3D`, `Sprite`, `MeshRenderer`, `CameraComponent`, `RigidBody2D`, `RigidBody3D`, `BoxCollider2D`, `CircleCollider2D`, `AudioSourceComponent`, `AnimationComponent`, `ScriptComponent`, `ActorComponent`, dan `NetworkIdentity`.
+  - **Entitas & Hierarki (`entity.ts`):** Entitas game dengan penambahan/pencarian/penghapusan komponen instan, aktivasi, tag, lapisan, dan hubungan induk/anak (*parent/children hierarchy*).
+  - **Dunia ECS (`world.ts`):** Penampung entitas dengan query filter sparse indexing berkinerja tinggi, eksekutor sistem, serta serialisasi snapshot JSON dunia game dan deserialisasi penuh.
+  - **Pengelola Adegan (`scene.ts`):** `Scene` dan `SceneManager` dengan registrasi adegan, transisi adegan aktif, dan pendelegasian siklus pembaruan serta penggambaran.
+- **Fisika 2D Deterministik (`src/runtime/game/physics/physics2d.ts`):**
+  - `PhysicsWorld2D` dengan integrasi gravitasi terpadu.
+  - Deteksi tabrakan AABB vs AABB dan Lingkaran vs Lingkaran.
+  - Resolusi tabrakan: pemisahan penetrasi posisi dan pantulan impuls kecepatan berdasarkan koefisien restitusi.
+  - Penembakan sinar (*raycasting*) untuk pengujian visibilitas dan halangan garis pandang.
+- **Manajemen Input (`src/runtime/game/input/input-manager.ts`):**
+  - Pelacakan status tombol keyboard (`isKeyDown`, `isKeyPressed`).
+  - Pelacakan posisi mouse dan penekanan tombol klik mouse.
+  - Pemetaan aksi abstrak (*action mapping*) untuk memisahkan logika input game dari tombol fisik.
+  - Utilitas peristiwa simulasi untuk pengujian otomatis headless tanpa perangkat keras input nyata.
+- **Sistem Audio Berlapis (`src/runtime/game/audio/audio-manager.ts`):**
+  - Registrasi klip suara `AudioClip` dengan durasi dan sumber berkas.
+  - Pemutaran, jeda, pemulihan (*resume*), dan penghentian suara instan.
+  - Hierarki volume berlapis: volume master dan pengali kategori independen (Master, Music, SFX, Voice).
+- **Animasi Sprite & Sistem Partikel (`src/runtime/game/animation/`, `src/runtime/game/particles/`):**
+  - `SpriteAnimationController`: Pembedahan lembar spritesheet otomatis (`createFromSpritesheet`), pergantian frame berbasis timeline durasi, looping, dan callback `onComplete`.
+  - `ParticleEmitter2D`: Emisi partikel dinamis dengan kecepatan, percepatan gravitasi, rentang masa hidup (*lifetime*), interpolasi warna awal ke akhir, dan fungsi ledakan partikel (*burst*).
+- **Game UI Modular (`src/runtime/game/ui/game-ui.ts`):**
+  - Hirarki antarmuka pengguna: `UIPanel`, `UIButton` interaktif, `UILabel` tipografi, `UIProgressBar` penunjuk darah/status, dan `UISlider` penggeser nilai terikat batas.
+  - Pemrosesan peristiwa input hit-testing global ke lokal.
+- **Manajemen Aset & Keamanan (`src/runtime/game/assets/asset-manager.ts`):**
+  - `AssetManager` terpadu dengan cache memori untuk tekstur, audio, dan berkas JSON.
+  - Perisai anti path-traversal (pencegahan eksploitasi `../` dan akses berkas sistem sensitif).
+  - Whitelist ekstensi berkas yang diizinkan (`.png`, `.jpg`, `.jpeg`, `.wav`, `.mp3`, `.ogg`, `.json`).
+- **Jaringan & Multiplayer (`src/runtime/game/network/network.ts`):**
+  - `PacketSerializer`: Serialisasi dan deserialisasi tipe paket baku (`CONNECT`, `DISCONNECT`, `INPUT`, `STATE_UPDATE`, `EVENT`, `PING`, `PONG`).
+  - `GameNetworkServer`: Peladen sinkronisasi dengan pelacakan klien tersambung dan penyiaran paket (*broadcast*).
+  - `GameNetworkClient`: Klien game yang terhubung ke server dengan penanganan peristiwa berbasis tipe paket.
+- **Sistem Simpanan Aman (`src/runtime/game/save/save-manager.ts`):**
+  - `SaveManager` dengan pembagian slot simpanan independen.
+  - Proteksi integritas data menggunakan kalkulasi hash checksum SHA-256 (menolak data yang dimanipulasi secara ilegal).
+  - Sistem migrasi versi skema simpanan otomatis saat versi aplikasi diperbarui.
+- **Integrasi Actor Model (`src/runtime/game/ecs/component.ts`):**
+  - `ActorComponent` yang menautkan `ActorRef` dari subsistem konkurensi Phase 46 ke entitas game untuk memproses logika AI asinkron dan komunikasi pesan terisolasi.
+- **Perkakas Proyek & CLI (`src/runtime/game/tools/`, `src/paket/cli.ts`):**
+  - `GameProjectGenerator`: Pembangkit struktur berkas proyek game baru (`project.nusantara.toml`, `src/utama.nusantara`, `adegan_utama.json`, `.gitignore`, `BACA-SAYA.md`).
+  - `GameProfiler`: Pemantau performa real-time (rata-rata FPS, waktu frame, waktu fisika/update/render, alokasi memori, dan throughput simulasi).
+  - Perintah CLI `nusantara game`:
+    - `nusantara game new <Nama>`: Membuat struktur proyek game Nusantara baru.
+    - `nusantara game run [berkas]`: Menjalankan game Nusantara dalam mode simulator deterministik.
+    - `nusantara game build [berkas]`: Mengompilasi dan mengemas game Nusantara ke direktori distribusi `dist/game/`.
+    - `nusantara game inspect`: Memeriksa kapabilitas dan spesifikasi Game SDK.
+    - `nusantara game benchmark`: Menguji performa throughput simulasi dan kapasitas partikel.
+    - `nusantara game assets`: Memvalidasi integritas aset dan proteksi anti path-traversal.
+    - `nusantara game package`: Mengemas game menjadi bundel mandiri portabel.
+- **Pustaka Standar Resmi (`src/stdlib/game.ts`, `src/stdlib/index.ts`):**
+  - Registrasi modul standar `game` (beserta alias `permainan` dan `engine`).
+  - Ekspor fungsi standar: `buatAplikasiGame`, `buatGame`, `vektor2`, `vektor3`, `warna`, `kotak`, `buatEntitas`, `buatDunia`, `buatAdegan`, `kamera2D`, `kamera3D`, `buatPartikel`, `buatTombolUI`, `buatLabelUI`, `buatPanelUI`, `buatProgresUI`, `buatKlienJaringan`, `buatServerJaringan`, `buatManajerSimpan`.
+- **Contoh Program Game Nusantara (`contoh/game/`):**
+  - `contoh/game/2d/game_pertama.nusantara`: Aplikasi game 2D pertama dengan inisialisasi viewport, vektor, dan loop frame.
+  - `contoh/game/2d/platformer.nusantara`: Game platformer dengan kamera 2D, gravitasi, dan lompatan karakter.
+  - `contoh/game/3d/game_3d.nusantara`: Game 3D dengan kamera perspektif, koordinat 3D, dan material warna.
+  - `contoh/game/ecs/entitas.nusantara`: Demonstrasi arsitektur Entity Component System (ECS) dengan entitas ksatria dan monster.
+  - `contoh/game/network/multiplayer.nusantara`: Demonstrasi sinkronisasi multiplayer dan penyimpanan save slot aman.
+- **Dokumentasi Teknis 15 Panduan Komprehensif (`docs/game-sdk/`):**
+  - 15 berkas dokumentasi teknis berbahasa Indonesia mencakup arsitektur inti, math, render loop, ECS, fisika 2D, input, audio, animasi, partikel, UI, aset, networking, save system, integrasi aktor, dan referensi CLI.
+- **Rangkaian Pengujian Otomatis Suite 43 (`pengujian/game/uji_game_sdk_fase47.ts`):**
+  - Suite pengujian ke-43 beranggotakan 33 skenario pengujian unit, integrasi, dan e2e yang lulus 100% (33 LULUS, 0 GAGAL, 0 SKIPPED).
+
 ## [v0.46.0] — 2026-11-06
 ### Phase 46: High-Performance Concurrency (Actor Model)
 

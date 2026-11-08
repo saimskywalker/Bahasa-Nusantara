@@ -2,12 +2,13 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_46:_high--performance_concurrency_(actor_model)-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.46.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_47:_game_development_kit_(game_sdk)-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.47.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-42_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-43_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Game SDK](https://img.shields.io/badge/game_sdk-2d%2F3d_ecs_physics_audio-blue.svg)](docs/game-sdk/01_pendahuluan_arsitektur.md)
 [![Actor Concurrency](https://img.shields.io/badge/concurrency-actor_model_&_structured_async-blue.svg)](docs/runtime/actor-model.md)
 [![Linker](https://img.shields.io/badge/linker-advanced_&_standalone-blue.svg)](docs/compiler/linker.md)
 [![NIR & SSA](https://img.shields.io/badge/compiler-nir_ssa_&_cfg-blue.svg)](docs/compiler/nir.md)
@@ -29,25 +30,25 @@
 
 **NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) tingkat tinggi yang dirancang dan dikembangkan dari nol menggunakan 100% tata bahasa, kata kunci teknis, dan leksikon Bahasa Indonesia.
 
-NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG*, *LLVM Backend & Kompilasi Native Ahead-of-Time (AOT)*, *Sistem Linker & Standalone Executable Generator*, hingga *Sistem Konkurensi Performa Tinggi berbasis Actor Model*.
+NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG*, *LLVM Backend & Kompilasi Native Ahead-of-Time (AOT)*, *Sistem Linker & Standalone Executable Generator*, *Sistem Konkurensi Performa Tinggi berbasis Actor Model*, hingga *Nusantara Game Development Kit (Game SDK)*.
 
 ### Visi & Misi Proyek
 - **Kedaulatan Teknologi & Bahasa:** Memberikan kemandirian dalam ekosistem perangkat lunak nasional melalui bahasa pemrograman formal berstandar internasional (ISO/IEC 14977 EBNF).
 - **Akselerasi Edukasi Komputasi:** Menghilangkan batasan bahasa asing bagi pelajar dan pengembang di seluruh Nusantara dalam memahami konsep algoritma, struktur data, dan rekayasa perangkat lunak.
-- **Produksi Industri & Multiplatform:** Mampu digunakan untuk membangun utilitas terminal, layanan API web, aplikasi desktop GUI, aplikasi seluler produksi, hingga biner kompilasi native yang dioptimalkan.
+- **Produksi Industri & Multiplatform:** Mampu digunakan untuk membangun utilitas terminal, layanan API web, aplikasi desktop GUI, aplikasi seluler produksi, game 2D/3D deterministik, hingga biner kompilasi native yang dioptimalkan.
 - **Evolusi Menuju Sistem Operasi:** Menjadi fondasi runtime dan bahasa pemrograman utama bagi proyek jangka panjang **NusantaraOS**.
 
 ---
 
 ## 2. Status Perkembangan Proyek & Roadmap
 
-- **Status Saat Ini:** **🟢 Phase 46: High-Performance Concurrency (Actor Model) (Milestone v0.46.0)**.
-- **Total Fase Diaudit:** 49 Fase (Phase 1 s/d Phase 49).
-  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 46):** 46 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
-  - 🔵 **Dalam Perencanaan (Phase 47 s/d Phase 49):** 3 fase riset lanjutan (Optimasi Lanjut LTO, Game Engine 2D/3D, dan Kernel NusantaraOS).
-- **Rangkaian Pengujian:** 42 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.127 test cases pada 41 suite TypeScript = total 1.294 pemeriksaan gabungan terverifikasi).
-- **Audit Terakhir:** 6 November 2026.
-- **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 49.
+- **Status Saat Ini:** **🟢 Phase 47: Nusantara Game Development Kit (Game SDK) (Milestone v0.47.0)**.
+- **Total Fase Diaudit:** 50 Fase (Phase 1 s/d Phase 50).
+  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 47):** 47 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
+  - 🔵 **Dalam Perencanaan (Phase 48 s/d Phase 50):** 3 fase riset lanjutan (Grafika Native WebGPU/Vulkan, Optimasi Lanjut LTO, dan Kernel NusantaraOS).
+- **Rangkaian Pengujian:** 43 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.160 test cases pada 42 suite TypeScript = total 1.327 pemeriksaan gabungan terverifikasi).
+- **Audit Terakhir:** 8 November 2026.
+- **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 50.
 
 ---
 
@@ -114,6 +115,23 @@ Seluruh fitur di bawah ini telah diverifikasi melalui audit kode sumber (`src/`)
 - **Manajemen Sumber Daya & Diagnostik Stall:** `ResourceManager` pembatas kuota aktor/mailbox aktif dan `ConcurrencyDiagnostics` pendeteksi aktor macet (*stalls*) dan deadlock siklis.
 - **Dukungan Kompiler & LLVM:** Kata kunci bahasa `aktor`, `terima`, `kirim`, `hentikan`, dan `await`, opcode NIR (`actor.create`, `actor.send`, `actor.stop`, `async.start`, `await`), serta emisi LLVM IR dengan stub native runtime C terintegrasi (`nusantara_actor_*`, `nusantara_task_*`).
 - **CLI Konkurensi:** Perintah `nusantara actor` (`--list`, `--stats`, `--inspect`) dan `nusantara concurrency` (`--benchmark`, `--diagnostics`).
+
+### H. Nusantara Game Development Kit (Game SDK) (Phase 47)
+- **Core Engine & Deterministic GameLoop:** Siklus frame deterministik dengan fixed timestep accumulator (`Time.deltaTime`, `unscaledDeltaTime`, `timeScale`, perhitungan FPS akurat).
+- **Abstraksi Grafika & Rasterizer Virtual:** Antarmuka terpadu `IRenderer` dengan `Canvas2DRenderer` yang mendukung rendering HTML5 Canvas serta software rasterizer command buffer virtual tanpa ketergantungan wajib pada GPU fisik.
+- **Kamera 2D & 3D:** `Camera2D` (koordinat dunia-ke-layar, zoom, pembatasan batas, pergerakan halus) dan `Camera3D` (bidang pandang FOV, rasio aspek, vektor tatap *lookAt*, dan vektor maju).
+- **Primitif 3D, Material & Shader:** Pembangkit mesh geometris (`Mesh.createCube`, `createPlane`, `createSphere`), `MaterialManager`, `TextureManager`, dan kompilasi mock shader `ShaderManager`.
+- **Entity Component System (ECS) & Scene Manager:** Arsitektur ECS berkinerja tinggi dengan indexing sparse query, hierarki parent/children, `SceneManager`, serta serialisasi/deserialisasi penuh snapshot dunia game.
+- **Simulasi Fisika 2D Deterministik:** `PhysicsWorld2D` dengan integrasi gravitasi Euler, deteksi tabrakan AABB dan Lingkaran, pemisahan penetrasi & respon impuls momentum, serta penembakan sinar (*raycasting*).
+- **Manajemen Input Terpadu:** `InputManager` keyboard, mouse (posisi, tombol), pemetaan aksi abstrak terkonfigurasi, dan generator peristiwa input simulasi.
+- **Sistem Audio Berlapis:** `AudioManager` dengan registrasi klip suara, pemutaran, jeda, penghentian, serta hierarki volume master dan multi-kategori (Master, Music, SFX, Voice).
+- **Animasi Sprite & Sistem Partikel:** `SpriteAnimationController` berbasis timeline frame & callback `onComplete`, serta `ParticleEmitter2D` berbasis gravitasi, lifetime, dan interpolasi warna.
+- **Game UI Modular:** Komponen antarmuka `UIPanel`, `UIButton`, `UILabel`, `UIProgressBar`, `UISlider`, dan hit-testing interaksi input.
+- **Manajemen Aset Aman:** `AssetManager` terproteksi perisai anti path-traversal dan whitelist ekstensi file (`.png`, `.jpg`, `.wav`, `.mp3`, `.json`).
+- **Jaringan & Multiplayer:** Serialisasi paket data deterministik `PacketSerializer`, `GameNetworkClient`, dan `GameNetworkServer` (broadcast, state sync).
+- **Sistem Simpanan Aman:** `SaveManager` dengan verifikasi integritas hash checksum SHA-256 dan migrasi versi simpanan otomatis.
+- **Integrasi Actor Model (Phase 46):** `ActorComponent` untuk memetakan perilaku AI entitas, state concurrent, dan pengiriman pesan antar-aktor via `ActorSystem`.
+- **Perkakas Proyek & CLI:** Perintah baris perintah `nusantara game` (`new`, `run`, `build`, `inspect`, `benchmark`, `assets`, `package`) dan `GameProfiler` (FPS, draw calls, waktu frame).
 
 ---
 
@@ -192,6 +210,28 @@ mulai
     kirim(p, Tambah(10))
     kirim(p, Tambah(25))
     hentikan(p)
+selesai
+```
+
+### 4.5 Game Development Kit (Phase 47)
+```nusantara
+program GamePertama
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== GAME PERTAMA NUSANTARA ===")
+
+    // 1. Buat aplikasi game dan dimensi viewport
+    app : peta = game.buatAplikasiGame("Petualangan Nusantara", 800, 600)
+    tampilkan("Aplikasi diinisialisasi:", app["judul"])
+
+    // 2. Vektor geometri dan warna
+    pos : peta = game.vektor2(100, 200)
+    warnaPemain : peta = game.warna(0.2, 0.7, 1.0, 1.0)
+    kotakPemain : peta = game.kotak(100, 200, 32, 32)
+
+    // 3. Simulasikan langkah frame deterministik
+    app.langkah(1 / 60)
+    tampilkan("Simulasi frame sukses pada target 60 FPS")
 selesai
 ```
 

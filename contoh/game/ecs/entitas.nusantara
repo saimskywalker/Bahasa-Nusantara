@@ -1,0 +1,23 @@
+// ============================================
+// CONTOH 4: ENTITY COMPONENT SYSTEM (ECS)
+// Bahasa Pemrograman Nusantara v0.47.0
+// ============================================
+
+program GameECS
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== MEMULAI CONTOH ENTITY COMPONENT SYSTEM (ECS) ===")
+
+    // 1. Buat Dunia ECS
+    dunia : peta = game.buatDunia()
+    tampilkan("Dunia ECS diinisialisasi.")
+
+    // 2. Buat Entitas Pemain dan Musuh
+    pemain : peta = game.buatEntitas("KsatriaNusantara")
+    musuh : peta = game.buatEntitas("MonsterHutan")
+
+    tampilkan("Entitas 1 dibuat: ", pemain["nama"])
+    tampilkan("Entitas 2 dibuat: ", musuh["nama"])
+
+    tampilkan("=== CONTOH ECS SELESAI DENGAN SUKSES ===")
+selesai

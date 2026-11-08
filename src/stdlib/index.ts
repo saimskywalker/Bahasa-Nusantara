@@ -30,6 +30,7 @@ import { simbolEksporRealtime, buatEksporRealtime } from './realtime';
 import { simbolEksporHTTP, buatEksporHTTP } from './http';
 import { simbolEksporGUI, buatEksporGUI } from './gui';
 import { simbolEksporMobile, buatEksporMobile } from './mobile';
+import { simbolEksporGame, buatEksporGame } from './game';
 
 export * from './teks';
 export * from './matematika';
@@ -54,6 +55,7 @@ export * from './realtime';
 export * from './http';
 export * from './gui';
 export * from './mobile';
+export * from './game';
 
 export interface MetadataModulStandar {
   nama: string;
@@ -300,6 +302,24 @@ export const KATALOG_MODUL_STANDAR: Record<string, MetadataModulStandar> = {
     simbolEkspor: simbolEksporMobile,
     pabrikEkspor: () => buatEksporMobile(),
   },
+  game: {
+    nama: 'game',
+    deskripsi: 'Nusantara Game Development Kit (Game SDK): loop, grafika 2D/3D, ECS, fisika, audio, input, partikel, UI, dan networking.',
+    simbolEkspor: simbolEksporGame,
+    pabrikEkspor: () => buatEksporGame(),
+  },
+  permainan: {
+    nama: 'permainan',
+    deskripsi: 'Alias resmi Bahasa Indonesia untuk modul game Nusantara.',
+    simbolEkspor: simbolEksporGame,
+    pabrikEkspor: () => buatEksporGame(),
+  },
+  engine: {
+    nama: 'engine',
+    deskripsi: 'Alias resmi modul game untuk arsitektur game engine Nusantara.',
+    simbolEkspor: simbolEksporGame,
+    pabrikEkspor: () => buatEksporGame(),
+  },
 };
 
 /**
@@ -397,6 +417,12 @@ export const DAFTAR_MODUL_STANDAR_FASE37 = [
   'ios',
 ];
 
+export const DAFTAR_MODUL_STANDAR_FASE47 = [
+  'game',
+  'permainan',
+  'engine',
+];
+
 export const DAFTAR_SEMUA_MODUL_STANDAR = [
   ...DAFTAR_MODUL_STANDAR_INTI,
   ...DAFTAR_MODUL_STANDAR_FASE28,
@@ -404,6 +430,7 @@ export const DAFTAR_SEMUA_MODUL_STANDAR = [
   ...DAFTAR_MODUL_STANDAR_FASE30,
   ...DAFTAR_MODUL_STANDAR_FASE31,
   ...DAFTAR_MODUL_STANDAR_FASE37,
+  ...DAFTAR_MODUL_STANDAR_FASE47,
 ];
 
 /**

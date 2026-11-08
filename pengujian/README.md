@@ -1,9 +1,9 @@
 # Kerangka Kerja & Sistem Pengujian Otomatis NUSANTARA
 
 > **Dokumentasi Resmi Rangkaian Pengujian Mutu (Quality Gate) Bahasa Pemrograman NUSANTARA**  
-> **Versi Rilis:** `v0.46.0` | **Status:** 42 Suite Pengujian Lulus 100%
+> **Versi Rilis:** `v0.47.0` | **Status:** 43 Suite Pengujian Lulus 100%
 
-Direktori `pengujian/` menampung seluruh kerangka pengujian mutu komprehensif bahasa pemrograman NUSANTARA, mulai dari verifikasi dokumen fondasi, analisis leksikal, parsing AST, evaluasi semantik & tipe, interpreter runtime, toolchain, framework web & desktop, ekosistem mobile, intermediate representation (NIR), LLVM backend, linker lanjutan, hingga sistem konkurensi performa tinggi berbasis Actor Model (Phase 1 s/d Phase 46).
+Direktori `pengujian/` menampung seluruh kerangka pengujian mutu komprehensif bahasa pemrograman NUSANTARA, mulai dari verifikasi dokumen fondasi, analisis leksikal, parsing AST, evaluasi semantik & tipe, interpreter runtime, toolchain, framework web & desktop, ekosistem mobile, intermediate representation (NIR), LLVM backend, linker lanjutan, sistem konkurensi (Actor Model), hingga Nusantara Game Development Kit (Phase 1 s/d Phase 47).
 
 ---
 
@@ -13,11 +13,11 @@ Sesuai audit teknis resmi dan transparan, berikut rincian metrik pengujian repos
 
 | Metrik | Jumlah Aktual | Penjelasan Operasional |
 |---|:---:|---|
-| **Skrip Pengujian** | **42 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 41 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
-| **Suite Pengujian** | **42 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
+| **Skrip Pengujian** | **43 Berkas** | Terdiri dari 1 skrip audit fondasi (`skrip/periksa_fondasi.js`) dan 42 skrip pengujian TypeScript (`pengujian/**/*.ts`). |
+| **Suite Pengujian** | **43 Suite** | Masing-masing berkas pengujian bertindak sebagai test suite terisolasi untuk menguji modul atau fase tertentu. |
 | **Pemeriksaan Dokumen Fondasi** | **167 Berkas** | Pemeriksaan keberadaan, kelengkapan isi, format lisensi, dan tata kelola pada Phase 1–5 oleh `skrip/periksa_fondasi.js`. |
-| **Kasus Pengujian TypeScript (Test Cases)** | **1.127 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 41 suite TypeScript (1.124 LULUS, 3 SKIPPED transparan karena toolchain LLVM/Clang host). |
-| **Total Pemeriksaan Gabungan** | **1.294 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.127 kasus uji TypeScript = 1.294 pemeriksaan.** |
+| **Kasus Pengujian TypeScript (Test Cases)** | **1.160 Kasus** | Total skenario pengujian unit, integrasi, dan e2e yang dieksekusi pada 42 suite TypeScript (1.157 LULUS, 3 SKIPPED transparan karena toolchain LLVM/Clang host). |
+| **Total Pemeriksaan Gabungan** | **1.327 Pemeriksaan** | **167 pemeriksaan dokumen fondasi + 1.160 kasus uji TypeScript = 1.327 pemeriksaan.** |
 
 ---
 
@@ -81,13 +81,14 @@ Setiap fitur dan subsistem diklasifikasikan secara jujur dan transparan berdasar
 | 40 | Phase 44 | LLVM Backend & AOT Native Compilation | `npx tsx pengujian/llvm/uji_llvm_fase44.ts` | 15 uji | LULUS | INTEGRATION TEST PASSED |
 | 41 | Phase 45 | Linker, Symbol Table, Relocation & Standalone Executable | `npx tsx pengujian/linker/uji_linker_fase45.ts` | 21 uji | LULUS | INTEGRATION TEST PASSED |
 | 42 | Phase 46 | High-Performance Concurrency (Actor Model) | `npx tsx pengujian/actor/uji_actor_fase46.ts` | 32 uji | LULUS | INTEGRATION TEST PASSED |
+| 43 | Phase 47 | Nusantara Game Development Kit (Game SDK) | `npx tsx pengujian/game/uji_game_sdk_fase47.ts` | 33 uji | LULUS | INTEGRATION TEST PASSED |
 
 ---
 
 ## 4. Cara Menjalankan Pengujian
 
 ### 4.1 Menjalankan Seluruh Rangkaian Pengujian
-Jalankan perintah standar npm untuk mengeksekusi ke-42 suite secara berurutan:
+Jalankan perintah standar npm untuk mengeksekusi ke-43 suite secara berurutan:
 
 ```bash
 npm test
@@ -100,11 +101,12 @@ Setiap fase memiliki target skrip mandiri pada `package.json`:
 # Pengujian Fondasi (Phase 1–5)
 node skrip/periksa_fondasi.js
 
-# Pengujian Kompiler, IR, LLVM, Linker & Aktor (Phase 43–46)
+# Pengujian Kompiler, IR, LLVM, Linker, Aktor & Game SDK (Phase 43–47)
 npm run test:nir-v43
 npm run test:llvm-v44
 npm run test:linker-v45
 npm run test:actor-v46
+npm run test:game-v47
 
 # Pengujian Kompiler Inti (Phase 6–10)
 npm run test:lexer
@@ -133,4 +135,5 @@ npm run test:pembaruan-v42
 5. **Pengujian LLVM Backend & AOT (Phase 44):** Pipeline emisi LLVM IR, pemetaan tipe data SSA, validasi sintaksis/semantik, integrasi optimasi, dan stub runtime C diuji dan divalidasi 100%. Pada lingkungan container tanpa instalasi biner compiler sistem (`clang`/`llc`), pengujian eksekusi biner mesin native ditandai *SKIPPED* secara transparan tanpa membuat klaim sukses palsu.
 6. **Pengujian Linker & Standalone Executable (Phase 45):** Tabel simbol (`SymbolTable`), resolusi simbol kuat/lemah (`SymbolResolver`), validasi relokasi arsitektur ELF/PE/Mach-O (`RelocationManager`), pustaka statis/dinamis (`LibraryManager`), inspektur dependensi runtime (`DependencyInspector`), inspeksi header biner biner mesin (`BinaryInspector`), dan pembuatan bundel mandiri (`StandalonePackager`) diuji 100% menggunakan 21 skenario pengujian. Apabila sistem host tidak memiliki linker eksternal (`clang`/`lld`), pengujian eksekusi executable native akhir dilewati (*SKIPPED*) secara transparan.
 7. **Pengujian Concurrency & Actor Model (Phase 46):** Seluruh siklus hidup aktor (`ActorStatus`), mailbox berbatas dengan isolasi state penuh, jaminan FIFO, strategi supervisi (`RESUME`, `RESTART`, `STOP`), model asinkron (`Task<T>`, `TaskGroup`, `CancellationToken`), pembatasan sumber daya (`ResourceManager`), dan diagnostik deteksi stall/deadlock (`ConcurrencyDiagnostics`) divalidasi 100%. Throughput konkurensi mencapai 40.000–52.000 pesan/detik tanpa kebocoran memori. Apabila clang/lld tidak terpasang di host, pengujian toolchain native ditandai *SKIPPED* secara transparan.
+8. **Pengujian Game Development Kit (Phase 47):** Seluruh subsistem Game SDK divalidasi 100% (33/33 uji): matematika geometris (Vector2, Vector3, Color, Rect), fixed timestep GameLoop & deterministik accumulator, IRenderer virtual command buffer (tanpa ketergantungan wajib pada GPU fisik headless), Kamera 2D/3D & Mesh generator, Entity Component System (ECS) dengan sparse indexing & serializer, simulasi fisika 2D (integrasi kecepatan, deteksi AABB/Lingkaran, dan pemisahan benturan impuls), manajer input aksi keyboard/mouse, audio kategori & volume master, animasi sprite ber-timeline, emisi partikel, Game UI modular, proteksi aset anti path-traversal & format whitelist, jaringan multiplayer ter-serialisasi, sistem simpanan verifikasi checksum SHA-256 & migrasi versi, integrasi ActorComponent via ActorSystem (Phase 46), generator proyek game, profiler metrik performa, perintah CLI `nusantara game`, serta pengeksekusian kode program contoh Nusantara.
 

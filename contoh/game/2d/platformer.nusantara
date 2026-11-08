@@ -1,0 +1,33 @@
+// ============================================
+// CONTOH 2: 2D PLATFORMER & FISIKA
+// Bahasa Pemrograman Nusantara v0.47.0
+// ============================================
+
+program GamePlatformer
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== MEMULAI CONTOH 2D PLATFORMER ===")
+
+    // 1. Buat Aplikasi Platformer
+    app : peta = game.buatAplikasiGame("Petualangan Nusantara", 800, 600)
+
+    // 2. Kamera dan Pemain
+    cam : peta = game.kamera2D(0, 0)
+    pemainX : bilangan = 100
+    pemainY : bilangan = 400
+    gravitasi : desimal = 9.8
+    kecepatanLompat : bilangan = -15
+
+    tampilkan("Kamera 2D zoom: ", cam["zoom"])
+    tampilkan("Posisi awal pemain di atas tanah: ", pemainX, pemainY)
+
+    // 3. Simulasi lompatan
+    vy : bilangan = kecepatanLompat
+    pemainY = pemainY + vy
+
+    tampilkan("Posisi pemain setelah melompat 1 frame: ", pemainY)
+    app.langkah(1 / 60)
+
+    tampilkan("Simulasi fisika platformer berhasil dijalankan.")
+    tampilkan("=== CONTOH 2D PLATFORMER SELESAI ===")
+selesai

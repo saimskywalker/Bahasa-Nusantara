@@ -1,0 +1,21 @@
+// ============================================
+// CONTOH 5: MULTIPLAYER & SISTEM SIMPAN
+// Bahasa Pemrograman Nusantara v0.47.0
+// ============================================
+
+program GameMultiplayer
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== MEMULAI CONTOH MULTIPLAYER & SISTEM SIMPAN ===")
+
+    // 1. Manajer Simpanan Game
+    simpanan : peta = game.buatManajerSimpan("1.0.0")
+    tampilkan("Manajer simpanan game dibuat.")
+
+    // 2. Aplikasi Multiplayer
+    appMulti : peta = game.buatAplikasiGame("Arena Multiplayer Nusantara", 800, 600)
+    appMulti.langkah(1 / 60)
+
+    tampilkan("Simulasi frame sinkronisasi multiplayer berhasil diselesaikan.")
+    tampilkan("=== CONTOH MULTIPLAYER SELESAI ===")
+selesai

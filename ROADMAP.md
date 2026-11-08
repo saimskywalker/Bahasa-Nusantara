@@ -188,6 +188,7 @@ Daftar suite pengujian terverifikasi:
 - `test:llvm-v44` — Suite uji LLVM Toolchain, Target Triple, Type Mapper, LLVM IR Generator, Validator, Optimizer, Runtime C Stub & AOT Pipeline (Phase 44).
 - `test:linker-v45` — Suite uji Linker, Symbol Table, Relocation Engine, Library Manager, Runtime Packager, Binary Inspector & Standalone Packaging (Phase 45).
 - `test:actor-v46` — Suite uji Concurrency & Actor Model, Mailbox Backpressure, Fairness, Async Tasks, NIR Opcodes, LLVM Lowering & CLI (Phase 46).
+- `test:game-v47` — Suite uji Nusantara Game Development Kit (Game SDK): Loop, Renderer 2D/3D, Kamera, ECS, Fisika 2D, Input, Audio, Partikel, Animasi, UI, Jaringan, Save System, Aktor & CLI `nusantara game` (Phase 47).
 
 ---
 
@@ -198,10 +199,11 @@ Daftar suite pengujian terverifikasi:
   - **Phase 44 (v0.44.0)**: LLVM Native Compiler Backend, Toolchain Manager, Target Triple & Data Layout, Type Mapping, LLVM IR Gen, IR Validator & Optimizer, Object Generator, Linker, Runtime C Stubs, AOT Pipeline & CLI `nusantara toolchain` / `nusantara aot` (🟢 Selesai).
   - **Phase 45 (v0.45.0)**: Nusantara Linker, Symbol Table System (`_N_*`), Strong/Weak Symbol Resolution, Relocation Engine ELF/PE/Mach-O, Static & Dynamic Linking, Library Manager, Dependency Inspector, Binary Inspector, Runtime Packager Profil Bundled/Minimal/Shared, Standalone Application Packager & CLI `nusantara link` / `inspect` / `package` (🟢 Selesai).
   - **Phase 46 (v0.46.0)**: High-Performance Concurrency (Actor Model), State Isolation, Bounded FIFO Mailbox & Backpressure, Ask-Reply, Dead Letter Queue, Task<T>, TaskGroup, CancellationToken, withTimeout, ResourceManager, ConcurrencyDiagnostics, Fair Scheduling, Parser & AST Concurrency, NIR Concurrency Opcodes, LLVM Native Stubs & CLI `nusantara actor` / `concurrency` (🟢 Selesai).
+  - **Phase 47 (v0.47.0)**: Nusantara Game Development Kit (Game SDK), Core Loop deterministik & Time, Canvas2DRenderer & IRenderer Command Buffer, Camera 2D/3D & Mesh Generation, Entity Component System (ECS) dengan sparse indexing & state serialization, 2D Physics Engine (impulse solver, AABB/Circle collision, raycasting), Input Manager (keyboard/mouse/action mapping), Audio Manager (volume hierarki & multi-category), Sprite Animation & Particle System, Game UI Modular, Asset Manager (anti path-traversal shield), Network Multiplayer (Client-Server packet serialization), Save System (checksum SHA-256 integrity & version migration), ActorComponent Integration (Phase 46), Project Scaffolder & CLI `nusantara game` (🟢 Selesai).
 - **Target Rilis Mendatang:**
-  - **Phase 47 (v0.47.0)**: Advanced Compiler Optimizations (LTO, Function Inlining, Loop Unrolling, Vectorization).
-  - **Phase 48 (v0.48.0)**: 2D/3D Game Engine & Multimedia Toolkit Asli Nusantara.
-  - **Phase 49 (v1.0.0)**: NusantaraOS Kernel & Sovereign Computing Architecture.
+  - **Phase 48 (v0.48.0)**: Advanced Native Graphics (Vulkan / WebGPU Native Backend) & Spatial 3D Audio.
+  - **Phase 49 (v0.49.0)**: Advanced Compiler Optimizations (LTO, Inlining, Loop Unrolling, Vectorization).
+  - **Phase 50 (v1.0.0)**: Nusantara Sovereign Computing & Complete Production Ecosystem.
 
 *Dokumen ROADMAP ini dirilis secara berkala dan disinkronkan secara ketat dengan hasil pengujian aktual repositori NUSANTARA.*
 

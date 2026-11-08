@@ -1,0 +1,24 @@
+// ============================================
+// CONTOH 3: 3D GRAPHICS & CAMERA
+// Bahasa Pemrograman Nusantara v0.47.0
+// ============================================
+
+program Game3D
+gunakan "std:game" sebagai game
+mulai
+    tampilkan("=== MEMULAI CONTOH 3D GAME ===")
+
+    // 1. Buat Kamera 3D
+    cam3D : peta = game.kamera3D()
+    tampilkan("Kamera 3D dibuat dengan FOV: ", cam3D["fov"])
+
+    // 2. Vektor 3D posisi kubus dan rotasi
+    posisiKubus : peta = game.vektor3(0, 1.5, -5)
+    tampilkan("Kubus 3D berada pada koordinat X=0, Y=1.5, Z=-5")
+
+    // 3. Warna material 3D
+    warnaEmas : peta = game.warna(1.0, 0.84, 0.0, 1.0)
+    tampilkan("Material kubus (hex): ", warnaEmas["hex"])
+
+    tampilkan("=== CONTOH 3D GAME SELESAI ===")
+selesai

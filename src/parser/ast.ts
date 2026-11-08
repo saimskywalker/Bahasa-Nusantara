@@ -41,6 +41,16 @@ export enum JenisNodeAST {
   PERNYATAAN_IMPOR = 'PERNYATAAN_IMPOR',
   PERNYATAAN_EKSPOR = 'PERNYATAAN_EKSPOR',
   AKSES_ANGGOTA = 'AKSES_ANGGOTA',
+
+  // --- NODE KONKURENSI & AKTOR (Phase 46) ---
+  DEKLARASI_AKTOR = 'DEKLARASI_AKTOR',
+  PENANGAN_PESAN = 'PENANGAN_PESAN',
+  KIRIM_PESAN = 'KIRIM_PESAN',
+  HENTIKAN_AKTOR = 'HENTIKAN_AKTOR',
+  TUNGGU_OPERASI = 'TUNGGU_OPERASI',
+  TUNGGU_SEMUA_OPERASI = 'TUNGGU_SEMUA_OPERASI',
+  EKSPRESI_BUAT_AKTOR = 'EKSPRESI_BUAT_AKTOR',
+  EKSPRESI_AWAIT = 'EKSPRESI_AWAIT',
 }
 
 export interface NodeAST {
@@ -58,7 +68,9 @@ export type EkspresiAST =
   | NodeEkspresiPengelompokan
   | NodePemanggilanFungsi
   | NodeAksesIndeks
-  | NodeAksesAnggota;
+  | NodeAksesAnggota
+  | NodeEkspresiBuatAktor
+  | NodeEkspresiAwait;
 
 export interface NodeLiteral extends NodeAST {
   jenis: JenisNodeAST.LITERAL;
@@ -146,7 +158,12 @@ export type PernyataanAST =
   | NodePernyataanEkspresi
   | NodePernyataanBlok
   | NodePernyataanImpor
-  | NodePernyataanEkspor;
+  | NodePernyataanEkspor
+  | NodeDeklarasiAktor
+  | NodeKirimPesan
+  | NodeHentikanAktor
+  | NodeTungguOperasi
+  | NodeTungguSemuaOperasi;
 
 export interface NodeDeklarasiVariabel extends NodeAST {
   jenis: JenisNodeAST.DEKLARASI_VARIABEL;
@@ -257,5 +274,54 @@ export interface NodeProgram extends NodeAST {
   daftarImpor: NodePernyataanImpor[];
   tubuhUtama: PernyataanAST[];
   daftarFungsi: NodeDeklarasiFungsi[];
+  daftarAktor?: NodeDeklarasiAktor[];
   daftarEkspor: NodePernyataanEkspor[];
 }
+
+// --- INTERFACE KONKURENSI & AKTOR (Phase 46) ---
+
+export interface NodePenanganPesan extends NodeAST {
+  jenis: JenisNodeAST.PENANGAN_PESAN;
+  polaPesan: string;
+  parameter: NodeParameterFungsi[];
+  tubuh: PernyataanAST[];
+}
+
+export interface NodeDeklarasiAktor extends NodeAST {
+  jenis: JenisNodeAST.DEKLARASI_AKTOR;
+  nama: string;
+  keadaanAwal: PernyataanAST[];
+  penanganPesan: NodePenanganPesan[];
+}
+
+export interface NodeKirimPesan extends NodeAST {
+  jenis: JenisNodeAST.KIRIM_PESAN;
+  target: EkspresiAST;
+  pesan: EkspresiAST;
+}
+
+export interface NodeHentikanAktor extends NodeAST {
+  jenis: JenisNodeAST.HENTIKAN_AKTOR;
+  target: EkspresiAST;
+}
+
+export interface NodeTungguOperasi extends NodeAST {
+  jenis: JenisNodeAST.TUNGGU_OPERASI;
+  target: EkspresiAST;
+}
+
+export interface NodeTungguSemuaOperasi extends NodeAST {
+  jenis: JenisNodeAST.TUNGGU_SEMUA_OPERASI;
+}
+
+export interface NodeEkspresiBuatAktor extends NodeAST {
+  jenis: JenisNodeAST.EKSPRESI_BUAT_AKTOR;
+  namaAktor: string;
+  argumen: EkspresiAST[];
+}
+
+export interface NodeEkspresiAwait extends NodeAST {
+  jenis: JenisNodeAST.EKSPRESI_AWAIT;
+  ekspresi: EkspresiAST;
+}
+

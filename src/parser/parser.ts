@@ -30,6 +30,14 @@ import {
   NodePernyataanImpor,
   NodePernyataanEkspor,
   NodeAksesAnggota,
+  NodeDeklarasiAktor,
+  NodePenanganPesan,
+  NodeKirimPesan,
+  NodeHentikanAktor,
+  NodeTungguOperasi,
+  NodeTungguSemuaOperasi,
+  NodeEkspresiBuatAktor,
+  NodeEkspresiAwait,
 } from './ast';
 import { GalatParser, JenisGalatParser, buatGalatTokenTakTerduga } from './galat';
 
@@ -67,6 +75,7 @@ export class Parser {
     const daftarEkspor: NodePernyataanEkspor[] = [];
     const tubuhUtama: PernyataanAST[] = [];
     const daftarFungsi: NodeDeklarasiFungsi[] = [];
+    const daftarAktor: NodeDeklarasiAktor[] = [];
 
     try {
       while (!this.stream.eof()) {
@@ -105,7 +114,12 @@ export class Parser {
             const mulaiTok = this.stream.next();
             while (!this.periksa(JenisToken.KW_SELESAI) && !this.stream.eof()) {
               const stmt = this.parsePernyataan();
-              if (stmt) tubuhUtama.push(stmt);
+              if (stmt) {
+                tubuhUtama.push(stmt);
+                if (stmt.jenis === JenisNodeAST.DEKLARASI_AKTOR) {
+                  daftarAktor.push(stmt as NodeDeklarasiAktor);
+                }
+              }
             }
             if (this.stream.eof()) {
               const g = new GalatParser(
@@ -122,7 +136,12 @@ export class Parser {
           const mulaiTok = this.stream.next();
           while (!this.periksa(JenisToken.KW_SELESAI) && !this.stream.eof()) {
             const stmt = this.parsePernyataan();
-            if (stmt) tubuhUtama.push(stmt);
+            if (stmt) {
+              tubuhUtama.push(stmt);
+              if (stmt.jenis === JenisNodeAST.DEKLARASI_AKTOR) {
+                daftarAktor.push(stmt as NodeDeklarasiAktor);
+              }
+            }
           }
           if (this.stream.eof()) {
             const g = new GalatParser(
@@ -137,6 +156,12 @@ export class Parser {
         } else if (this.periksa(JenisToken.KW_FUNGSI)) {
           const fn = this.parseDeklarasiFungsi();
           if (fn) daftarFungsi.push(fn);
+        } else if (this.periksa(JenisToken.KW_AKTOR)) {
+          const act = this.parseDeklarasiAktor();
+          if (act) {
+            daftarAktor.push(act);
+            tubuhUtama.push(act);
+          }
         } else {
           const stmt = this.parsePernyataan();
           if (stmt) {
@@ -165,6 +190,7 @@ export class Parser {
       daftarImpor,
       tubuhUtama,
       daftarFungsi,
+      daftarAktor,
       daftarEkspor,
       posisi: {
         awal: tokenAwal.posisi.awal,
@@ -419,6 +445,39 @@ export class Parser {
 
       if (this.cocok(JenisToken.KW_TETAP)) {
         return this.parseDeklarasiTetap(current);
+      }
+
+      // Konkurensi & Aktor (Phase 46)
+      if (this.periksa(JenisToken.KW_AKTOR)) {
+        return this.parseDeklarasiAktor();
+      }
+
+      if (this.cocok(JenisToken.KW_KIRIM)) {
+        return this.parseKirimPesan(current);
+      }
+
+      if (this.cocok(JenisToken.KW_BERHENTI)) {
+        return this.parseHentikanAktor(current);
+      }
+
+      if (this.periksa(JenisToken.KW_HENTIKAN)) {
+        if (this.stream.peek()?.jenis === JenisToken.KURUNG_BUKA) {
+          this.stream.next();
+          return this.parseHentikanAktor(current);
+        }
+        this.stream.next();
+        return {
+          jenis: JenisNodeAST.INSTRUKSI_HENTIKAN,
+          posisi: current.posisi,
+        };
+      }
+
+      if (this.cocok(JenisToken.KW_TUNGGU_SEMUA)) {
+        return this.parseTungguSemuaOperasi(current);
+      }
+
+      if (this.cocok(JenisToken.KW_TUNGGU)) {
+        return this.parseTungguOperasi(current);
       }
 
       if (this.periksa(JenisToken.KW_FUNGSI)) {
@@ -835,6 +894,132 @@ export class Parser {
     };
   }
 
+  public parseDeklarasiAktor(): NodeDeklarasiAktor {
+    const aktorTok = this.harapkan(JenisToken.KW_AKTOR, "kata kunci 'aktor'");
+    const namaTok = this.harapkan(JenisToken.IDENTIFIER, "nama aktor setelah kata kunci 'aktor'");
+    this.harapkan(JenisToken.KW_MULAI, "kata kunci 'mulai' setelah nama aktor");
+
+    const keadaanAwal: PernyataanAST[] = [];
+    const penanganPesan: NodePenanganPesan[] = [];
+
+    while (!this.periksa(JenisToken.KW_SELESAI) && !this.stream.eof()) {
+      if (this.cocok(JenisToken.KW_TERIMA)) {
+        const terimaTok = this.stream.previous();
+        const polaTok = this.harapkan(JenisToken.IDENTIFIER, "nama pola pesan setelah kata kunci 'terima'");
+        const parameter: NodeParameterFungsi[] = [];
+
+        if (this.cocok(JenisToken.KURUNG_BUKA)) {
+          if (!this.periksa(JenisToken.KURUNG_TUTUP)) {
+            do {
+              const pNama = this.harapkan(JenisToken.IDENTIFIER, 'nama parameter pesan');
+              let tipeData = 'apapun';
+              if (this.cocok(JenisToken.TITIK_DUA)) {
+                const tTok = this.harapkanNamaTipe();
+                tipeData = tTok.nilai;
+              }
+              parameter.push({
+                jenis: JenisNodeAST.PARAMETER_FUNGSI,
+                nama: pNama.nilai,
+                tipeData,
+                posisi: pNama.posisi,
+              });
+            } while (this.cocok(JenisToken.KOMA));
+          }
+          this.harapkan(JenisToken.KURUNG_TUTUP, "')' setelah parameter pesan");
+        }
+
+        // Opsional titik dua ':' setelah deklarasi pola terima
+        this.cocok(JenisToken.TITIK_DUA);
+
+        const tubuhPenangan: PernyataanAST[] = [];
+        while (
+          !this.periksa(JenisToken.KW_TERIMA) &&
+          !this.periksa(JenisToken.KW_SELESAI) &&
+          !this.stream.eof()
+        ) {
+          if (this.cocok(JenisToken.KW_AKHIR)) {
+            break;
+          }
+          const stmt = this.parsePernyataan();
+          if (stmt) tubuhPenangan.push(stmt);
+        }
+
+        penanganPesan.push({
+          jenis: JenisNodeAST.PENANGAN_PESAN,
+          polaPesan: polaTok.nilai,
+          parameter,
+          tubuh: tubuhPenangan,
+          posisi: {
+            awal: terimaTok.posisi.awal,
+            akhir: tubuhPenangan.length > 0 ? tubuhPenangan[tubuhPenangan.length - 1].posisi.akhir : polaTok.posisi.akhir,
+          },
+        });
+      } else {
+        const stmt = this.parsePernyataan();
+        if (stmt) keadaanAwal.push(stmt);
+      }
+    }
+
+    const selesaiTok = this.harapkan(JenisToken.KW_SELESAI, "kata kunci 'selesai' untuk menutup blok aktor");
+
+    return {
+      jenis: JenisNodeAST.DEKLARASI_AKTOR,
+      nama: namaTok.nilai,
+      keadaanAwal,
+      penanganPesan,
+      posisi: { awal: aktorTok.posisi.awal, akhir: selesaiTok.posisi.akhir },
+    };
+  }
+
+  private parseKirimPesan(tokenAwal: Token): NodeKirimPesan {
+    const hasParen = this.cocok(JenisToken.KURUNG_BUKA);
+    const target = this.parseEkspresi();
+    this.cocok(JenisToken.KOMA);
+    const pesan = this.parseEkspresi();
+    let posAkhir = pesan.posisi;
+    if (hasParen) {
+      const tutup = this.harapkan(JenisToken.KURUNG_TUTUP, "')' setelah argumen pesan");
+      posAkhir = tutup.posisi;
+    }
+    return {
+      jenis: JenisNodeAST.KIRIM_PESAN,
+      target,
+      pesan,
+      posisi: { awal: tokenAwal.posisi.awal, akhir: posAkhir.akhir },
+    };
+  }
+
+  private parseHentikanAktor(tokenAwal: Token): NodeHentikanAktor {
+    const hasParen = this.cocok(JenisToken.KURUNG_BUKA);
+    const target = this.parseEkspresi();
+    let posAkhir = target.posisi;
+    if (hasParen) {
+      const tutup = this.harapkan(JenisToken.KURUNG_TUTUP, "')' setelah target hentikan");
+      posAkhir = tutup.posisi;
+    }
+    return {
+      jenis: JenisNodeAST.HENTIKAN_AKTOR,
+      target,
+      posisi: { awal: tokenAwal.posisi.awal, akhir: posAkhir.akhir },
+    };
+  }
+
+  private parseTungguOperasi(tokenAwal: Token): NodeTungguOperasi {
+    const target = this.parseEkspresi();
+    return {
+      jenis: JenisNodeAST.TUNGGU_OPERASI,
+      target,
+      posisi: { awal: tokenAwal.posisi.awal, akhir: target.posisi.akhir },
+    };
+  }
+
+  private parseTungguSemuaOperasi(tokenAwal: Token): NodeTungguSemuaOperasi {
+    return {
+      jenis: JenisNodeAST.TUNGGU_SEMUA_OPERASI,
+      posisi: tokenAwal.posisi,
+    };
+  }
+
   public parseEkspresi(): EkspresiAST {
     return this.parseLogikaAtau();
   }
@@ -983,10 +1168,16 @@ export class Parser {
           posisi: { awal: expr.posisi.awal, akhir: tutupTok.posisi.akhir },
         };
       } else if (this.cocok(JenisToken.TITIK)) {
-        const anggotaTok = this.harapkan(
-          JenisToken.IDENTIFIER,
-          "nama anggota setelah tanda titik '.'"
-        );
+        let anggotaTok: Token;
+        const cur = this.stream.current();
+        if (cur.jenis === JenisToken.IDENTIFIER || cur.jenis.startsWith('KW_')) {
+          anggotaTok = this.stream.next();
+        } else {
+          anggotaTok = this.harapkan(
+            JenisToken.IDENTIFIER,
+            "nama anggota setelah tanda titik '.'"
+          );
+        }
         if (this.cocok(JenisToken.KURUNG_BUKA)) {
           const argumen: EkspresiAST[] = [];
           if (!this.periksa(JenisToken.KURUNG_TUTUP)) {
@@ -1147,6 +1338,40 @@ export class Parser {
         nilaiMentah: 'kosong',
         nilaiTerurai: null,
         posisi: current.posisi,
+      };
+    }
+
+    // Instansiasi Aktor: buat NamaAktor / buat NamaAktor(...)
+    if (this.cocok(JenisToken.KW_BUAT)) {
+      const buatTok = this.stream.previous();
+      const namaAktorTok = this.harapkan(JenisToken.IDENTIFIER, "nama aktor setelah kata kunci 'buat'");
+      const argumen: EkspresiAST[] = [];
+      let posAkhir = namaAktorTok.posisi;
+      if (this.cocok(JenisToken.KURUNG_BUKA)) {
+        if (!this.periksa(JenisToken.KURUNG_TUTUP)) {
+          do {
+            argumen.push(this.parseEkspresi());
+          } while (this.cocok(JenisToken.KOMA));
+        }
+        const tutupTok = this.harapkan(JenisToken.KURUNG_TUTUP, "')' setelah argumen pembuatan aktor");
+        posAkhir = tutupTok.posisi;
+      }
+      return {
+        jenis: JenisNodeAST.EKSPRESI_BUAT_AKTOR,
+        namaAktor: namaAktorTok.nilai,
+        argumen,
+        posisi: { awal: buatTok.posisi.awal, akhir: posAkhir.akhir },
+      };
+    }
+
+    // Ekspresi Await: await <ekspresi>
+    if (this.cocok(JenisToken.KW_AWAIT)) {
+      const awaitTok = this.stream.previous();
+      const expr = this.parseEkspresi();
+      return {
+        jenis: JenisNodeAST.EKSPRESI_AWAIT,
+        ekspresi: expr,
+        posisi: { awal: awaitTok.posisi.awal, akhir: expr.posisi.akhir },
       };
     }
 

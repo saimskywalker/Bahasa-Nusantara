@@ -2,12 +2,13 @@
 
 > **Bahasa Pemrograman 100% Bahasa Indonesia untuk Komputasi Modern, Terbuka, dan Berkelanjutan.**
 
-[![Status](https://img.shields.io/badge/status-fase_45:_linker_&_standalone_executable-blue.svg)](ROADMAP.md)
-[![Versi](https://img.shields.io/badge/versi-v0.45.0-emerald.svg)](PERUBAHAN.md)
+[![Status](https://img.shields.io/badge/status-fase_46:_high--performance_concurrency_(actor_model)-blue.svg)](ROADMAP.md)
+[![Versi](https://img.shields.io/badge/versi-v0.46.0-emerald.svg)](PERUBAHAN.md)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-brightgreen.svg)](.github/workflows/ci.yml)
 [![Lisensi](https://img.shields.io/badge/lisensi-Apache_2.0-blue.svg)](LISENSI)
 [![Tata Bahasa](https://img.shields.io/badge/grammar-EBNF_ISO--14977-purple.svg)](dokumentasi/GRAMMAR-EBNF.md)
-[![Testing](https://img.shields.io/badge/testing-41_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Testing](https://img.shields.io/badge/testing-42_suites_lulus_100%25-green.svg)](pengujian/README.md)
+[![Actor Concurrency](https://img.shields.io/badge/concurrency-actor_model_&_structured_async-blue.svg)](docs/runtime/actor-model.md)
 [![Linker](https://img.shields.io/badge/linker-advanced_&_standalone-blue.svg)](docs/compiler/linker.md)
 [![NIR & SSA](https://img.shields.io/badge/compiler-nir_ssa_&_cfg-blue.svg)](docs/compiler/nir.md)
 [![LLVM AOT](https://img.shields.io/badge/backend-llvm_ir_&_aot_native-blue.svg)](docs/compiler/llvm-backend.md)
@@ -28,7 +29,7 @@
 
 **NUSANTARA** adalah bahasa pemrograman serba guna (*general-purpose programming language*) tingkat tinggi yang dirancang dan dikembangkan dari nol menggunakan 100% tata bahasa, kata kunci teknis, dan leksikon Bahasa Indonesia.
 
-NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG*, *LLVM Backend & Kompilasi Native Ahead-of-Time (AOT)*, hingga *Sistem Linker & Standalone Executable Generator*.
+NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa asing, melainkan rekayasa perangkat lunak mandiri yang mencakup arsitektur kompilasi lengkap: *Lexer*, *Parser (Recursive Descent AST)*, *Sistem Tipe Statis & Inferensi*, *Pohon Sintaksis Abstrak*, *Interpreter Eksekusi*, *CLI Toolkit*, *Pustaka Standar (std)*, *Ekosistem Aplikasi Web & Desktop*, *Platform Mobile Lintas-Platform (Android & iOS)*, *Nusantara Intermediate Representation (NIR) berbasis SSA & CFG*, *LLVM Backend & Kompilasi Native Ahead-of-Time (AOT)*, *Sistem Linker & Standalone Executable Generator*, hingga *Sistem Konkurensi Performa Tinggi berbasis Actor Model*.
 
 ### Visi & Misi Proyek
 - **Kedaulatan Teknologi & Bahasa:** Memberikan kemandirian dalam ekosistem perangkat lunak nasional melalui bahasa pemrograman formal berstandar internasional (ISO/IEC 14977 EBNF).
@@ -40,13 +41,13 @@ NUSANTARA bukan sekadar terjemahan sintaksis atau praprosesor teks atas bahasa a
 
 ## 2. Status Perkembangan Proyek & Roadmap
 
-- **Status Saat Ini:** **🟢 Phase 45: Nusantara Linker & Standalone Executable (Milestone v0.45.0)**.
-- **Total Fase Diaudit:** 48 Fase (Phase 1 s/d Phase 48).
-  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 45):** 45 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
-  - 🔵 **Dalam Perencanaan (Phase 46 s/d Phase 48):** 3 fase riset lanjutan (Optimasi Lanjut LTO, Game Engine 2D/3D, dan Kernel NusantaraOS).
-- **Rangkaian Pengujian:** 41 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.095 test cases pada 40 suite TypeScript = total 1.262 pemeriksaan gabungan terverifikasi).
-- **Audit Terakhir:** 5 November 2026.
-- **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 48.
+- **Status Saat Ini:** **🟢 Phase 46: High-Performance Concurrency (Actor Model) (Milestone v0.46.0)**.
+- **Total Fase Diaudit:** 49 Fase (Phase 1 s/d Phase 49).
+  - 🟢 **Selesai dan Teruji (Phase 1 s/d Phase 46):** 46 fase berstatus implementasi nyata lengkap dengan rangkaian pengujian unit, integrasi, dan e2e.
+  - 🔵 **Dalam Perencanaan (Phase 47 s/d Phase 49):** 3 fase riset lanjutan (Optimasi Lanjut LTO, Game Engine 2D/3D, dan Kernel NusantaraOS).
+- **Rangkaian Pengujian:** 42 test suite otomatis lulus 100% (167 pemeriksaan dokumen fondasi + 1.127 test cases pada 41 suite TypeScript = total 1.294 pemeriksaan gabungan terverifikasi).
+- **Audit Terakhir:** 6 November 2026.
+- **Dokumentasi Roadmap Lengkap:** Silakan baca [ROADMAP.md](ROADMAP.md) untuk tabel detail status, bukti implementasi, dan rencana pengembangan fase 1 hingga 49.
 
 ---
 
@@ -102,6 +103,17 @@ Seluruh fitur di bawah ini telah diverifikasi melalui audit kode sumber (`src/`)
 - **Inspektur Format Biner Mesin (`BinaryInspector`):** Validasi biner native bawaan tanpa alat eksternal untuk header ELF (`\x7fELF`), PE/COFF (`MZ`), dan Mach-O.
 - **Pembuatan & Pengemasan Executable Mandiri:** `ExecutableBuilder` dan `StandalonePackager` yang menghasilkan executable mandiri dengan profil runtime `BUNDLED`, `MINIMAL`, atau `SHARED`, beserta struktur direktori portabel (`bin/`, `lib/`, `config/`, `resources/`, `manifest.json`, `LISENSI.txt`, `BACA-SAYA.txt`) dan arsip terkompresi.
 - **Perintah CLI:** `nusantara link` (menautkan objek/pustaka), `nusantara inspect` (analisis biner dan dependensi), dan `nusantara package` (membuat paket bundel mandiri).
+
+### G. High-Performance Concurrency & Actor Model (Phase 46)
+- **Model Aktor Terisolasi:** Pola *share nothing* di mana setiap aktor memiliki siklus hidup independen (`ActorStatus`), alamat unik (`ActorRef`), dan state privat yang terlindung dari akses konkuren langsung.
+- **Mailbox Berbatas & Kebijakan Luapan:** Antrean pesan berbatas (bounded FIFO) dengan 4 strategi luapan (*overflow policy*): `REJECT`, `WAIT`, `DROP_OLDEST`, dan `DROP_NEWEST`.
+- **Semantik Pengiriman Pesan:** Pengiriman asinkron tanpa blokir (`kirim`), pola permintaan-tanggapan dengan batas waktu otomatis (`ask`), pengalihan pesan (`forward`), serta penampungan pesan tak terkirim pada *Dead Letter Queue*.
+- **Penjadwalan Adil & Pengendali Throughput:** Penjadwal kooperatif (`FairnessController`) dengan alokasi throughput budget per giliran untuk mencegah starvation antar-aktor.
+- **Structured Concurrency Runtime:** Abstraksi tugas ringan `Task<T>`, pengelompokan `TaskGroup` (`joinAll`, `joinAny`), pembatalan kooperatif `CancellationToken`, dan pembatasan durasi `withTimeout`.
+- **Pengawasan & Ketahanan Kesalahan:** Hirarki supervisi aktor dengan 4 strategi pemulihan: `RESUME` (lanjutkan pesan berikutnya), `RESTART` (reset state aktor), `STOP` (hentikan aktor), dan `ESCALATE` (teruskan ke supervisor induk).
+- **Manajemen Sumber Daya & Diagnostik Stall:** `ResourceManager` pembatas kuota aktor/mailbox aktif dan `ConcurrencyDiagnostics` pendeteksi aktor macet (*stalls*) dan deadlock siklis.
+- **Dukungan Kompiler & LLVM:** Kata kunci bahasa `aktor`, `terima`, `kirim`, `hentikan`, dan `await`, opcode NIR (`actor.create`, `actor.send`, `actor.stop`, `async.start`, `await`), serta emisi LLVM IR dengan stub native runtime C terintegrasi (`nusantara_actor_*`, `nusantara_task_*`).
+- **CLI Konkurensi:** Perintah `nusantara actor` (`--list`, `--stats`, `--inspect`) dan `nusantara concurrency` (`--benchmark`, `--diagnostics`).
 
 ---
 
@@ -159,6 +171,30 @@ mulai
 selesai
 ```
 
+### 4.4 Konkurensi & Model Aktor (Phase 46)
+```nusantara
+program DemoAktor
+mulai
+    aktor Penghitung mulai
+        variabel nilai: Bulat = 0
+
+        terima Tambah(jumlah: Bulat)
+            nilai = nilai + jumlah
+            cetak("Nilai bertambah menjadi: " + nilai)
+        akhir
+
+        terima Ambil(pemohon: Aktor)
+            kirim(pemohon, nilai)
+        akhir
+    selesai
+
+    variabel p: Aktor = buat Penghitung()
+    kirim(p, Tambah(10))
+    kirim(p, Tambah(25))
+    hentikan(p)
+selesai
+```
+
 ---
 
 ## 5. Instalasi & Menjalankan Proyek
@@ -166,16 +202,16 @@ selesai
 ### 5.1 Menggunakan Paket Biner Rilis Resmi
 Unduh paket distribusi untuk sistem operasi Anda dari direktori `dist/` atau halaman rilis resmi:
 
-- **Windows (x64)**: `nusantara-v0.45.0-windows-x64.zip`
-- **Linux (x64)**: `nusantara-v0.45.0-linux-x64.tar.gz` atau `.zip`
-- **macOS (Intel x64)**: `nusantara-v0.45.0-macos-x64.tar.gz`
-- **macOS (Apple Silicon ARM64)**: `nusantara-v0.45.0-macos-arm64.tar.gz`
+- **Windows (x64)**: `nusantara-v0.46.0-windows-x64.zip`
+- **Linux (x64)**: `nusantara-v0.46.0-linux-x64.tar.gz` atau `.zip`
+- **macOS (Intel x64)**: `nusantara-v0.46.0-macos-x64.tar.gz`
+- **macOS (Apple Silicon ARM64)**: `nusantara-v0.46.0-macos-arm64.tar.gz`
 
 #### Langkah Pemasangan Cepat (Linux / macOS):
 ```bash
 # 1. Ekstrak arsip rilis
-tar -xzf nusantara-v0.45.0-linux-x64.tar.gz
-cd nusantara-v0.45.0-linux-x64
+tar -xzf nusantara-v0.46.0-linux-x64.tar.gz
+cd nusantara-v0.46.0-linux-x64
 
 # 2. Jalankan skrip instalasi otomatis ke PATH pengguna
 ./install.sh
@@ -185,7 +221,7 @@ nusantara --versi
 ```
 
 Pada Windows:
-1. Ekstrak berkas `nusantara-v0.45.0-windows-x64.zip`.
+1. Ekstrak berkas `nusantara-v0.46.0-windows-x64.zip`.
 2. Klik ganda berkas `install.bat` atau tambahkan direktori `bin` ke variabel lingkungan `PATH`.
 3. Buka PowerShell / Command Prompt dan jalankan:
    ```powershell

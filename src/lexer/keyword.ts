@@ -52,6 +52,17 @@ export const TABEL_KATA_KUNCI: Readonly<Record<string, JenisToken>> = Object.fre
   ekspor: JenisToken.KW_EKSPOR,
   sebagai: JenisToken.KW_SEBAGAI,
 
+  // Kata Kunci Konkurensi & Aktor (Phase 46)
+  aktor: JenisToken.KW_AKTOR,
+  terima: JenisToken.KW_TERIMA,
+  kirim: JenisToken.KW_KIRIM,
+  berhenti: JenisToken.KW_BERHENTI,
+  tunggu: JenisToken.KW_TUNGGU,
+  tunggu_semua: JenisToken.KW_TUNGGU_SEMUA,
+  async: JenisToken.KW_ASYNC,
+  await: JenisToken.KW_AWAIT,
+  pilih_pesan: JenisToken.KW_PILIH_PESAN,
+
   // Operator Logika Leksikal Bahasa Indonesia
   dan: JenisToken.OP_LOGIKA_DAN,
   atau: JenisToken.OP_LOGIKA_ATAU,

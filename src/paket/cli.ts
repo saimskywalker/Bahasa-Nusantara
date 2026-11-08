@@ -47,6 +47,9 @@ import { AOTCompiler } from '../compiler/aot';
 import { LLVMToolchainManager } from '../compiler/llvm';
 import { LinkerManager, DependencyInspector } from '../compiler/linker';
 import { BinaryInspector, ExecutableBuilder, StandalonePackager } from '../compiler/executable';
+import { ActorSystem, ActorRegistry, ActorStatus } from '../runtime/actor';
+import { ResourceManager, ConcurrencyDiagnostics } from '../runtime/concurrency';
+import { TaskGroup } from '../runtime/async';
 
 export interface OpsiCLI {
   pengelola?: PengelolaPaket;
@@ -246,6 +249,16 @@ export class NusantaraCLI {
             'toolchain',
             'aot',
             'kompilasi',
+            'link',
+            'taut',
+            'inspect',
+            'inspeksi',
+            'package',
+            'kemas',
+            'actor',
+            'aktor',
+            'concurrency',
+            'konkurensi',
           ].includes(perintah) &&
             this.pembaca.apakahAda(perintah)))
       ) {
@@ -392,6 +405,22 @@ export class NusantaraCLI {
         case 'package':
         case 'kemas': {
           return this.prosesPerintahPackage(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'actor':
+        case 'aktor': {
+          return this.prosesPerintahActor(args.slice(1), {
+            json: opsiJSON,
+            warna: opsiWarna,
+          });
+        }
+
+        case 'concurrency':
+        case 'konkurensi': {
+          return this.prosesPerintahConcurrency(args.slice(1), {
             json: opsiJSON,
             warna: opsiWarna,
           });
@@ -1279,6 +1308,239 @@ export class NusantaraCLI {
     this.log(`Total Berkas Dikemas : ${pkgRes.filesPackaged.length} berkas`);
 
     return pkgRes.success ? 0 : 1;
+  }
+
+  /**
+   * Eksekusi inspeksi dan manajemen subsistem Actor Model (Phase 46).
+   */
+  private prosesPerintahActor(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    const system = ActorSystem.dapatkanInstance();
+    const registry = system.dapatkanRegistry();
+
+    const isList = args.includes('--list') || args.includes('daftar');
+    const isStats = args.includes('--stats') || args.includes('status');
+    const inspectIdx = args.indexOf('--inspect') !== -1 ? args.indexOf('--inspect') : args.indexOf('inspeksi');
+    let targetActorId = inspectIdx !== -1 && args[inspectIdx + 1] ? args[inspectIdx + 1] : undefined;
+
+    if (!targetActorId && args.length === 1 && !args[0].startsWith('-') && args[0] !== 'daftar' && args[0] !== 'status') {
+      targetActorId = args[0];
+    }
+
+    if (isStats || (!isList && !targetActorId)) {
+      const stats = system.dapatkanStatistik();
+      if (opsi.json || args.includes('--json')) {
+        this.log(JSON.stringify(stats, null, 2));
+        return 0;
+      }
+
+      this.log('======================================================');
+      this.log('        STATISTIK NUSANTARA ACTOR SYSTEM (Fase 46)    ');
+      this.log('======================================================');
+      this.log(`Total Aktor Terdaftar  : ${stats.totalAktor}`);
+      this.log(`Aktor Aktif (Running)  : ${stats.aktorAktif}`);
+      this.log(`Pesan Terkirim         : ${stats.pesanTerkirim}`);
+      this.log(`Pesan Terproses        : ${stats.pesanDiproses}`);
+      this.log(`Dead Letters           : ${stats.deadLetters}`);
+      this.log(`Throughput Schedular   : ${stats.pesanPerDetik.toFixed(2)} msg/s`);
+      this.log('------------------------------------------------------');
+      this.log("Gunakan 'nusantara actor --list' untuk melihat daftar aktor.");
+      this.log("Gunakan 'nusantara actor --inspect <id>' untuk detail aktor.");
+      return 0;
+    }
+
+    if (isList) {
+      const daftar = registry.daftarSemua();
+      if (opsi.json || args.includes('--json')) {
+        this.log(JSON.stringify(daftar, null, 2));
+        return 0;
+      }
+
+      this.log('======================================================');
+      this.log('          DAFTAR AKTOR TERDAFTAR (Fase 46)            ');
+      this.log('======================================================');
+      if (daftar.length === 0) {
+        this.log('(Tidak ada aktor aktif yang terdaftar saat ini)');
+      } else {
+        for (const a of daftar) {
+          this.log(`• ID: ${a.id.padEnd(20)} Nama: ${a.nama.padEnd(18)} Status: ${a.status}`);
+        }
+      }
+      return 0;
+    }
+
+    if (targetActorId) {
+      const aktor = registry.temukanDenganId(targetActorId) || registry.temukanDenganNama(targetActorId);
+      if (!aktor) {
+        this.error(`[Galat] Aktor '${targetActorId}' tidak ditemukan di registri.`);
+        return 1;
+      }
+
+      const info = {
+        id: aktor.dapatkanId(),
+        nama: aktor.dapatkanNama(),
+        status: aktor.dapatkanStatus(),
+        mailboxSize: aktor.dapatkanMailbox().ukuran(),
+        mailboxCapacity: aktor.dapatkanMailbox().kapasitasMaksimum(),
+        processedCount: aktor.dapatkanJumlahPesanDiproses(),
+        failedCount: aktor.dapatkanJumlahKegagalan(),
+      };
+
+      if (opsi.json || args.includes('--json')) {
+        this.log(JSON.stringify(info, null, 2));
+        return 0;
+      }
+
+      this.log('======================================================');
+      this.log(`          INSPEKSI AKTOR: ${info.nama} (${info.id})   `);
+      this.log('======================================================');
+      this.log(`Status             : ${info.status}`);
+      this.log(`Kapasitas Mailbox  : ${info.mailboxCapacity}`);
+      this.log(`Isi Mailbox Saat Ini : ${info.mailboxSize}`);
+      this.log(`Total Diproses     : ${info.processedCount}`);
+      this.log(`Total Kegagalan    : ${info.failedCount}`);
+      return 0;
+    }
+
+    return 0;
+  }
+
+  /**
+   * Eksekusi diagnostik konkurensi, konfigurasi worker, dan benchmark (Phase 46).
+   */
+  private prosesPerintahConcurrency(
+    args: string[],
+    opsi: { json?: boolean; warna?: boolean }
+  ): number {
+    let workerCount = 4;
+    const workerIdx = args.indexOf('--workers');
+    if (workerIdx !== -1 && args[workerIdx + 1]) {
+      const val = parseInt(args[workerIdx + 1], 10);
+      if (!isNaN(val) && val > 0) workerCount = val;
+    }
+
+    const isBenchmark = args.includes('--benchmark') || args.includes('tolok-ukur');
+    const isDiagnostics = args.includes('--diagnostics') || args.includes('--cek-kebuntuan');
+
+    if (isDiagnostics) {
+      const diag = new ConcurrencyDiagnostics();
+      const hasil = diag.analisis();
+      if (opsi.json || args.includes('--json')) {
+        this.log(JSON.stringify(hasil, null, 2));
+        return 0;
+      }
+
+      this.log('======================================================');
+      this.log('      DIAGNOSTIK KONKURENSI & KEBUNTUAN NUSANTARA     ');
+      this.log('======================================================');
+      this.log(`Potensi Kebuntuan (Deadlock) : ${hasil.deadlockDetected ? 'TERDETEKSI' : 'AMAN (Tidak ada)'}`);
+      this.log(`Aktor Terhenti (Stalled)     : ${hasil.stalledActors.length} aktor`);
+      this.log(`Task Macet                   : ${hasil.stalledTasks.length} tugas`);
+      if (hasil.rekomendasi.length > 0) {
+        this.log('\nRekomendasi Perbaikan:');
+        for (const rek of hasil.rekomendasi) {
+          this.log(`  • ${rek}`);
+        }
+      }
+      return 0;
+    }
+
+    if (isBenchmark) {
+      this.log('======================================================');
+      this.log('   TOLOK UKUR KONKURENSI & AKTOR NUSANTARA (Fase 46)  ');
+      this.log('======================================================');
+      this.log(`Menjalankan benchmark dengan worker pool: ${workerCount}...`);
+
+      const totalMessages = 10000;
+      const startTime = Date.now();
+      const startMemory = typeof process !== 'undefined' && process.memoryUsage ? process.memoryUsage().heapUsed : 0;
+
+      // Simulasi message passing terisolasi 10.000 pesan
+      const system = new ActorSystem({
+        maxActors: 1000,
+        workerCount,
+        throughputBudget: 20,
+      });
+
+      let processed = 0;
+      const targetRef = system.spawn({
+        name: 'benchmark-actor',
+        initialState: null,
+        mailboxOptions: { capacity: totalMessages * 2 },
+        behavior: async (state, msg) => {
+          if (msg.payload === 'PING') {
+            processed++;
+          }
+          return state;
+        },
+      });
+
+      for (let i = 0; i < totalMessages; i++) {
+        targetRef.send('PING');
+      }
+
+      // Proses antrean mailbox hingga selesai
+      const actorInstance = system.registry.getByName('benchmark-actor');
+      let iterations = 0;
+      while (actorInstance && !actorInstance.mailbox.isEmpty && iterations < 50000) {
+        actorInstance.processOneMessage();
+        iterations++;
+      }
+
+      const elapsedMs = Math.max(1, Date.now() - startTime);
+      const endMemory = typeof process !== 'undefined' && process.memoryUsage ? process.memoryUsage().heapUsed : 0;
+      const memDeltaMB = Math.max(0, (endMemory - startMemory) / (1024 * 1024));
+      const throughput = Math.round((processed / elapsedMs) * 1000);
+      const avgLatencyMs = (elapsedMs / Math.max(1, processed)).toFixed(4);
+
+      const benchmarkResult = {
+        totalMessages,
+        messagesProcessed: processed,
+        workers: workerCount,
+        elapsedTimeMs: elapsedMs,
+        throughputMsgPerSec: throughput,
+        averageLatencyMs: parseFloat(avgLatencyMs),
+        memoryDeltaMB: parseFloat(memDeltaMB.toFixed(2)),
+      };
+
+      if (opsi.json || args.includes('--json')) {
+        this.log(JSON.stringify(benchmarkResult, null, 2));
+        system.hentikanSemua();
+        return 0;
+      }
+
+      this.log(`Pesan Dikirim          : ${totalMessages}`);
+      this.log(`Pesan Berhasil Diproses: ${processed}`);
+      this.log(`Waktu Eksekusi         : ${elapsedMs} ms`);
+      this.log(`Throughput             : ${throughput.toLocaleString()} pesan/detik`);
+      this.log(`Latensi Rata-Rata      : ${avgLatencyMs} ms`);
+      this.log(`Penggunaan Memori      : ${memDeltaMB.toFixed(2)} MB`);
+      this.log('======================================================');
+
+      system.hentikanSemua();
+      return 0;
+    }
+
+    // Default status konkurensi
+    const resManager = new ResourceManager({ maxWorkers: workerCount });
+    const stats = resManager.dapatkanStatistik();
+    if (opsi.json || args.includes('--json')) {
+      this.log(JSON.stringify(stats, null, 2));
+      return 0;
+    }
+
+    this.log('======================================================');
+    this.log('         STATUS SUBSISTEM KONKURENSI NUSANTARA        ');
+    this.log('======================================================');
+    this.log(`Pekerja Aktif (Workers): ${stats.currentWorkers} / ${stats.maxWorkers}`);
+    this.log(`Aktor Terdaftar        : ${stats.currentActors} / ${stats.maxActors}`);
+    this.log(`Tugas Asinkron         : ${stats.currentTasks} / ${stats.maxTasks}`);
+    this.log('------------------------------------------------------');
+    this.log("Gunakan 'nusantara concurrency --benchmark' untuk uji performa throughput.");
+    this.log("Gunakan 'nusantara concurrency --diagnostics' untuk analisis deadlock.");
+    return 0;
   }
 
   /**
@@ -2681,6 +2943,10 @@ Perintah Linker & Executable (Phase 45):
   nusantara link <obj1.o> [obj2.o] -o <output> [--static] [--shared] [-L <path>] [-l <lib>]
   nusantara inspect <biner> [--symbols] [--sections] [--dependencies]
   nusantara package <berkas.nusantara> [--output <dist>] [--nama <app>] [--versi <ver>]
+
+Perintah Concurrency & Actor Model (Phase 46):
+  nusantara actor [--list] [--inspect <id>] [--stats]
+  nusantara concurrency [--workers <n>] [--benchmark] [--diagnostics]
 
 Opsi Global:
   --debug                Tampilkan jejak tumpukan lengkap dan info diagnostik rinci

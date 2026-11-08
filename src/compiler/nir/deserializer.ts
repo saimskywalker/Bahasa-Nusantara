@@ -23,6 +23,11 @@ import {
   NIRPhiInst,
   NIRPredicate,
   NIRStoreInst,
+  NIRActorCreateInst,
+  NIRActorSendInst,
+  NIRActorStopInst,
+  NIRAsyncStartInst,
+  NIRAwaitInst,
 } from './instruction';
 import { NIRModule } from './module';
 import {
@@ -35,6 +40,21 @@ import { NIRType, NIRTypes } from './type';
 import { NIRGlobal, NIRValue } from './value';
 
 export class NIRDeserializer {
+  public static deserializeModule(json: any): NIRModule {
+    const data = typeof json === 'string' ? JSON.parse(json) : json;
+    return NIRDeserializer.fromJSON(data);
+  }
+
+  public static deserializeFunction(json: any): NIRFunction {
+    const data = typeof json === 'string' ? JSON.parse(json) : json;
+    const mod = NIRDeserializer.fromJSON(data);
+    const fns = Array.from(mod.functions.values());
+    if (fns.length === 0) {
+      throw new Error('Tidak ada fungsi yang ditemukan dalam data serialisasi NIR');
+    }
+    return fns[0];
+  }
+
   public static fromJSON(json: any): NIRModule {
     if (!json || typeof json !== 'object') {
       throw new Error('Data NIR tidak valid: objek JSON diperlukan');
@@ -219,6 +239,34 @@ export class NIRDeserializer {
       case NIROpcode.CAST: {
         const src = resolveVal(ops[0]);
         return new NIRCastInst(data.castKind as NIRCastKind, src, type, data.id);
+      }
+
+      // Concurrency & Actor Deserialization (Phase 46)
+      case NIROpcode.ACTOR_CREATE: {
+        const initArg = ops[0] ? resolveVal(ops[0]) : undefined;
+        return new NIRActorCreateInst(data.actorName || 'Actor', initArg, data.id);
+      }
+
+      case NIROpcode.ACTOR_SEND: {
+        const target = resolveVal(ops[0], NIRTypes.ptr());
+        const msg = resolveVal(ops[1]);
+        return new NIRActorSendInst(target, msg, data.id);
+      }
+
+      case NIROpcode.ACTOR_STOP: {
+        const target = resolveVal(ops[0], NIRTypes.ptr());
+        return new NIRActorStopInst(target, data.id);
+      }
+
+      case NIROpcode.ASYNC_START: {
+        const callee = resolveVal(ops[0], NIRTypes.ptr());
+        const args = ops.slice(1).map((op: string) => resolveVal(op));
+        return new NIRAsyncStartInst(callee, args, data.id);
+      }
+
+      case NIROpcode.AWAIT: {
+        const task = resolveVal(ops[0], NIRTypes.ptr());
+        return new NIRAwaitInst(task, type, data.id);
       }
 
       default:

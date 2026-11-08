@@ -1,0 +1,31 @@
+// Contoh Concurrency Nusantara: Pengiriman Pesan Antar-Aktor (Ping-Pong)
+// Phase 46 - High-Performance Concurrency (Actor Model)
+
+aktor PemainPing {
+    definisi penangan(pesan) {
+        cetak("Ping menerima: " + pesan);
+    }
+}
+
+aktor PemainPong {
+    definisi penangan(pesan) {
+        cetak("Pong menerima: " + pesan);
+    }
+}
+
+fungsi utama() {
+    cetak("=== DEMO PING-PONG ACTOR MODEL ===");
+    
+    var ping = buat PemainPing();
+    var pong = buat PemainPong();
+    
+    // Kirim pesan tanpa berbagi state memori (Zero Shared State)
+    kirim(ping, "MULAI");
+    kirim(pong, "BALAS");
+    
+    // Hentikan aktor setelah selesai
+    hentikan(ping);
+    hentikan(pong);
+    
+    cetak("Aktor berhasil dihentikan.");
+}

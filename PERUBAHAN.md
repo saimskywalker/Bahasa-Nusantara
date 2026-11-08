@@ -4,6 +4,53 @@ Seluruh perubahan penting pada proyek bahasa pemrograman NUSANTARA dicatat dalam
 
 Format penomoran versi mengacu pada **Semantic Versioning** (`vMAJOR.MINOR.PATCH`). Pada masa pengembangan awal, versi minor mencerminkan tahapan fase roadmap (misal `v0.1.0` untuk Phase 1, `v0.2.0` untuk Phase 2, `v0.3.0` untuk Phase 3, `v0.4.0` untuk Phase 4, `v0.5.0` untuk Phase 5, `v0.6.0` untuk Phase 6, `v0.7.0` untuk Phase 7, `v0.8.0` untuk Phase 8, `v0.9.0` untuk Phase 9, `v0.10.0` untuk Phase 10).
 
+## [v0.46.0] — 2026-11-06
+### Phase 46: High-Performance Concurrency (Actor Model)
+
+Fase ini mengimplementasikan sistem konkurensi performa tinggi berbasis *Actor Model* dan *Structured Concurrency* terpadu pada bahasa pemrograman NUSANTARA. Implementasi ini menghadirkan isolasi status (*share nothing state isolation*), antrean pesan berbatas (*bounded mailboxes*), kebijakan luapan (*overflow policies*), jaminan pengurutan pesan FIFO, pola interaksi *Ask-Reply*, *Dead Letter Queue*, sistem supervisi berjenjang, *task executor* kooperatif, pengatur keadilan (*fairness controller*), manajer kuota sumber daya (*resource manager*), deteksi kemacetan (*concurrency diagnostics*), hingga integrasi menyeluruh pada parser, NIR intermediate representation, emisi LLVM IR dengan runtime C native, dan antarmuka CLI.
+
+#### Ditambahkan:
+- **Sistem Model Aktor & Isolasi Status (`src/runtime/actor/`):**
+  - **Siklus Hidup Aktor (`lifecycle.ts`):** 6 status formal (`CREATED`, `RUNNING`, `SUSPENDED`, `STOPPING`, `STOPPED`, `FAILED`) dengan validasi transisi status mutlak dan proteksi dari transisi ilegal (`KOR4005`).
+  - **Mailbox Berbatas & Kebijakan Luapan (`mailbox.ts`):** Antrean FIFO pesan berbatas dengan kapasitas terkonfigurasi dan 4 strategi luapan: `REJECT` (melempar `MailboxOverflowError` KOR4003), `WAIT` (backpressure asinkron berbasis Promise), `DROP_OLDEST` (menghapus pesan terlama), dan `DROP_NEWEST` (mengabaikan pesan masuk terbaru).
+  - **Pesan Terstruktur & Format Baku (`message.ts`):** Interface pesan baku `Message<T>` dengan ID unik, timestamp nano/milidetik, tipe pesan (`USER`, `SYSTEM`, `SUPERVISION`, `HEARTBEAT`), pengirim opsional `sender`, dan muatan `payload`.
+  - **Pola Komunikasi & Penanganan Pesan (`actor-ref.ts`, `actor.ts`, `actor-context.ts`):** Pengiriman pesan tanpa blokir `send()`, pola permintaan-tanggapan `ask(payload, timeoutMs)` dengan Promise dan timeout otomatis, pengalihan pesan `forward()`, dan pembuatan anak aktor `spawn()`.
+  - **Registri & Sistem Aktor (`actor-registry.ts`, `actor-system.ts`):** Singleton `ActorSystem` terisolasi, pencarian aktor berdasarkan ID dan nama unik, pendaftaran otomatis, dan penampungan pesan ke aktor yang telah mati pada *Dead Letter Queue*.
+  - **Supervisi Kesalahan Modular (`actor-supervisor.ts`):** Strategi supervisi bertingkat dengan 4 direktif aksi pemulihan: `RESUME` (lanjutkan pesan berikutnya), `RESTART` (reset state aktor ke kondisi awal), `STOP` (hentikan aktor secara permanen), dan `ESCALATE` (teruskan galat ke supervisor induk).
+  - **Worker Pool & Dispatcher (`worker-pool.ts`, `scheduler.ts`):** Penjadwalan kooperatif aktor di atas worker pool dengan kuota giliran (*throughput budget*) untuk menjamin eksekusi yang adil (*fair scheduling*).
+- **Structured Concurrency Runtime (`src/runtime/async/`):**
+  - **Abstraksi Tugas Ringan (`task.ts`):** Kelas `Task<T>` dengan status siklus hidup (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED`), eksekusi terisolasi, dan perolehan hasil `result()`.
+  - **Grup Tugas Terstruktur (`task-group.ts`):** Abstraksi `TaskGroup` untuk meluncurkan sub-tugas paralel, penggabungan seluruh tugas `joinAll()`, penggabungan tugas tercepat `joinAny()`, dan kaskade pembatalan hierarkis.
+  - **Pembatalan Kooperatif (`cancellation.ts`):** `CancellationToken` dan `CancellationTokenSource` reaktif dengan pemicu pembatalan instan dan callback pendengar.
+  - **Batas Waktu Operasi (`timeout.ts`):** Utilitas `withTimeout(promise, ms)` dan `sleep(ms)` dengan pelaporan galat ramah `TaskTimeoutError` (`KOR4008`).
+  - **Task Executor Terbatas (`executor.ts`):** Eksekutor antrean konkurensi dengan slot batas eksekusi simultan.
+- **Manajemen Sumber Daya, Keadilan & Diagnostik (`src/runtime/concurrency/`):**
+  - **Manajer Sumber Daya (`resource-manager.ts`):** Penegakan kuota maksimum aktor aktif (`maxActors`) dan pemantauan memori untuk mencegah kehabisan sumber daya (`ResourceExhaustedError` KOR4006).
+  - **Pengendali Keadilan Penjadwalan (`fairness.ts`):** `FairnessController` berbasis batas throughput per giliran (*throughput budget*) untuk mencegah *starvation* aktor lambat oleh aktor sibuk.
+  - **Diagnostik Stall & Deadlock (`diagnostics.ts`):** `ConcurrencyDiagnostics` yang memantau durasi pemrosesan pesan, mendeteksi aktor yang mengalami *stall* (melebihi batas toleransi milidetik), dan menganalisis siklus saling-tunggu deadlock antar-aktor.
+- **Sintaks Bahasa Nusantara & Dukungan Kompiler (`src/parser/`, `src/compiler/`):**
+  - **Parser & Pohon Sintaksis Abstrak:** Kata kunci resmi `aktor`, `terima`, `kirim`, `hentikan`, dan `await`, pembuatan node AST `DEKLARASI_AKTOR`, `PENANGAN_PESAN`, `KIRIM_PESAN`, `HENTIKAN_AKTOR`, `EKSPRESI_BUAT_AKTOR`, dan `EKSPRESI_AWAIT`.
+  - **Nusantara Intermediate Representation (NIR):** Opcodes konkurensi baru (`actor.create`, `actor.send`, `actor.stop`, `async.start`, `await`), metode pembangun `NIRBuilder`, validasi semantik pada `NIRVerifier`, serta serialisasi/deserialisasi JSON round-trip pada `NIRSerializer` dan `NIRDeserializer`.
+  - **LLVM Backend & Native C Runtime:** Pemetaan instruksi LLVM IR memanggil fungsi C Runtime konkurensi native (`nusantara_actor_create`, `nusantara_actor_send`, `nusantara_actor_stop`, `nusantara_task_spawn`, `nusantara_task_wait`) pada `native-runtime.ts` dan `runtime-packager.ts`.
+- **Integrasi Antarmuka CLI (`src/paket/cli.ts`):**
+  - `nusantara actor`: Perintah pemantauan status aktor (`--stats`), daftar aktor aktif (`--list`), dan inspeksi detail aktor (`--inspect <id>`).
+  - `nusantara concurrency`: Perintah tolok ukur throughput pesan (`--benchmark`, `--workers <n>`) dan diagnosa kesehatan konkurensi (`--diagnostics`).
+- **Dokumentasi Teknis Lengkap (`docs/runtime/`):**
+  - `docs/runtime/actor-model.md`: Panduan arsitektur model aktor, isolasi memori, dan siklus hidup.
+  - `docs/runtime/message-passing.md`: Panduan semantik pengiriman pesan, mailbox, backpressure, dan ask-reply.
+  - `docs/runtime/concurrency.md`: Panduan structured concurrency, worker pools, dan resource management.
+  - `docs/runtime/asynchronous.md`: Panduan pemrograman asinkron `Task<T>`, `TaskGroup`, dan pembatalan kooperatif.
+  - `docs/runtime/scheduling.md`: Panduan penjadwalan kooperatif dan pengendalian keadilan throughput.
+  - `docs/runtime/runtime-safety.md`: Panduan keselamatan runtime, penanganan galat `KOR4001`–`KOR4011`, dan supervisi.
+- **Contoh Program Acuan (`contoh/`):**
+  - `contoh/actor/penghitung.nusantara`: Implementasi aktor penghitung dengan mutasi state terisolasi.
+  - `contoh/actor/pengiriman_pesan.nusantara`: Komunikasi asinkron antar-aktor pengirim dan penerima.
+  - `contoh/actor/banyak_actor.nusantara`: Orkestrasi ratusan aktor serentak dengan worker pool.
+  - `contoh/async/tugas_asinkron.nusantara`: Pola tugas asinkron `Task` dan penanganan batas waktu.
+  - `contoh/concurrency/worker_pool.nusantara`: Pemrosesan terdistribusi beban kerja melalui worker pool terpadu.
+- **Rangkaian Pengujian Otomatis (`pengujian/actor/uji_actor_fase46.ts`):**
+  - Suite pengujian ke-42 beranggotakan 32 skenario pengujian komprehensif mencakup siklus hidup, penolakan transisi ilegal, jaminan FIFO, pola ask-reply, timeout, dead letter queue, kebijakan luapan mailbox (`REJECT`, `DROP_OLDEST`, `DROP_NEWEST`), throughput budget scheduler, task life-cycle, token cancellation, timeout, task groups, strategi supervisi `RESUME`/`STOP`, resource manager quota, stall detection diagnostics, stress test 5.000 pesan dengan throughput aktual 40.000–52.000 pesan/detik tanpa memory leak, parser sintaks aktor/await, NIR opcodes & verifier, serialisasi roundtrip JSON, emisi LLVM IR C stub, dan CLI commands (31 pengujian LULUS 100%, 1 pengujian toolchain host dilewati *SKIPPED* secara transparan).
+
 ## [v0.45.0] — 2026-11-05
 ### Phase 45: Nusantara Linker & Standalone Executable
 

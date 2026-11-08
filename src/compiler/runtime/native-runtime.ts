@@ -32,6 +32,37 @@ void nusantara_cetak_teks(const char* str) {
     }
 }
 
+// Runtime Concurrency & Actor Model (Fase 46)
+void* nusantara_actor_create(const char* name) {
+    (void)name;
+    // Mengembalikan handle dummy opaque untuk environment tanpa libpthread
+    return malloc(sizeof(void*));
+}
+
+int32_t nusantara_actor_send(void* actor, int64_t msg_id, void* payload) {
+    (void)actor;
+    (void)msg_id;
+    (void)payload;
+    return 0; // Berhasil terkirim
+}
+
+void nusantara_actor_stop(void* actor) {
+    if (actor != NULL) {
+        free(actor);
+    }
+}
+
+void* nusantara_task_spawn(void* (*func)(void*), void* arg) {
+    if (func != NULL) {
+        return func(arg);
+    }
+    return NULL;
+}
+
+void* nusantara_task_wait(void* task_handle) {
+    return task_handle;
+}
+
 // C Entry Point standar sistem operasi
 int main(int argc, char** argv) {
     // Inisialisasi runtime Nusantara

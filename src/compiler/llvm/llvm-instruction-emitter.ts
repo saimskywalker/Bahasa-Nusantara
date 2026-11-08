@@ -34,7 +34,7 @@ import { LLVMTypeMapper } from './llvm-type-mapper';
 
 export class LLVMInstructionEmitter {
   constructor(
-    private readonly typeMapper: LLVMTypeMapper,
+    private readonly typeMapper: LLVMTypeMapper = new LLVMTypeMapper(),
     private readonly diag?: LLVMDiagnosticsManager
   ) {}
 
@@ -197,6 +197,36 @@ export class LLVMInstructionEmitter {
 
       case NIROpcode.UNREACHABLE: {
         return 'unreachable';
+      }
+
+      // Concurrency & Actor LLVM Lowering (Phase 46)
+      case NIROpcode.ACTOR_CREATE: {
+        return `${inst.id} = call ptr @nusantara_actor_create(ptr null)`;
+      }
+
+      case NIROpcode.ACTOR_SEND: {
+        const ops = (inst as any).operands || [];
+        const target = ops[0] ? this.formatValue(ops[0]) : 'null';
+        const msg = ops[1] ? this.formatValue(ops[1]) : 'null';
+        return `call i32 @nusantara_actor_send(ptr ${target}, i64 0, ptr ${msg})`;
+      }
+
+      case NIROpcode.ACTOR_STOP: {
+        const ops = (inst as any).operands || [];
+        const target = ops[0] ? this.formatValue(ops[0]) : 'null';
+        return `call void @nusantara_actor_stop(ptr ${target})`;
+      }
+
+      case NIROpcode.ASYNC_START: {
+        const ops = (inst as any).operands || [];
+        const callee = ops[0] ? this.formatValue(ops[0]) : 'null';
+        return `${inst.id} = call ptr @nusantara_task_spawn(ptr ${callee}, ptr null)`;
+      }
+
+      case NIROpcode.AWAIT: {
+        const ops = (inst as any).operands || [];
+        const task = ops[0] ? this.formatValue(ops[0]) : 'null';
+        return `${inst.id} = call ptr @nusantara_task_wait(ptr ${task})`;
       }
 
       default:

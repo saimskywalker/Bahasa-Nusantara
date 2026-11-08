@@ -1,0 +1,26 @@
+// Contoh Concurrency Nusantara: Actor Penghitung dengan Isolasi State
+// Phase 46 - High-Performance Concurrency (Actor Model)
+
+aktor Penghitung {
+    definisi penangan(pesan) {
+        jika (pesan.jenis == "TAMBAH") {
+            cetak("Penghitung menerima permintaan penambahan nilai.");
+        } atau jika (pesan.jenis == "BACA") {
+            cetak("Penghitung mengembalikan nilai saat ini.");
+        }
+    }
+}
+
+fungsi utama() {
+    cetak("=== DEMO AKTOR PENGHITUNG NUSANTARA ===");
+    
+    // Inisialisasi aktor melalui referensi aman (ActorRef)
+    var p = buat Penghitung();
+    
+    // Pengiriman pesan asynchronous terisolasi (FIFO ordering)
+    kirim(p, "TAMBAH");
+    kirim(p, "TAMBAH");
+    kirim(p, "BACA");
+    
+    cetak("Pesan berhasil dikirimkan ke mailbox aktor.");
+}

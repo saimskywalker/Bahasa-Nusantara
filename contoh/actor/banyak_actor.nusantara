@@ -1,0 +1,25 @@
+// Contoh Concurrency Nusantara: Skalabilitas Banyak Aktor (Fan-Out)
+// Phase 46 - High-Performance Concurrency (Actor Model)
+
+aktor Pekerja {
+    definisi penangan(pesan) {
+        cetak("Pekerja memproses tugas: " + pesan);
+    }
+}
+
+fungsi utama() {
+    cetak("=== DEMO BANYAK AKTOR SERENTAK (FAN-OUT) ===");
+    
+    // Alokasi beberapa aktor independen dengan mailbox masing-masing
+    var p1 = buat Pekerja();
+    var p2 = buat Pekerja();
+    var p3 = buat Pekerja();
+    var p4 = buat Pekerja();
+    
+    kirim(p1, "TUGAS_1");
+    kirim(p2, "TUGAS_2");
+    kirim(p3, "TUGAS_3");
+    kirim(p4, "TUGAS_4");
+    
+    cetak("Semua tugas telah didistribusikan ke aktor pekerja.");
+}

@@ -184,6 +184,10 @@ export class NIRTypes {
     return new NIRType(NIRTypeKind.POINTER, elem);
   }
 
+  public static ptr(elem?: NIRType): NIRType {
+    return NIRTypes.pointer(elem);
+  }
+
   public static array(elem: NIRType, size: number = 0): NIRType {
     return new NIRType(NIRTypeKind.ARRAY, elem, size);
   }

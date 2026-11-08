@@ -22,6 +22,11 @@ import {
   NIRPhiInst,
   NIRPredicate,
   NIRStoreInst,
+  NIRActorCreateInst,
+  NIRActorSendInst,
+  NIRActorStopInst,
+  NIRAsyncStartInst,
+  NIRAwaitInst,
 } from './instruction';
 import {
   NIRBranchInst,
@@ -43,6 +48,10 @@ export class NIRBuilder {
 
   public setInsertPoint(bb: NIRBasicBlock): void {
     this.insertBlock = bb;
+  }
+
+  public positionAtEnd(bb: NIRBasicBlock): void {
+    this.setInsertPoint(bb);
   }
 
   public getInsertBlock(): NIRBasicBlock | null {
@@ -171,6 +180,27 @@ export class NIRBuilder {
     name?: string
   ): NIRCastInst {
     return this.insert(new NIRCastInst(kind, val, targetType, name));
+  }
+
+  // --- Concurrency & Actor Instructions (Phase 46) ---
+  public createActorCreate(actorName: string, initialArg?: NIRValue, name?: string): NIRActorCreateInst {
+    return this.insert(new NIRActorCreateInst(actorName, initialArg, name));
+  }
+
+  public createActorSend(target: NIRValue, message: NIRValue, name?: string): NIRActorSendInst {
+    return this.insert(new NIRActorSendInst(target, message, name));
+  }
+
+  public createActorStop(target: NIRValue, name?: string): NIRActorStopInst {
+    return this.insert(new NIRActorStopInst(target, name));
+  }
+
+  public createAsyncStart(callee: NIRValue, args: NIRValue[] = [], name?: string): NIRAsyncStartInst {
+    return this.insert(new NIRAsyncStartInst(callee, args, name));
+  }
+
+  public createAwait(task: NIRValue, resultType: NIRType, name?: string): NIRAwaitInst {
+    return this.insert(new NIRAwaitInst(task, resultType, name));
   }
 
   // --- Terminator Instructions ---

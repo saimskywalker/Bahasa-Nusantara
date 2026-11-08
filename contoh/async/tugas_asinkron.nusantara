@@ -1,0 +1,15 @@
+// Contoh Concurrency Nusantara: Structured Async Tasks & Await
+// Phase 46 - High-Performance Concurrency (Actor Model)
+
+fungsi ambilDataServer() {
+    cetak("Mengunduh data secara asinkron...");
+    kembalikan "DATA_BERHASIL_DIUNDUH";
+}
+
+fungsi utama() {
+    cetak("=== DEMO TUGAS ASINKRON (ASYNC / AWAIT) ===");
+    
+    // Eksekusi tugas asinkron dengan penanganan non-blocking
+    var hasil = await ambilDataServer();
+    cetak("Hasil diterima: " + hasil);
+}

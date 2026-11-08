@@ -50,6 +50,13 @@ export enum NIROpcode {
 
   // Cast / Conversion
   CAST = 'cast',
+
+  // Concurrency & Actor (Phase 46)
+  ACTOR_CREATE = 'actor.create',
+  ACTOR_SEND = 'actor.send',
+  ACTOR_STOP = 'actor.stop',
+  ASYNC_START = 'async.start',
+  AWAIT = 'await',
 }
 
 export enum NIRPredicate {
@@ -451,3 +458,88 @@ export class NIRCastInst extends NIRInstruction {
     };
   }
 }
+
+// --- CONCURRENCY & ACTOR INSTRUCTIONS (Phase 46) ---
+
+export class NIRActorCreateInst extends NIRInstruction {
+  constructor(
+    public readonly actorName: string,
+    public readonly initialArg?: NIRValue,
+    name?: string
+  ) {
+    super(NIROpcode.ACTOR_CREATE, NIRTypes.ptr(), name);
+    if (initialArg) {
+      this.addOperand(initialArg);
+    }
+  }
+
+  public toString(): string {
+    const argStr = this.initialArg ? `(${this.initialArg.id})` : '';
+    return `${this.id} = actor.create @${this.actorName}${argStr}`;
+  }
+
+  public override toJSON(): any {
+    return {
+      ...super.toJSON(),
+      actorName: this.actorName,
+    };
+  }
+}
+
+export class NIRActorSendInst extends NIRInstruction {
+  constructor(
+    public targetActor: NIRValue,
+    public messagePayload: NIRValue,
+    name?: string
+  ) {
+    super(NIROpcode.ACTOR_SEND, NIRTypes.void(), name);
+    this.addOperand(targetActor);
+    this.addOperand(messagePayload);
+  }
+
+  public toString(): string {
+    return `actor.send ${this.targetActor.id}, ${this.messagePayload.id}`;
+  }
+}
+
+export class NIRActorStopInst extends NIRInstruction {
+  constructor(public targetActor: NIRValue, name?: string) {
+    super(NIROpcode.ACTOR_STOP, NIRTypes.void(), name);
+    this.addOperand(targetActor);
+  }
+
+  public toString(): string {
+    return `actor.stop ${this.targetActor.id}`;
+  }
+}
+
+export class NIRAsyncStartInst extends NIRInstruction {
+  constructor(
+    public callee: NIRValue,
+    public args: NIRValue[] = [],
+    name?: string
+  ) {
+    super(NIROpcode.ASYNC_START, NIRTypes.ptr(), name);
+    this.addOperand(callee);
+    for (const arg of args) {
+      this.addOperand(arg);
+    }
+  }
+
+  public toString(): string {
+    const argStrs = this.args.map((a) => a.id).join(', ');
+    return `${this.id} = async.start ${this.callee.id}(${argStrs})`;
+  }
+}
+
+export class NIRAwaitInst extends NIRInstruction {
+  constructor(public task: NIRValue, resultType: NIRType, name?: string) {
+    super(NIROpcode.AWAIT, resultType, name);
+    this.addOperand(task);
+  }
+
+  public toString(): string {
+    return `${this.id} = await ${this.type.toString()} ${this.task.id}`;
+  }
+}
+

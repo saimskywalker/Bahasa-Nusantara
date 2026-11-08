@@ -52,6 +52,17 @@ export enum JenisToken {
   KW_EKSPOR = 'KW_EKSPOR',           // ekspor
   KW_SEBAGAI = 'KW_SEBAGAI',         // sebagai
 
+  // --- KATA KUNCI KONKURENSI & AKTOR (Phase 46) ---
+  KW_AKTOR = 'KW_AKTOR',             // aktor
+  KW_TERIMA = 'KW_TERIMA',           // terima
+  KW_KIRIM = 'KW_KIRIM',             // kirim
+  KW_BERHENTI = 'KW_BERHENTI',       // berhenti
+  KW_TUNGGU = 'KW_TUNGGU',           // tunggu
+  KW_TUNGGU_SEMUA = 'KW_TUNGGU_SEMUA', // tunggu_semua
+  KW_ASYNC = 'KW_ASYNC',             // async
+  KW_AWAIT = 'KW_AWAIT',             // await
+  KW_PILIH_PESAN = 'KW_PILIH_PESAN', // pilih_pesan
+
   // --- IDENTIFIER & LITERAL ---
   IDENTIFIER = 'IDENTIFIER',         // nama, umur, hitungTotal
   LITERAL_BILANGAN = 'LITERAL_BILANGAN', // 0, 42, 1000

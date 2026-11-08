@@ -46,6 +46,14 @@ export class NIRBasicBlock extends NIRValue {
     this.instructions.push(inst);
   }
 
+  public getInstructions(): NIRInstruction[] {
+    const list: NIRInstruction[] = [...this.phiNodes, ...this.instructions];
+    if (this.terminator) {
+      list.push(this.terminator);
+    }
+    return list;
+  }
+
   public insertInstructionBefore(newInst: NIRInstruction, beforeInst: NIRInstruction): void {
     newInst.parent = this;
     if (newInst instanceof NIRPhiInst) {

@@ -148,4 +148,8 @@ export class LLVMToolchainManager {
       found: false,
     };
   }
+
+  public static detectToolchain(customBinDir?: string): LLVMToolchainStatus {
+    return new LLVMToolchainManager(customBinDir).detect();
+  }
 }

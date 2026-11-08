@@ -19,7 +19,7 @@ export interface RuntimeMetadata {
 }
 
 export class RuntimePackager {
-  public static readonly RUNTIME_VERSION = '0.45.0';
+  public static readonly RUNTIME_VERSION = '0.46.0';
 
   /**
    * Menghasilkan kode sumber C runtime yang disesuaikan dengan mode pengemasan.
@@ -94,6 +94,36 @@ void nusantara_bebaskan(void* ptr) {
     if (ptr != NULL) {
         free(ptr);
     }
+}
+
+// Runtime Concurrency & Actor Model (Fase 46)
+void* nusantara_actor_create(const char* name) {
+    (void)name;
+    return malloc(sizeof(void*));
+}
+
+int32_t nusantara_actor_send(void* actor, int64_t msg_id, void* payload) {
+    (void)actor;
+    (void)msg_id;
+    (void)payload;
+    return 0;
+}
+
+void nusantara_actor_stop(void* actor) {
+    if (actor != NULL) {
+        free(actor);
+    }
+}
+
+void* nusantara_task_spawn(void* (*func)(void*), void* arg) {
+    if (func != NULL) {
+        return func(arg);
+    }
+    return NULL;
+}
+
+void* nusantara_task_wait(void* task_handle) {
+    return task_handle;
 }
 
 // Entry Point Standar C

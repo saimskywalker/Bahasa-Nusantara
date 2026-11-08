@@ -203,6 +203,47 @@ export class ASTPrinter {
         }
         return res;
       }
+
+      case JenisNodeAST.DEKLARASI_AKTOR: {
+        const a = stmt as any;
+        let res = `${indent}DeklarasiAktor: ${a.nama}\n`;
+        for (const h of a.penanganPesan) {
+          res += `${indent}  Terima (${h.polaPesan}):\n`;
+          for (const s of h.tubuh) {
+            res += ASTPrinter.cetakPernyataan(s, indent + '    ');
+          }
+        }
+        return res;
+      }
+
+      case JenisNodeAST.KIRIM_PESAN: {
+        const k = stmt as any;
+        let res = `${indent}KirimPesan:\n`;
+        res += `${indent}  Target:\n` + ASTPrinter.cetakEkspresi(k.target, indent + '    ');
+        res += `${indent}  Pesan:\n` + ASTPrinter.cetakEkspresi(k.pesan, indent + '    ');
+        return res;
+      }
+
+      case JenisNodeAST.HENTIKAN_AKTOR: {
+        const h = stmt as any;
+        let res = `${indent}HentikanAktor:\n`;
+        res += `${indent}  Target:\n` + ASTPrinter.cetakEkspresi(h.target, indent + '    ');
+        return res;
+      }
+
+      case JenisNodeAST.TUNGGU_OPERASI: {
+        const t = stmt as any;
+        let res = `${indent}TungguOperasi:\n`;
+        res += `${indent}  Target:\n` + ASTPrinter.cetakEkspresi(t.target, indent + '    ');
+        return res;
+      }
+
+      case JenisNodeAST.TUNGGU_SEMUA_OPERASI: {
+        return `${indent}TungguSemuaOperasi\n`;
+      }
+
+      default:
+        return `${indent}Pernyataan: ${(stmt as any).jenis}\n`;
     }
   }
 
@@ -285,6 +326,21 @@ export class ASTPrinter {
         res += `${indent}  Target:\n` + ASTPrinter.cetakEkspresi(a.target, indent + '    ');
         return res;
       }
+
+      case JenisNodeAST.EKSPRESI_BUAT_AKTOR: {
+        const b = expr as any;
+        return `${indent}BuatAktor: ${b.namaAktor}\n`;
+      }
+
+      case JenisNodeAST.EKSPRESI_AWAIT: {
+        const w = expr as any;
+        let res = `${indent}Await:\n`;
+        res += ASTPrinter.cetakEkspresi(w.ekspresi, indent + '  ');
+        return res;
+      }
+
+      default:
+        return `${indent}Ekspresi: ${(expr as any).jenis}\n`;
     }
   }
 }

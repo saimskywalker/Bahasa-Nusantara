@@ -33,10 +33,19 @@ import { NIRTypeKind } from './type';
 
 export interface NIRVerificationResult {
   valid: boolean;
+  isValid: boolean;
   errors: string[];
 }
 
 export class NIRVerifier {
+  public verifyModule(mod: NIRModule): NIRVerificationResult {
+    return NIRVerifier.verifyModule(mod);
+  }
+
+  public verifyFunction(fn: NIRFunction): NIRVerificationResult {
+    return NIRVerifier.verifyFunction(fn);
+  }
+
   public static verifyModule(mod: NIRModule): NIRVerificationResult {
     const errors: string[] = [];
 
@@ -69,6 +78,7 @@ export class NIRVerifier {
 
     return {
       valid: errors.length === 0,
+      isValid: errors.length === 0,
       errors,
     };
   }
@@ -80,12 +90,12 @@ export class NIRVerifier {
       if (fn.basicBlocks.length > 0) {
         errors.push(`Fungsi deklarasi eksternal '@${fn.name}' tidak boleh memiliki basic block`);
       }
-      return { valid: errors.length === 0, errors };
+      return { valid: errors.length === 0, isValid: errors.length === 0, errors };
     }
 
     if (fn.basicBlocks.length === 0) {
       errors.push(`Fungsi terdefinisi '@${fn.name}' harus memiliki minimal 1 basic block`);
-      return { valid: false, errors };
+      return { valid: false, isValid: false, errors };
     }
 
     // 1. Validasi Entry Block
@@ -131,6 +141,7 @@ export class NIRVerifier {
 
     return {
       valid: errors.length === 0,
+      isValid: errors.length === 0,
       errors,
     };
   }
@@ -234,6 +245,45 @@ export class NIRVerifier {
         const call = inst as NIRCallInst;
         if (!call.calleeName) {
           errors.push(`Pemanggilan fungsi call '${inst.id}' kehilangan nama target`);
+        }
+        break;
+      }
+
+      // Concurrency & Actor Verification (Phase 46)
+      case NIROpcode.ACTOR_CREATE: {
+        if (!inst.type.isPointer()) {
+          errors.push(`Hasil instruksi actor.create '${inst.id}' harus bertipe pointer (ptr)`);
+        }
+        break;
+      }
+
+      case NIROpcode.ACTOR_SEND: {
+        const operands = (inst as any).operands || [];
+        if (operands.length < 2) {
+          errors.push(`Instruksi actor.send '${inst.id}' memerlukan target actor dan message payload`);
+        }
+        break;
+      }
+
+      case NIROpcode.ACTOR_STOP: {
+        const operands = (inst as any).operands || [];
+        if (operands.length < 1) {
+          errors.push(`Instruksi actor.stop '${inst.id}' memerlukan target actor`);
+        }
+        break;
+      }
+
+      case NIROpcode.ASYNC_START: {
+        if (!inst.type.isPointer()) {
+          errors.push(`Hasil instruksi async.start '${inst.id}' harus bertipe pointer (task handle)`);
+        }
+        break;
+      }
+
+      case NIROpcode.AWAIT: {
+        const operands = (inst as any).operands || [];
+        if (operands.length < 1) {
+          errors.push(`Instruksi await '${inst.id}' memerlukan task operand`);
         }
         break;
       }

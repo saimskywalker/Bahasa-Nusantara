@@ -1,0 +1,21 @@
+// Contoh Concurrency Nusantara: Worker Pool & Backpressure Handling
+// Phase 46 - High-Performance Concurrency (Actor Model)
+
+aktor Agregator {
+    definisi penangan(pesan) {
+        cetak("Agregator mengagregasi data batch: " + pesan);
+    }
+}
+
+fungsi utama() {
+    cetak("=== DEMO WORKER POOL & KAPASITAS MAILBOX ===");
+    
+    var agg = buat Agregator();
+    
+    // Mengirim aliran pesan beruntun dengan throughput budget fair scheduling
+    untuk (var i = 1; i <= 5; i = i + 1) {
+        kirim(agg, "BATCH_" + i);
+    }
+    
+    cetak("Semua batch telah dikirim ke mailbox agregator.");
+}
